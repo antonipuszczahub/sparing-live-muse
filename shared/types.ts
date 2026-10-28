@@ -13,6 +13,9 @@ export interface Persona {
 export interface TwinProfile {
   company: string;
   url: string;
+  /** The person on the other side of the call at this company, e.g. "Head of Operations". */
+  buyerRole: string;
+  buyerBio: string;
   summary: string;
   customers: string;
   /** What this company currently struggles with, as visible from public sources. */

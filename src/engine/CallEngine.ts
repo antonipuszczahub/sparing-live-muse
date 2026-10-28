@@ -1,4 +1,5 @@
 import type { BotReply, Mood, SessionConfig, Turn } from '../../shared/types.ts';
+import { cleanSpeech } from '../../shared/speech.ts';
 import { postSSE } from '../lib/sse.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
@@ -28,6 +29,7 @@ export class CallEngine {
   private turns: Turn[] = [];
   private state: CallState = 'connecting';
   private liveBot = '';
+  private rawBot = '';
   private liveUser = '';
   private mood: Mood = 3;
   private startedAt = 0;
@@ -146,6 +148,7 @@ export class CallEngine {
       this.turns.push({ role: 'bot', text: spoken + ' —', thought: this.pendingFinal?.thought, mood: this.mood, at: this.now() });
     }
     this.liveBot = '';
+    this.rawBot = '';
     this.sentenceBuf = '';
     this.pendingFinal = null;
     this.set('listening');
@@ -159,6 +162,7 @@ export class CallEngine {
     const ac = (this.abort = new AbortController());
     this.speaker.reset();
     this.liveBot = '';
+    this.rawBot = '';
     this.sentenceBuf = '';
     this.pendingFinal = null;
     this.set('thinking');
@@ -190,18 +194,23 @@ export class CallEngine {
   }
 
   private onSay(delta: string) {
-    this.liveBot += delta;
+    this.rawBot += delta;
+    this.liveBot = cleanSpeech(this.rawBot);
     this.sentenceBuf += delta;
     const { sentences, rest } = takeSentences(this.sentenceBuf);
     this.sentenceBuf = rest;
-    for (const s of sentences) this.speaker.say(s);
+    for (const s of sentences) {
+      const spoken = cleanSpeech(s);
+      if (spoken) this.speaker.say(spoken);
+    }
     this.emit();
   }
 
   private onFinalReply(reply: BotReply) {
     this.pendingFinal = reply;
     this.mood = reply.mood;
-    if (this.sentenceBuf.trim()) this.speaker.say(this.sentenceBuf.trim());
+    const tail = cleanSpeech(this.sentenceBuf).trim();
+    if (tail) this.speaker.say(tail);
     this.sentenceBuf = '';
     this.liveBot = reply.reply;
     this.speaker.finish();

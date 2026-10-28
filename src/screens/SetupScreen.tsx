@@ -3,16 +3,30 @@ import { LEVELS, SCENARIOS, SCENARIO_IDS } from '../../shared/scenarios.ts';
 import type { Level, ScenarioId, SessionConfig } from '../../shared/types.ts';
 import { sttSupported } from '../lib/stt.ts';
 
+const TWIN_EXAMPLE: Record<ScenarioId, string> = {
+  sales: 'e.g. basecamp.com, or the website of the company you will call',
+  defense: '',
+  salary: 'e.g. the company you work for or are joining',
+  pitch: 'e.g. the fund you are pitching, such as ycombinator.com',
+};
+
 interface Health {
   ok: boolean;
   keyConfigured: boolean;
   budget: { spentToday: number; dailyLimit: number };
 }
 
-export function SetupScreen({ onStart }: { onStart: (session: string, config: SessionConfig) => void }) {
+export function SetupScreen({
+  onStart,
+  onTwin,
+}: {
+  onStart: (session: string, config: SessionConfig) => void;
+  onTwin: (session: string, config: SessionConfig, company: string) => void;
+}) {
   const [scenario, setScenario] = useState<ScenarioId>('sales');
   const [level, setLevel] = useState<Level>(2);
   const [topic, setTopic] = useState('');
+  const [company, setCompany] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [health, setHealth] = useState<Health | null>(null);
@@ -42,7 +56,8 @@ export function SetupScreen({ onStart }: { onStart: (session: string, config: Se
       });
       if (!r.ok) throw new Error('Could not start a session');
       const { session, config } = (await r.json()) as { session: string; config: SessionConfig };
-      onStart(session, config);
+      if (company.trim() && scenario !== 'defense') onTwin(session, config, company.trim());
+      else onStart(session, config);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
       setBusy(false);
@@ -80,6 +95,20 @@ export function SetupScreen({ onStart }: { onStart: (session: string, config: Se
           className="mt-1 w-full rounded-lg border border-[var(--line)] bg-[var(--panel)] px-3 py-2 outline-none focus:border-[var(--accent)]"
         />
       </section>
+
+      {scenario !== 'defense' && (
+        <section className="mt-6">
+          <label className="text-sm text-[var(--muted)]">
+            Rehearse with a real company <span className="text-xs">(optional, researched live on the web)</span>
+          </label>
+          <input
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder={TWIN_EXAMPLE[scenario]}
+            className="mt-1 w-full rounded-lg border border-[var(--line)] bg-[var(--panel)] px-3 py-2 outline-none focus:border-[var(--accent)]"
+          />
+        </section>
+      )}
 
       <section className="mt-6">
         <div className="text-sm text-[var(--muted)]">Difficulty</div>

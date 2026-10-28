@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "check:meta": "tsx --env-file=.env scripts/check-meta.ts",
     "try:turn": "tsx --env-file=.env scripts/try-turn.ts",
-    "try:audit": "tsx --env-file=.env scripts/try-audit.ts"
+    "try:audit": "tsx --env-file=.env scripts/try-audit.ts",
+    "try:twin": "tsx --env-file=.env scripts/try-twin.ts"
   },
   "dependencies": {
     "express": "^5.3.0",

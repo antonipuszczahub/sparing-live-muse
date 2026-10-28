@@ -2,6 +2,7 @@ import express from 'express';
 import { z } from 'zod';
 import { audit } from './agents/auditor.ts';
 import { characterTurn } from './agents/persona.ts';
+import { buildTwin } from './agents/twin.ts';
 import { BudgetError } from './meta/client.ts';
 import { ledger } from './meta/ledger.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
@@ -91,6 +92,40 @@ app.post('/api/turn', async (req, res) => {
   } catch (e) {
     if (e instanceof BudgetError) send('error', { message: e.message, budget: e.reason });
     else if (!ac.signal.aborted) send('error', { message: e instanceof Error ? e.message : 'Unknown error' });
+  } finally {
+    res.end();
+  }
+});
+
+/**
+ * Digital twin research as Server-Sent Events:
+ *   event: step  data: {kind: search|open|note, text}   live progress of the research agent
+ *   event: twin  data: TwinProfile
+ *   event: error data: {message, budget?}
+ */
+app.post('/api/twin', async (req, res) => {
+  const parsed = z
+    .object({
+      session: z.string().min(4).max(64),
+      company: z.string().min(2).max(200),
+      scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
+      topic: z.string().max(400),
+    })
+    .safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
+  const send = (event: string, data: unknown) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  const ac = new AbortController();
+  res.on('close', () => ac.abort());
+  try {
+    const twin = await buildTwin({ ...parsed.data, scenario: parsed.data.scenario as never, signal: ac.signal }, (step) => send('step', step));
+    send('twin', twin);
+  } catch (e) {
+    if (e instanceof BudgetError) send('error', { message: e.message, budget: e.reason });
+    else if (!ac.signal.aborted) send('error', { message: e instanceof Error ? e.message : 'Research failed' });
   } finally {
     res.end();
   }
