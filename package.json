@@ -14,7 +14,9 @@
     "try:turn": "tsx --env-file=.env scripts/try-turn.ts",
     "try:audit": "tsx --env-file=.env scripts/try-audit.ts",
     "try:twin": "tsx --env-file=.env scripts/try-twin.ts",
-    "try:portrait": "tsx --env-file=.env scripts/try-portrait.ts"
+    "try:portrait": "tsx --env-file=.env scripts/try-portrait.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "eval": "tsx --env-file=.env scripts/eval.ts"
   },
   "dependencies": {
     "express": "^5.3.0",
