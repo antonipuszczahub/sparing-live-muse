@@ -9,6 +9,8 @@ export interface OpenHost {
   baseURL: string;
   apiKey: string;
   model: string;
+  /** Passed as reasoning_effort. Muse Spark Open always reasons and defaults to the deepest setting, which is too slow for speech. */
+  reasoningEffort?: string;
 }
 
 interface Preset {
@@ -17,11 +19,14 @@ interface Preset {
   keyEnv: string;
   /** Model id the host serves. Empty when it differs per deployment and OPEN_MODEL must say. */
   model: string;
+  /** Default reasoning_effort for this host, when it is known to accept one. */
+  effort?: string;
 }
 
 const PRESETS: Record<string, Preset> = {
   // Hackathon model id; it is not the one in Baseten's own docs.
-  baseten: { label: 'Baseten', baseURL: 'https://inference.baseten.co/v1', keyEnv: 'BASETEN_API_KEY', model: 'meta-models/muse-spark-open-1026' },
+  // Baseten documents reasoning_effort for Muse Spark Open: low, medium, high, xhigh (default). Checked 2026-10-28.
+  baseten: { label: 'Baseten', baseURL: 'https://inference.baseten.co/v1', keyEnv: 'BASETEN_API_KEY', model: 'meta-models/muse-spark-open-1026', effort: 'low' },
   fireworks: { label: 'Fireworks', baseURL: 'https://api.fireworks.ai/inference/v1', keyEnv: 'FIREWORKS_API_KEY', model: '' },
   ollama: { label: 'Ollama (local)', baseURL: 'http://localhost:11434/v1', keyEnv: '', model: '' },
   // Anything else that is OpenAI-compatible, for example a vLLM endpoint deployed on Modal.
@@ -58,5 +63,6 @@ export function openHost(env: Record<string, string | undefined> = process.env):
   const apiKey = env.OPEN_API_KEY || (p.keyEnv ? env[p.keyEnv] : '') || (id === 'ollama' ? 'ollama' : '');
   if (!baseURL || !model || !apiKey) return null;
 
-  return { id, label: env.OPEN_LABEL || p.label || labelFor(baseURL), baseURL, apiKey, model };
+  const reasoningEffort = env.OPEN_REASONING_EFFORT?.trim() || p.effort;
+  return { id, label: env.OPEN_LABEL || p.label || labelFor(baseURL), baseURL, apiKey, model, ...(reasoningEffort && reasoningEffort !== 'default' ? { reasoningEffort } : {}) };
 }

@@ -42,6 +42,8 @@ export class CallEngine {
   private error?: string;
   /** Said once when the cloud voice gives way to the browser voice. Kept apart so another error does not hide it. */
   private voiceNotice = '';
+  /** Said once when a turn of an open-weights call had to be served by Meta's hosted model. */
+  private openNotice = '';
   private lastLatencyMs?: number;
 
   private ears: EarsLike;
@@ -170,7 +172,7 @@ export class CallEngine {
       mood: this.mood,
       elapsedMs: this.state === 'ended' ? this.now() : Date.now() - this.startedAt,
       endReason: this.endReason,
-      error: [this.error, this.voiceNotice].filter(Boolean).join(' ') || undefined,
+      error: [this.error, this.voiceNotice, this.openNotice].filter(Boolean).join(' ') || undefined,
       lastLatencyMs: this.lastLatencyMs,
     });
   }
@@ -271,6 +273,7 @@ export class CallEngine {
   }
 
   private onFinalReply(reply: BotReply) {
+    if (this.config.provider === 'open' && reply.servedBy === 'meta' && !this.openNotice) this.openNotice = translate(this.lang, 'openFellBack');
     this.pendingFinal = reply;
     this.mood = reply.mood;
     const tail = cleanSpeech(this.sentenceBuf).trim();

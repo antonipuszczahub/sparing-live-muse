@@ -18,6 +18,13 @@ import { SCENARIO_IDS } from '../shared/scenarios.ts';
 import { newSeed, rollVariant } from '../shared/variation.ts';
 import type { SessionConfig } from '../shared/types.ts';
 
+// Keys written by the ElevenLabs CLI live in .env.local; load them too when the file exists (they do not override .env).
+try {
+  process.loadEnvFile('.env.local');
+} catch {
+  /* no such file */
+}
+
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '8mb' }));

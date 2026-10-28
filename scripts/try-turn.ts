@@ -1,6 +1,7 @@
 // Plays a short scripted call against the live character agent and prints latency per turn.
 // Run: npm run try:turn            (English)
 //      npm run try:turn -- --lang pl [variant] [level]
+//      npm run try:turn -- --open       the character on the configured open-weights host
 import { characterTurn } from '../server/agents/persona.ts';
 import { ledger } from '../server/meta/ledger.ts';
 import { rollVariant } from '../shared/variation.ts';
@@ -11,6 +12,7 @@ const lang: Lang = argv.includes('--lang') && argv[argv.indexOf('--lang') + 1] =
 const nums = argv.filter((a, i) => /^\d+$/.test(a) && argv[i - 1] !== '--lang');
 const variant = Number(nums[0]) || 12345;
 const level = (Number(nums[1]) || 3) as 1 | 2 | 3 | 4;
+const provider = argv.includes('--open') ? ('open' as const) : undefined;
 const v = rollVariant('sales', variant, lang);
 
 const config: SessionConfig =
@@ -24,8 +26,9 @@ const config: SessionConfig =
         lang,
         // The caller in the script below is a woman, speaking formally ("Pani").
         user: { gender: 'f', formal: true },
+        provider,
       }
-    : { scenario: 'sales', level, topic: 'A redesign of their website, 3,000 USD, two weeks', persona: v.persona, variant };
+    : { scenario: 'sales', level, topic: 'A redesign of their website, 3,000 USD, two weeks', persona: v.persona, variant, provider };
 
 const SCRIPT: Record<Lang, string[]> = {
   en: [

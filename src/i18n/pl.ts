@@ -65,6 +65,7 @@ export const pl: Dict = {
   hungUpBy: (name, gender) => `${name} ${gender === 'f' ? 'rozłączyła się' : 'rozłączył się'}`,
   callEnded: 'Rozmowa zakończona',
   openBadge: 'Otwarte wagi',
+  openFellBack: 'Host otwartych wag nie odpowiedział, więc część tur obsługuje hostowany model Meta.',
   samBadge: 'Kadrowanie SAM 3.1',
   canSee: (name) => `Notatki o Twoim ekranie (${name} go widzi)`,
   sharingLooking: 'Udostępniasz ekran, trwa analiza…',

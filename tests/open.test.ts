@@ -41,3 +41,14 @@ test('OPEN_HOST wins over key detection, and OPEN_LABEL renames it', () => {
   assert.equal(h.id, 'fireworks');
   assert.equal(h.label, 'Fireworks (team)');
 });
+
+test('Baseten runs Muse Spark Open at low reasoning by default, because its default (xhigh) is too slow to speak', () => {
+  assert.equal(openHost({ BASETEN_API_KEY: 'k' })!.reasoningEffort, 'low');
+});
+
+test('the reasoning effort can be changed or left to the host, and other hosts get none unless told', () => {
+  assert.equal(openHost({ BASETEN_API_KEY: 'k', OPEN_REASONING_EFFORT: 'medium' })!.reasoningEffort, 'medium');
+  assert.equal('reasoningEffort' in openHost({ BASETEN_API_KEY: 'k', OPEN_REASONING_EFFORT: 'default' })!, false);
+  assert.equal('reasoningEffort' in openHost({ FIREWORKS_API_KEY: 'k', OPEN_MODEL: 'm' })!, false);
+  assert.equal(openHost({ FIREWORKS_API_KEY: 'k', OPEN_MODEL: 'm', OPEN_REASONING_EFFORT: 'low' })!.reasoningEffort, 'low');
+});

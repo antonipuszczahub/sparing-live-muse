@@ -68,4 +68,6 @@ export interface BotReply {
   mood: Mood;
   reply: string;
   hangup: boolean;
+  /** Which weights wrote this turn. A call set to open weights can be served by Meta's hosted model when the host fails. */
+  servedBy?: 'meta' | 'open';
 }

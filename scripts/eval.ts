@@ -2,7 +2,10 @@
 // Plays scripted weak and strong callers at every difficulty and measures what the README claims.
 // Run: npm run eval                 (about 2 minutes, a few cents)  -> writes docs/EVAL.md
 //      npm run eval -- --lang pl    the same checks in Polish         -> writes docs/EVAL.pl.md
-import { mkdirSync, writeFileSync } from 'node:fs';
+//      npm run eval -- --open       the character on the open-weights host -> writes docs/EVAL.open.md (or .open.pl.md)
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { openWeightsInfo } from '../server/meta/client.ts';
+import { parseManifest, quantile } from '../server/meta/manifest.ts';
 import { characterTurn } from '../server/agents/persona.ts';
 import { ledger } from '../server/meta/ledger.ts';
 import { levelDef } from '../shared/scenarios.ts';
@@ -12,6 +15,11 @@ import { rollVariant } from '../shared/variation.ts';
 const argv = process.argv.slice(2);
 const lang: Lang = argv.includes('--lang') && argv[argv.indexOf('--lang') + 1] === 'pl' ? 'pl' : 'en';
 const LANGUAGE = { en: 'English', pl: 'Polish' }[lang];
+const open = argv.includes('--open');
+const provider = open ? ('open' as const) : undefined;
+const host = open ? openWeightsInfo() : null;
+if (open && !host) throw new Error('--open needs an open-weights host in .env (see .env.example)');
+const startedAt = Date.now();
 
 const WEAK: Record<Lang, string[]> = {
   en: [
@@ -69,12 +77,15 @@ interface Call {
   empty: number;
 }
 
+/** Why turns failed, with counts, so a failing run explains itself. */
+const failures = new Map<string, number>();
+
 async function play(level: Level, profile: 'weak' | 'strong', seed: number): Promise<Call> {
   const v = rollVariant('sales', seed, lang);
   const config: SessionConfig =
     lang === 'pl'
-      ? { scenario: 'sales', level, topic: 'Przebudowa strony internetowej, 12 000 zł', persona: v.persona, variant: seed, lang, user: { gender: 'm', formal: true } }
-      : { scenario: 'sales', level, topic: 'Website redesign, 3,000 USD', persona: v.persona, variant: seed };
+      ? { scenario: 'sales', level, topic: 'Przebudowa strony internetowej, 12 000 zł', persona: v.persona, variant: seed, lang, user: { gender: 'm', formal: true }, provider }
+      : { scenario: 'sales', level, topic: 'Website redesign, 3,000 USD', persona: v.persona, variant: seed, provider };
   const history: Turn[] = [];
   const call: Call = { level, profile, firstWords: [], replies: [], moods: [], hungUp: false, leaks: 0, empty: 0 };
   const lines = profile === 'weak' ? WEAK[lang] : STRONG[lang];
@@ -92,7 +103,8 @@ async function play(level: Level, profile: 'weak' | 'strong', seed: number): Pro
         call.hungUp = true;
         break;
       }
-    } catch {
+    } catch (e) {
+      failures.set(String((e as Error).message).slice(0, 140), (failures.get(String((e as Error).message).slice(0, 140)) ?? 0) + 1);
       call.empty++;
       break;
     }
@@ -102,16 +114,29 @@ async function play(level: Level, profile: 'weak' | 'strong', seed: number): Pro
 }
 
 const spent0 = ledger.spentToday();
-const jobs: Promise<Call>[] = [];
+const jobs: (() => Promise<Call>)[] = [];
 for (const level of [1, 2, 3, 4] as Level[])
   for (const profile of ['weak', 'strong'] as const)
-    for (let r = 0; r < RUNS; r++) jobs.push(play(level, profile, 1000 + r * 37));
+    for (let r = 0; r < RUNS; r++) jobs.push(() => play(level, profile, 1000 + r * 37));
 
 console.log(`Playing ${jobs.length} calls against the live model…`);
 const t0 = Date.now();
-const calls = await Promise.all(jobs);
+// Meta's API takes all 24 calls at once. An open-weights host has its own request limit (Baseten: 100 a minute),
+// so there the calls run two at a time, which also keeps the latency numbers free of queueing.
+const width = open ? Number(process.env.EVAL_CONCURRENCY) || 2 : jobs.length;
+const calls: Call[] = new Array(jobs.length);
+let next = 0;
+await Promise.all(
+  Array.from({ length: Math.min(width, jobs.length) }, async () => {
+    while (next < jobs.length) {
+      const i = next++;
+      calls[i] = await jobs[i]!();
+    }
+  }),
+);
 console.log(`Done in ${((Date.now() - t0) / 1000).toFixed(0)} s\n`);
 
+for (const [why, n] of failures) console.log(`failure x${n}: ${why}`);
 const all = calls.flatMap((c) => c.firstWords);
 let repeats = 0;
 let pairs = 0;
@@ -138,9 +163,16 @@ const rows = ([1, 2, 3, 4] as Level[]).map((level) => {
   };
 });
 
-const md = `# Behaviour evaluation${lang === 'pl' ? ' (Polish)' : ''}
+// Output tokens as the ledger recorded them for the character turns of this run (reasoning counts as output).
+const ran = parseManifest(readFileSync(process.env.MANIFEST_PATH || 'data/manifest.jsonl', 'utf8')).filter(
+  (e) => e.kind === 'character-turn' && e.t >= startedAt && (e.provider ?? 'meta') === (open ? 'open' : 'meta'),
+);
+const out = ran.flatMap((e) => (e.completionTokens === undefined ? [] : [e.completionTokens]));
+const tokenRow = out.length ? `${Math.round(quantile(out, 0.5)!)} / ${Math.round(quantile(out, 0.95)!)} / ${Math.max(...out)}` : 'n/a';
 
-Generated by \`npm run eval${lang === 'pl' ? ' -- --lang pl' : ''}\` on ${new Date().toISOString().slice(0, 10)} against the live Meta Model API (\`muse-spark-1.3\`). Language of the calls: ${LANGUAGE}.
+const md = `# Behaviour evaluation${open ? ' on open weights' : ''}${lang === 'pl' ? ' (Polish)' : ''}
+
+Generated by \`npm run eval${open ? ' -- --open' : ''}${lang === 'pl' ? ' -- --lang pl' : ''}\` on ${new Date().toISOString().slice(0, 10)} against ${open ? `open weights (\`${host!.model}\` on ${host!.label}, reasoning effort ${host!.reasoningEffort ?? 'host default'})` : 'the live Meta Model API (\`muse-spark-1.3\`)'}. Language of the calls: ${LANGUAGE}.
 ${calls.length} scripted calls (${RUNS} seeds x 4 difficulty levels x weak/strong caller), ${turns} character turns.
 
 | Check | Result |
@@ -150,6 +182,7 @@ ${calls.length} scripted calls (${RUNS} seeds x 4 difficulty levels x weak/stron
 | Turns that repeat an earlier turn of the same call (overlap >= 65%) | ${repeats} of ${pairs} pairs |
 | Stage directions leaked into speech (\`*sigh*\`, \`(pause)\`) | ${leaks} of ${turns} turns |
 | Failed or empty turns | ${errors} |
+| Output tokens per turn, reasoning included (median / p95 / max) | ${tokenRow} |
 
 ## Does difficulty change behaviour?
 
@@ -162,5 +195,6 @@ ${rows.map((r) => `| ${r.level} | ${r.hangWeak}/${RUNS} | ${r.moodWeak.toFixed(1
 Cost of this evaluation: $${(ledger.spentToday() - spent0).toFixed(3)}.
 `;
 mkdirSync('docs', { recursive: true });
-writeFileSync(lang === 'pl' ? 'docs/EVAL.pl.md' : 'docs/EVAL.md', md);
+const outArg = argv.includes('--out') ? argv[argv.indexOf('--out') + 1] : undefined;
+writeFileSync(outArg ?? `docs/EVAL${open ? '.open' : ''}${lang === 'pl' ? '.pl' : ''}.md`, md);
 console.log(md);

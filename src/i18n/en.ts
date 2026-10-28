@@ -64,6 +64,7 @@ export const en = {
   hungUpBy: (name: string, _gender: Gender) => `${name} hung up`,
   callEnded: 'Call ended',
   openBadge: 'Open weights',
+  openFellBack: "The open-weights host did not answer, so some turns use Meta's hosted model.",
   samBadge: 'SAM 3.1 framing',
   canSee: (name: string) => `${name} can see your screen (what they noted)`,
   sharingLooking: 'Sharing your screen, looking…',

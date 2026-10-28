@@ -5,7 +5,7 @@ import { cleanSpeech } from '../../shared/speech.ts';
 import { rollVariant } from '../../shared/variation.ts';
 import type { BotReply, Mood, SessionConfig, Turn } from '../../shared/types.ts';
 import { MODELS } from '../meta/models.ts';
-import { stream, type ChatMessage } from '../meta/client.ts';
+import { BudgetError, stream, type ChatMessage } from '../meta/client.ts';
 import { buildSystemPromptPl } from './persona.pl.ts';
 
 /*
@@ -122,31 +122,51 @@ export interface TurnInput {
   signal?: AbortSignal;
 }
 
-/** One character turn. Streams the spoken text through onSay and resolves with the full structured reply. */
-export async function characterTurn(input: TurnInput, onSay: (delta: string) => void): Promise<BotReply> {
+/**
+ * One character turn. Streams the spoken text through onSay and resolves with the full structured reply.
+ * On open weights, a host that errors, is rate limited or returns nothing does not end the call: while nothing
+ * has been spoken yet, the turn is asked again from Meta's hosted Spark with the same prompt, and the reply says so.
+ */
+export async function characterTurn(input: TurnInput, onSay: (delta: string) => void, run: typeof stream = stream): Promise<BotReply> {
   const system = buildSystemPrompt(input.config, { screen: input.screen });
   const lang = langOf(input.config);
   const opening = input.history.length === 0 ? beginNote(scenarioDef(input.config.scenario, lang).opening, lang) : undefined;
-  const say = new SayStream();
-  const raw = await stream(
-    {
-      model: input.config.provider === 'open' ? MODELS.open : MODELS.spark,
-      provider: input.config.provider,
-      messages: toMessages(system, input.history, opening),
-      kind: 'character-turn',
-      session: input.session,
-      // Reasoning tokens count against this limit (measured: 60-370 per turn at effort "minimal").
-      maxTokens: 900,
-      temperature: 0.9,
-      effort: 'minimal',
-      signal: input.signal,
-    },
-    (d) => {
-      const s = say.push(d);
-      if (s) onSay(s);
-    },
-  );
-  const reply = parseReply(raw);
-  if (!reply.reply) throw new Error('The model returned an empty reply');
-  return reply;
+
+  let spoken = false;
+  const attempt = async (provider: 'meta' | 'open'): Promise<BotReply> => {
+    const say = new SayStream();
+    const raw = await run(
+      {
+        model: provider === 'open' ? MODELS.open : MODELS.spark,
+        provider,
+        messages: toMessages(system, input.history, opening),
+        kind: 'character-turn',
+        session: input.session,
+        // Reasoning tokens count against this limit (measured: 60-370 per turn at effort "minimal" on Meta's Spark).
+        // Muse Spark Open always reasons, and its reasoning grows with the conversation, so it gets a much larger budget.
+        maxTokens: provider === 'open' ? 2500 : 900,
+        temperature: 0.9,
+        effort: 'minimal',
+        signal: input.signal,
+      },
+      (d) => {
+        const s = say.push(d);
+        if (s) {
+          spoken = true;
+          onSay(s);
+        }
+      },
+    );
+    const reply = parseReply(raw);
+    if (!reply.reply) throw new Error('The model returned an empty reply');
+    return { ...reply, servedBy: provider };
+  };
+
+  if (input.config.provider !== 'open') return attempt('meta');
+  try {
+    return await attempt('open');
+  } catch (e) {
+    if (e instanceof BudgetError || input.signal?.aborted || spoken) throw e;
+    return attempt('meta');
+  }
 }

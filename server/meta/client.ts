@@ -22,9 +22,9 @@ export function openWeightsConfigured(): boolean {
 }
 
 /** Which host and model the open-weights provider points at, for the UI and the manifest. */
-export function openWeightsInfo(): { host: string; label: string; model: string } | null {
+export function openWeightsInfo(): { host: string; label: string; model: string; reasoningEffort?: string } | null {
   const h = openHost();
-  return h ? { host: h.id, label: h.label, model: h.model } : null;
+  return h ? { host: h.id, label: h.label, model: h.model, reasoningEffort: h.reasoningEffort } : null;
 }
 
 export function meta(provider: Provider = 'meta'): OpenAI {
@@ -65,8 +65,8 @@ function params(o: CallOptions) {
     messages: o.messages,
     max_tokens: o.maxTokens,
     temperature: o.temperature,
-    // reasoning_effort is a Meta API parameter; the open-weights host is not guaranteed to accept it.
-    ...(o.effort && o.provider !== 'open' ? { reasoning_effort: o.effort } : {}),
+    // Meta's API takes the effort the caller asks for; an open-weights host takes the one its configuration names (or none).
+    ...(o.provider === 'open' ? (openHost()?.reasoningEffort ? { reasoning_effort: openHost()!.reasoningEffort } : {}) : o.effort ? { reasoning_effort: o.effort } : {}),
     ...(o.schema
       ? { response_format: { type: 'json_schema' as const, json_schema: { name: o.schema.name, schema: o.schema.schema, strict: true } } }
       : {}),
