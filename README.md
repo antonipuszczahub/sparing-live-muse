@@ -38,6 +38,12 @@ Muse Spark Open always reasons, and Baseten's default depth (`xhigh`) is too slo
 
 Notes from measuring the API (they shaped the design): reasoning tokens count against `max_tokens`; `json_schema` output does not stream and returns keys alphabetically (so live turns use a tagged plain-text format and the character decides to hang up *after* it has spoken); web search exists only on the Responses API; the `-contributor` variant of Spark is 2-4x slower than the standard model.
 
+## Open weights: where and why
+
+One stage runs on Muse Spark Open, and it is the one that is load-bearing for the whole product: **the live counterpart** (`characterTurn` in `server/agents/persona.ts`). Every spoken turn of the call, including the private thought, the mood on the face and the decision to hang up, is produced by the open-weight model when the start-screen tick is on. Nothing else about the call changes: same prompts, same tagged stream, same barge-in loop.
+
+Why this stage: it is the highest-volume, most latency-sensitive call (one per turn, the user waits for the first word), so it is where an open model you can host yourself matters most, and where the cost and speed can be measured against the hosted model on identical scripted calls ([`docs/EVAL.open.md`](docs/EVAL.open.md) against [`docs/EVAL.md`](docs/EVAL.md), same for Polish). The other stages stay on hosted Muse models, each the model made for its task: Wonder for web-search research (search exists only on Meta's Responses API) and the structured audit, Spark for reading the shared screen, Muse Image for portraits, SAM 3.1 for camera framing, Voice Transcribe for the ears. The hybrid is deliberate, not a fallback: if the open host fails before the character has spoken, that one turn is asked again from hosted Spark and the call says so, and `docs/MANIFEST.md` records which model answered each call.
+
 ## Architecture
 
 ```mermaid
@@ -149,7 +155,7 @@ Three guards keep it bounded: 8,000 characters per session, 20,000 per visitor p
 
 ## Privacy
 
-Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. If an ElevenLabs key is set, the character's own lines (never the user's audio) are sent to ElevenLabs to be spoken. While free Meta credits are in use, Meta may use content for product improvement; the app says so before the first call. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
+Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. If an ElevenLabs key is set, the character's own lines (never the user's audio) are sent to ElevenLabs to be spoken. The hackathon credits only cover the standard Contributor variants of Meta's models: content sent to them (your voice for transcription, the text of the call, and, if you turn them on, screenshots of the screen you share and frames from the camera) may be used to train future Meta models, the opt-out variants are not covered by these credits, and zero data retention cannot be enabled for them. The app says so before the first call, and screen sharing and the camera are both off until you start them. With the open-weights tick on, the text of the live turns goes to the open-weights host (Baseten in the default setup) instead of Meta's hosted Spark; that host's own terms apply and are not checked here. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
 
 ## Layout
 

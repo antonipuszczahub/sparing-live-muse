@@ -25,7 +25,7 @@ export const en = {
   startCall: 'Start call',
   headphones: 'Use headphones so the character does not hear itself.',
   privacy:
-    "Privacy: your voice is relayed to Meta's speech model and your words go to Meta's Muse models. While free Meta credits are in use, Meta may use this content to improve its products. This app stores no audio or transcripts; it keeps only a cost log, and your weak spots stay in this browser.",
+    "Privacy: your voice is relayed to Meta's speech model and your words go to Meta's Muse models. While free Meta credits are in use, this content (including shared screens and camera frames, if you turn them on) may be used to train future Meta models. With open weights on, the text of the call goes to the open-weights host instead. This app stores no audio or transcripts; it keeps only a cost log, and your weak spots stay in this browser.",
   budgetToday: (spent: string, limit: string) => `Budget today: $${spent} of $${limit}`,
   noVoice: 'No English voice found in this browser. Use Microsoft Edge for natural voices.',
   voiceTitle: 'Character voice',
