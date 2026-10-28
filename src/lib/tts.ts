@@ -53,13 +53,16 @@ export function sortVoices<V extends VoiceLike>(vs: V[]): V[] {
  * The voice for a character: the one the user chose if it is still there, otherwise a Natural voice of the
  * right gender, otherwise any Natural voice, otherwise a basic one of the right gender, otherwise the first.
  */
-export function rankVoices<V extends VoiceLike>(vs: V[], lang: Lang, gender: 'm' | 'f', saved?: string | null): VoicePick<V> {
+export function rankVoices<V extends VoiceLike>(vs: V[], lang: Lang, gender: 'm' | 'f', saved?: string | null, seed = 0): VoicePick<V> {
   const chosen = saved ? vs.find((v) => v.name === saved) : undefined;
   if (chosen) return { voice: chosen, natural: isNatural(chosen), matched: true };
   const natural = vs.filter(isNatural);
   const pool = natural.length ? natural : vs;
   const re = NAMES[lang][gender];
-  const named = pool.find((v) => re.test(v.name));
+  // Several voices fit the gender (Edge has many English Natural voices): the character's seed picks one, so the
+  // same person always sounds the same and different calls sound like different people.
+  const fitting = pool.filter((v) => re.test(v.name));
+  const named = fitting.length ? fitting[Math.abs(Math.trunc(seed)) % fitting.length] : undefined;
   const exact = pool.find((v) => v.lang.replace('_', '-').toLowerCase() === LANG_META[lang].speech.toLowerCase());
   const voice = named ?? exact ?? pool[0] ?? null;
   return { voice, natural: !!voice && isNatural(voice), matched: !!named };
@@ -88,8 +91,8 @@ export function saveVoice(lang: Lang, gender: 'm' | 'f', name: string | null) {
   }
 }
 
-export function pickVoice(gender: 'm' | 'f', lang: Lang = 'en'): VoicePick {
-  return rankVoices(voices(lang), lang, gender, savedVoice(lang, gender));
+export function pickVoice(gender: 'm' | 'f', lang: Lang = 'en', seed = 0): VoicePick {
+  return rankVoices(voices(lang), lang, gender, savedVoice(lang, gender), seed);
 }
 
 /** Says a short sample with a voice, for the picker. */

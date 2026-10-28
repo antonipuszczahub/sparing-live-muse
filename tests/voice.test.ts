@@ -67,3 +67,21 @@ test('a character keeps its voice, and different characters spread over the appr
   assert.equal(voiceFromPool([], 5, 'fallback'), 'fallback');
   assert.equal(voiceFromPool([], 5, null), null);
 });
+
+test('a character keeps its Natural voice and different characters spread over the Natural voices of the gender', () => {
+  const en = [
+    v('Microsoft Aria Online (Natural) - English (United States)', 'en-US'),
+    v('Microsoft Jenny Online (Natural) - English (United States)', 'en-US'),
+    v('Microsoft Sonia Online (Natural) - English (United Kingdom)', 'en-GB'),
+    v('Microsoft Guy Online (Natural) - English (United States)', 'en-US'),
+    v('Microsoft Zira - English (United States)', 'en-US'),
+  ];
+  const pick = (seed: number) => rankVoices(en, 'en', 'f', null, seed).voice!.name;
+  assert.equal(pick(5), pick(5), 'the same seed always gives the same voice');
+  const seen = new Set(Array.from({ length: 30 }, (_, i) => pick(i * 7919 + 3)));
+  assert.equal(seen.size, 3, 'all three female Natural voices are used, the basic Zira never is');
+  assert.ok([...seen].every((n) => /Natural/.test(n)));
+  assert.match(rankVoices(en, 'en', 'm', null, 11).voice!.name, /Guy/);
+  assert.match(rankVoices(EDGE, 'pl', 'f', null, 99).voice!.name, /Zofia/, 'Polish has one Natural voice per gender, so the seed changes nothing');
+  assert.match(rankVoices(en, 'en', 'f', 'Microsoft Zira - English (United States)', 2).voice!.name, /Zira/, 'the voice the user chose still wins');
+});

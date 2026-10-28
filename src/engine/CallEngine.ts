@@ -68,7 +68,7 @@ export class CallEngine {
   ) {
     this.lang = langOf(config);
     // A browser may have no voice of the right gender (Windows ships a single Polish voice): shift the pitch instead.
-    const pick = pickVoice(config.persona.gender, this.lang);
+    const pick = pickVoice(config.persona.gender, this.lang, config.variant);
     this.browserPick = pick;
     this.voiceName = pick.voice?.name ?? '';
     this.speaker = this.useSpeaker(new Speaker(pick.voice, this.lang, pitchFor(pick.matched, config.persona.gender)));
