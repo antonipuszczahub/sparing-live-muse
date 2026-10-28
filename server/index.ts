@@ -6,7 +6,7 @@ import { look } from './agents/eye.ts';
 import { characterTurn } from './agents/persona.ts';
 import { drawPortraits, type Portraits } from './agents/portrait.ts';
 import { buildTwin } from './agents/twin.ts';
-import { BudgetError } from './meta/client.ts';
+import { BudgetError, openWeightsConfigured } from './meta/client.ts';
 import { ledger } from './meta/ledger.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
 import { newSeed, rollVariant } from '../shared/variation.ts';
@@ -30,6 +30,7 @@ const ConfigSchema = z.object({
   twin: z.any().optional(),
   variant: z.number().int().nonnegative(),
   focus: z.array(z.string().max(80)).max(3).optional(),
+  provider: z.enum(['meta', 'open']).optional(),
 });
 
 const TurnSchema = z.object({
@@ -48,17 +49,17 @@ const TurnSchema = z.object({
 });
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, keyConfigured: Boolean(process.env.MODEL_API_KEY), budget: ledger.summary() });
+  res.json({ ok: true, keyConfigured: Boolean(process.env.MODEL_API_KEY), openWeights: openWeightsConfigured(), budget: ledger.summary() });
 });
 
 /** Start a new call: roll today's variation and the character. */
 app.post('/api/session', (req, res) => {
-  const { scenario, level, topic, focus } = z
-    .object({ scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), level: z.number().int().min(1).max(4), topic: z.string().max(400), focus: z.array(z.string().max(80)).max(3).optional() })
+  const { scenario, level, topic, focus, provider } = z
+    .object({ scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), level: z.number().int().min(1).max(4), topic: z.string().max(400), focus: z.array(z.string().max(80)).max(3).optional(), provider: z.enum(['meta', 'open']).optional() })
     .parse(req.body);
   const variant = newSeed();
   const v = rollVariant(scenario as never, variant);
-  const config: SessionConfig = { scenario: scenario as never, level: level as never, topic, persona: v.persona, variant, focus };
+  const config: SessionConfig = { scenario: scenario as never, level: level as never, topic, persona: v.persona, variant, focus, provider: provider === 'open' && openWeightsConfigured() ? 'open' : undefined };
   const session = `s_${variant.toString(36)}_${Date.now().toString(36)}`;
   // Start drawing the face now: by the time the call connects (after twin research, if any) it is ready.
   if (ledger.canSpend(session).ok && process.env.MODEL_API_KEY) {

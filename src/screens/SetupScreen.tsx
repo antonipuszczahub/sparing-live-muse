@@ -14,6 +14,7 @@ const TWIN_EXAMPLE: Record<ScenarioId, string> = {
 interface Health {
   ok: boolean;
   keyConfigured: boolean;
+  openWeights?: boolean;
   budget: { spentToday: number; dailyLimit: number };
 }
 
@@ -33,6 +34,7 @@ export function SetupScreen({
   const [health, setHealth] = useState<Health | null>(null);
   const [weak, setWeak] = useState<string[]>(() => topWeakSpots(3));
   const [useMemory, setUseMemory] = useState(true);
+  const [openWeights, setOpenWeights] = useState(false);
   const sc = SCENARIOS[scenario];
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export function SetupScreen({
       const r = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario, level, topic: topic.trim() || sc.topicExample, focus: useMemory ? weak : undefined }),
+        body: JSON.stringify({ scenario, level, topic: topic.trim() || sc.topicExample, focus: useMemory ? weak : undefined, provider: openWeights ? 'open' : undefined }),
       });
       if (!r.ok) throw new Error('Could not start a session');
       const { session, config } = (await r.json()) as { session: string; config: SessionConfig };

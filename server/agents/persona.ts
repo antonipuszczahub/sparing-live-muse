@@ -125,7 +125,8 @@ export async function characterTurn(input: TurnInput, onSay: (delta: string) => 
   const say = new SayStream();
   const raw = await stream(
     {
-      model: MODELS.spark,
+      model: input.config.provider === 'open' ? MODELS.open : MODELS.spark,
+      provider: input.config.provider,
       messages: toMessages(system, input.history, opening),
       kind: 'character-turn',
       session: input.session,

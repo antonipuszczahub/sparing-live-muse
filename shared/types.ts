@@ -38,6 +38,8 @@ export interface SessionConfig {
   variant: number;
   /** Weak spots from earlier calls that this character should probe. */
   focus?: string[];
+  /** Which weights run the character: Meta Model API (default) or open weights on Baseten. */
+  provider?: 'meta' | 'open';
 }
 
 export type Mood = 1 | 2 | 3 | 4 | 5;
