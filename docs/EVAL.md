@@ -22,4 +22,4 @@ Final mood is 1 (hostile) to 5 (won over), averaged over 3 seeds. Hang-ups are c
 | Tough | 3/3 | 1.3 | 0/3 | 3.0 |
 | Brutal | 3/3 | 1.0 | 0/3 | 3.0 |
 
-Cost of this evaluation: 0.170.
+Cost of this evaluation: $0.170.

@@ -133,7 +133,7 @@ Final mood is 1 (hostile) to 5 (won over), averaged over ${RUNS} seeds. Hang-ups
 |---|---|---|---|---|
 ${rows.map((r) => `| ${r.level} | ${r.hangWeak}/${RUNS} | ${r.moodWeak.toFixed(1)} | ${r.hangStrong}/${RUNS} | ${r.moodStrong.toFixed(1)} |`).join('\n')}
 
-Cost of this evaluation: ${(ledger.spentToday() - spent0).toFixed(3)}.
+Cost of this evaluation: $${(ledger.spentToday() - spent0).toFixed(3)}.
 `;
 mkdirSync('docs', { recursive: true });
 writeFileSync('docs/EVAL.md', md);
