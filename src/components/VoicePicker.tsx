@@ -58,6 +58,7 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
     const options = voicesForGender(catalog!.voices, gender);
     const saved = savedCloudVoice(lang, gender);
     const effective = saved && options.some((v) => v.id === saved) ? saved : catalog!.defaults[gender];
+    const pool = (catalog!.pool?.[gender] ?? []).map((id) => options.find((v) => v.id === id)?.name.split(' ')[0]).filter(Boolean);
     return (
       <div key={gender} className="flex flex-wrap items-center gap-2">
         <span className="w-36 text-sm text-[var(--muted)]">{t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}</span>
@@ -71,7 +72,7 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
         >
           <option value="">
             {t('voiceAuto')}
-            {effective ? ` → ${options.find((v) => v.id === effective)?.name ?? ''}` : ''}
+            {pool.length > 1 ? ` → ${pool.join(', ')}` : effective ? ` → ${options.find((v) => v.id === effective)?.name ?? ''}` : ''}
           </option>
           {options.map((v) => (
             <option key={v.id} value={v.id} disabled={v.locked}>

@@ -143,7 +143,7 @@ What it costs, from the [ElevenLabs API price list](https://elevenlabs.io/pricin
 | Judges and visitors for two weeks | 300 | 600,000 | $24 |
 | If an X post takes off | 1,500 | 3,000,000 | $120 |
 
-On the **free plan** (10,000 credits a month, a handful of calls) only ElevenLabs' standard voices work through the API; library voices, which include the voices made for Polish, need a paid plan or $5 of credits. The server reads the plan, shows such voices as locked and never picks one by default, and a refused voice is reported as a plan problem, not as a used-up quota.
+On the **free plan** (10,000 credits a month, a handful of calls) only ElevenLabs' standard voices work through the API; library voices, which include the voices made for Polish, need a paid plan or $5 of credits. Each character gets one of a few voices that were listened to and approved, chosen from its seed: the same person always sounds the same and different calls sound like different people (`ELEVENLABS_VOICES_F` / `_M` replace the list, and the visitor can pick a voice on the start screen). The server reads the plan, shows such voices as locked and never picks one by default, and a refused voice is reported as a plan problem, not as a used-up quota.
 
 Three guards keep it bounded: 8,000 characters per session, 20,000 per visitor per hour and 150,000 per day (all in `.env`), counted in the same ledger as the Meta calls. Past a cap the call continues with the browser voice, it does not stop. `docs/MANIFEST.md` lists the characters actually spoken and the estimated cost. Only the character's lines go to ElevenLabs, never the user's audio.
 

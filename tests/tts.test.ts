@@ -3,8 +3,11 @@ import type { AddressInfo } from 'node:net';
 import { test } from 'node:test';
 import express from 'express';
 import { Allowance } from '../server/limits.ts';
-import { defaultVoices, toCloudVoices, ttsConfig, ttsCostUsd } from '../server/tts/elevenlabs.ts';
+import { defaultVoices, toCloudVoices, ttsConfig, ttsCostUsd, voicePool } from '../server/tts/elevenlabs.ts';
 import { registerTts, voiceHealth } from '../server/tts/route.ts';
+
+/** Ignores the approved names, so a test sees how the catalog itself ranks the voices. */
+const NONE = { ELEVENLABS_VOICES_F: '', ELEVENLABS_VOICES_M: '' };
 
 const RAW = [
   { voice_id: 'enm00000001', name: 'Brian', labels: { gender: 'male', accent: 'american' } },
@@ -28,10 +31,10 @@ test('voices are mapped, voices made for the language come first, and defaults f
   assert.deepEqual(pl.map((v) => v.name), ['Kuba', 'Ola', 'Sarah', 'Brian'], 'made for Polish, then no known accent, then another language accent');
   assert.deepEqual(pl.map((v) => v.native), [true, true, false, false]);
   assert.deepEqual(pl.map((v) => v.gender), ['m', 'f', 'f', 'm']);
-  assert.deepEqual(defaultVoices(pl, 'pl', {}), { m: 'plm00000001', f: 'plf00000001' });
+  assert.deepEqual(defaultVoices(pl, 'pl', NONE), { m: 'plm00000001', f: 'plf00000001' });
   const en = toCloudVoices(RAW, 'en');
   assert.deepEqual(en.map((v) => v.name), ['Brian', 'Sarah', 'Kuba', 'Ola']);
-  assert.deepEqual(defaultVoices(en, 'en', {}), { m: 'enm00000001', f: 'enf00000001' }, 'a Polish voice is not the default for English');
+  assert.deepEqual(defaultVoices(en, 'en', NONE), { m: 'enm00000001', f: 'enf00000001' }, 'a Polish voice is not the default for English');
   assert.equal(defaultVoices(pl, 'pl', { ELEVENLABS_VOICE_PL_F: 'custom12345' }).f, 'custom12345');
   assert.deepEqual(defaultVoices([], 'en', {}), { m: null, f: null });
 });
@@ -180,10 +183,10 @@ test('on the free plan library voices are locked and never the default; on a pai
   ];
   const free = toCloudVoices(raw, 'pl', 'free');
   assert.deepEqual(free.map((v) => [v.name, v.locked]), [['Kinga', true], ['Alice', false]]);
-  assert.equal(defaultVoices(free, 'pl', {}).f, 'pre00000001', 'the voice the plan cannot use is skipped');
+  assert.equal(defaultVoices(free, 'pl', NONE).f, 'pre00000001', 'the voice the plan cannot use is skipped');
   const paid = toCloudVoices(raw, 'pl', 'starter');
   assert.ok(paid.every((v) => !v.locked));
-  assert.equal(defaultVoices(paid, 'pl', {}).f, 'lib00000001', 'the native Polish voice wins once it can be used');
+  assert.equal(defaultVoices(paid, 'pl', NONE).f, 'lib00000001', 'the native Polish voice wins once it can be used');
   assert.ok(toCloudVoices(raw, 'pl').every((v) => !v.locked), 'an unreadable plan locks nothing');
 });
 
@@ -197,4 +200,29 @@ test('a library voice refused for the plan is reported as a plan problem, not as
   } finally {
     s.close();
   }
+});
+
+const VOICES = toCloudVoices(
+  [
+    { voice_id: 'sar00000001', name: 'Sarah - Mature, Reassuring', category: 'premade', labels: { gender: 'female' } },
+    { voice_id: 'jes00000001', name: 'Jessica - Playful', category: 'premade', labels: { gender: 'female' } },
+    { voice_id: 'lau00000001', name: 'Laura - Enthusiast', category: 'premade', labels: { gender: 'female' } },
+    { voice_id: 'ali00000001', name: 'Alice - Clear', category: 'premade', labels: { gender: 'female' } },
+    { voice_id: 'kin00000001', name: 'Kinga - Warm', category: 'professional', labels: { gender: 'female' } },
+    { voice_id: 'bri00000001', name: 'Brian - Deep', category: 'premade', labels: { gender: 'male' } },
+  ],
+  'pl',
+  'free',
+);
+
+test('the approved voices form the pool, in the order they were approved, and nothing else is in it', () => {
+  assert.deepEqual(voicePool(VOICES, {}).f, ['sar00000001', 'jes00000001', 'lau00000001']);
+  assert.deepEqual(voicePool(VOICES, {}).m, ['bri00000001'], 'with no approved male voice the first usable one stands in');
+  assert.deepEqual(voicePool(VOICES, { ELEVENLABS_VOICES_F: 'Laura, Alice' }).f, ['lau00000001', 'ali00000001'], 'the list can be replaced');
+  assert.deepEqual(voicePool(VOICES, { ELEVENLABS_VOICES_F: 'Kinga' }).f, voicePool(VOICES, NONE).f, 'a locked approved voice is skipped, the rest of the catalog stands in');
+});
+
+test('the default is the first approved voice unless one is forced', () => {
+  assert.equal(defaultVoices(VOICES, 'pl', {}).f, 'sar00000001');
+  assert.equal(defaultVoices(VOICES, 'pl', { ELEVENLABS_VOICE_PL_F: 'forced123456' }).f, 'forced123456');
 });

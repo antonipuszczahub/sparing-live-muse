@@ -38,7 +38,8 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   `en.ts` defines the keys and `pl.ts` is typed with them, so a missing string does not compile.
 - **Voice of the character.** Meta has no speech synthesis. Either the browser's voices (`src/lib/tts.ts`, picker in
   `VoicePicker.tsx`, lists filtered by gender) or ElevenLabs (`server/tts/`, `src/lib/cloudSpeaker.ts`): sentences are
-  requested as they stream in, played back to back on the audio clock, with the browser voice as fallback. Caps in
+  requested as they stream in, played back to back on the audio clock, with the browser voice as fallback. A character gets one of
+  the approved voices (`APPROVED` in `server/tts/elevenlabs.ts`, listened to by the user) from its seed. Caps in
   characters per session, visitor and day.
 - **Open weights.** `server/meta/open.ts` picks the host (Baseten, Fireworks, Modal, Ollama). Muse Spark Open always
   reasons; the Baseten preset sends `reasoning_effort: low` (xhigh is 3x slower and sometimes returns nothing). A failing

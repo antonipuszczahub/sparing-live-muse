@@ -93,12 +93,28 @@ export function toCloudVoices(raw: RawVoice[], lang: Lang, tier?: string): Cloud
   return voices.sort((a, b) => rank.get(b.id)! - rank.get(a.id)! || a.name.localeCompare(b.name));
 }
 
-/** The voice used when the user has not picked one: an env override, else the first voice of the right gender. */
-export function defaultVoices(voices: CloudVoice[], lang: Lang, env: NodeJS.ProcessEnv = process.env): { m: string | null; f: string | null } {
-  const pick = (g: 'm' | 'f') => {
-    const override = env[`ELEVENLABS_VOICE_${lang.toUpperCase()}_${g.toUpperCase()}`]?.trim();
-    return override || voices.find((v) => v.gender === g && !v.locked)?.id || null;
+/**
+ * Voices that were listened to and approved, by name, in the order they are tried. Each character gets one of them
+ * from its seed, so the same person always has the same voice and different calls sound like different people.
+ * ELEVENLABS_VOICES_F / ELEVENLABS_VOICES_M ("Sarah,Jessica") replace the lists.
+ */
+const APPROVED: Record<'m' | 'f', string[]> = { f: ['Sarah', 'Jessica', 'Laura'], m: [] };
+
+/** The usable voices of a gender, approved ones first (in the approved order), then the rest as the catalog ranks them. */
+export function voicePool(voices: CloudVoice[], env: NodeJS.ProcessEnv = process.env): { m: string[]; f: string[] } {
+  const pool = (g: 'm' | 'f') => {
+    const names = (env[`ELEVENLABS_VOICES_${g.toUpperCase()}`]?.split(',').map((n) => n.trim()).filter(Boolean)) ?? APPROVED[g];
+    const usable = voices.filter((v) => v.gender === g && !v.locked);
+    const approved = names.flatMap((n) => usable.filter((v) => v.name.toLowerCase().startsWith(n.toLowerCase())).slice(0, 1));
+    return approved.length ? approved.map((v) => v.id) : usable.slice(0, 1).map((v) => v.id);
   };
+  return { m: pool('m'), f: pool('f') };
+}
+
+/** The voice used when the user has not picked one: an env override, else the first of the pool. */
+export function defaultVoices(voices: CloudVoice[], lang: Lang, env: NodeJS.ProcessEnv = process.env): { m: string | null; f: string | null } {
+  const pool = voicePool(voices, env);
+  const pick = (g: 'm' | 'f') => env[`ELEVENLABS_VOICE_${lang.toUpperCase()}_${g.toUpperCase()}`]?.trim() || pool[g][0] || null;
   return { m: pick('m'), f: pick('f') };
 }
 

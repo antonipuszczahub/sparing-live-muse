@@ -90,7 +90,7 @@ export class CallEngine {
    */
   private async chooseVoice() {
     const gender = this.config.persona.gender;
-    const cloud = await resolveCloudVoice(this.lang, gender).catch(() => null);
+    const cloud = await resolveCloudVoice(this.lang, gender, this.config.variant).catch(() => null);
     if (!cloud || this.state === 'ended') return;
     const pick = this.browserPick;
     const speaker = createCloudSpeaker(this.session, this.lang, cloud.id, { voice: pick.voice, pitch: pitchFor(pick.matched, gender) });

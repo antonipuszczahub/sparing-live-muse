@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 import { z } from 'zod';
 import { Allowance } from '../limits.ts';
-import { defaultVoices, listVoices, speak, ttsConfig, ttsCostUsd, TtsError } from './elevenlabs.ts';
+import { defaultVoices, listVoices, speak, ttsConfig, ttsCostUsd, TtsError, voicePool } from './elevenlabs.ts';
 
 /** What the routes need from the budget ledger; the real ledger satisfies it, tests pass a small fake. */
 export interface TtsLedger {
@@ -45,7 +45,7 @@ export function registerTts(app: Express, deps: { ledger: TtsLedger; env?: NodeJ
     const lang = req.query.lang === 'pl' ? 'pl' : 'en';
     try {
       const voices = await listVoices(cfg, lang, fetchFn);
-      res.json({ model: cfg.model, voices, defaults: defaultVoices(voices, lang, env) });
+      res.json({ model: cfg.model, voices, defaults: defaultVoices(voices, lang, env), pool: voicePool(voices, env) });
     } catch (e) {
       const err = e instanceof TtsError ? e : new TtsError('unavailable', 'Could not list voices');
       res.status(err.status).json({ error: err.message, code: err.code });

@@ -57,3 +57,13 @@ test('each list offers only the voices that fit the character gender', () => {
   assert.equal(genderOf(v('Microsoft Zira - English (United States)', 'en-US'), 'en'), 'f');
   assert.equal(genderOf(v('Microsoft David - English (United States)', 'en-US'), 'en'), 'm');
 });
+
+test('a character keeps its voice, and different characters spread over the approved voices', async () => {
+  const { voiceFromPool } = await import('../src/lib/cloudVoice.ts');
+  const pool = ['a', 'b', 'c'];
+  assert.equal(voiceFromPool(pool, 7, 'x'), voiceFromPool(pool, 7, 'x'));
+  const seen = new Set(Array.from({ length: 30 }, (_, i) => voiceFromPool(pool, i * 7919 + 3, 'x')));
+  assert.deepEqual([...seen].sort(), ['a', 'b', 'c']);
+  assert.equal(voiceFromPool([], 5, 'fallback'), 'fallback');
+  assert.equal(voiceFromPool([], 5, null), null);
+});

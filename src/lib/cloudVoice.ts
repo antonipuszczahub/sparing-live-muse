@@ -20,6 +20,8 @@ export interface CloudCatalog {
   model: string;
   voices: CloudVoice[];
   defaults: { m: string | null; f: string | null };
+  /** Approved voices per gender; a character without a chosen voice gets one of them from its seed. */
+  pool: { m: string[]; f: string[] };
 }
 
 let available: Promise<{ model: string } | null> | null = null;
@@ -91,12 +93,17 @@ export function saveCloudVoice(lang: Lang, gender: 'm' | 'f', id: string | null)
   }
 }
 
+/** One of the approved voices for a character: the same seed always gives the same voice, different seeds spread over the pool. */
+export function voiceFromPool(pool: string[], seed: number, fallback: string | null): string | null {
+  return pool.length ? pool[Math.abs(Math.trunc(seed)) % pool.length]! : fallback;
+}
+
 /** The cloud voice for a character, or null when the call should use the browser's voice. */
-export async function resolveCloudVoice(lang: Lang, gender: 'm' | 'f'): Promise<{ id: string; name: string } | null> {
+export async function resolveCloudVoice(lang: Lang, gender: 'm' | 'f', seed = 0): Promise<{ id: string; name: string } | null> {
   if (getSource() === 'browser' || !(await cloudAvailable())) return null;
   const catalog = await cloudCatalog(lang);
   if (!catalog) return null;
-  const id = savedCloudVoice(lang, gender) ?? catalog.defaults[gender];
+  const id = savedCloudVoice(lang, gender) ?? voiceFromPool(catalog.pool?.[gender] ?? [], seed, catalog.defaults[gender]);
   if (!id) return null;
   return { id, name: catalog.voices.find((v) => v.id === id)?.name ?? id };
 }
