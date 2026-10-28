@@ -26,7 +26,7 @@ export const pl: Dict = {
   startCall: 'Zadzwoń',
   headphones: 'Załóż słuchawki, żeby postać nie słyszała samej siebie.',
   privacy:
-    'Prywatność: Twój głos jest przekazywany do modelu mowy Meta, a Twoje słowa trafiają do modeli Muse firmy Meta. Dopóki używane są darmowe kredyty Meta, firma może wykorzystywać te treści do ulepszania swoich produktów. Ta aplikacja nie przechowuje nagrań ani transkrypcji; zapisuje tylko dziennik kosztów, a Twoje słabe punkty zostają w tej przeglądarce.',
+    'Prywatność: Twój głos jest przekazywany do modelu mowy Meta, a Twoje słowa trafiają do modeli Muse firmy Meta. Dopóki używane są darmowe kredyty Meta, te treści (także udostępniany ekran i klatki z kamery, jeśli je włączysz) mogą być użyte do trenowania przyszłych modeli Meta. Przy włączonych otwartych wagach tekst rozmowy trafia do hosta otwartych wag. Ta aplikacja nie przechowuje nagrań ani transkrypcji; zapisuje tylko dziennik kosztów, a Twoje słabe punkty zostają w tej przeglądarce.',
   budgetToday: (spent, limit) => `Budżet na dziś: $${spent} z $${limit}`,
   noVoice: 'Ta przeglądarka nie udostępnia polskiego głosu. Użyj Microsoft Edge: ma polskie głosy „Natural” (Zofia, Marek).',
   voiceTitle: 'Głos postaci',

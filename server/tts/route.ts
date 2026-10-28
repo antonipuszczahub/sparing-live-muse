@@ -27,6 +27,15 @@ export function ttsLimits(env: NodeJS.ProcessEnv = process.env) {
   };
 }
 
+/**
+ * The hackathon allows only Meta models at runtime, and ElevenLabs is not one, so the cloud voice stays off (the
+ * browser's own voice speaks) unless THIRD_PARTY_VOICE=on is set. That switch is for local experiments only and
+ * must not be set on the host that serves the submission.
+ */
+export function thirdPartyVoiceEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  return env.THIRD_PARTY_VOICE === 'on' ? env : { ...env, ELEVENLABS_API_KEY: '' };
+}
+
 /** For /api/health: is the voice on, and how much of today's allowance is left. */
 export function voiceHealth(ledger: Pick<TtsLedger, 'charsToday'>, env: NodeJS.ProcessEnv = process.env) {
   const cfg = ttsConfig(env);
