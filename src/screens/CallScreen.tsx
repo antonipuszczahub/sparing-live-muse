@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { SCENARIOS } from '../../shared/scenarios.ts';
 import { CallEngine, type CallSnapshot } from '../engine/CallEngine.ts';
+import { ScreenShare } from '../lib/screen.ts';
 
 const MOOD_LABEL = ['', 'Hostile', 'Cold', 'Neutral', 'Warming up', 'Won over'];
 const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
@@ -22,13 +23,51 @@ export function CallScreen({
   const engine = useRef<CallEngine | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const ended = useRef(false);
+  const share = useRef<ScreenShare | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [seen, setSeen] = useState('');
 
   useEffect(() => {
     const e = new CallEngine(config, session, setSnap);
     engine.current = e;
     e.start();
-    return () => e.dispose();
+    return () => {
+      e.dispose();
+      share.current?.stop();
+    };
   }, [config, session]);
+
+  async function toggleShare() {
+    if (share.current?.active) {
+      share.current.stop();
+      engine.current?.setScreen(undefined);
+      setSharing(false);
+      setSeen('');
+      return;
+    }
+    const s = new ScreenShare(
+      async (image) => {
+        const r = await fetch('/api/eye', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session, scenario: config.scenario, topic: config.topic, image }),
+        }).catch(() => null);
+        return r?.ok ? ((await r.json()) as { notes: string }).notes : null;
+      },
+      (notes, first) => {
+        setSeen(notes);
+        engine.current?.setScreen(notes, first);
+      },
+    );
+    s.onEnded = () => {
+      engine.current?.setScreen(undefined);
+      setSharing(false);
+      setSeen('');
+    };
+    share.current = s;
+    setSharing(await s.start());
+  }
+
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' });
@@ -83,6 +122,13 @@ export function CallScreen({
         {snap.liveUser && <Bubble turn={{ role: 'user', text: snap.liveUser, at: 0 }} name="You" live />}
       </div>
 
+      {sharing && (
+        <details className="mb-2 rounded-lg border border-[var(--line)] bg-[var(--panel)] px-3 py-2 text-xs text-[var(--muted)]">
+          <summary className="cursor-pointer">{seen ? `${config.persona.name.split(' ')[0]} can see your screen (what they noted)` : 'Sharing your screen, looking…'}</summary>
+          <p className="mt-2 whitespace-pre-wrap leading-relaxed">{seen}</p>
+        </details>
+      )}
+
       {snap.error && <p className="mb-2 text-sm text-amber-400">{snap.error}</p>}
 
       <footer className="rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
@@ -92,6 +138,15 @@ export function CallScreen({
             {statusText}
             {snap.lastLatencyMs != null && <span className="ml-2 text-xs">first word {(snap.lastLatencyMs / 1000).toFixed(1)} s</span>}
           </div>
+          {ScreenShare.supported() && (
+            <button
+              onClick={toggleShare}
+              disabled={snap.state === 'ended'}
+              className={`ml-auto mr-2 rounded-lg border px-3 py-2 text-sm transition ${sharing ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`}
+            >
+              {sharing ? 'Stop sharing' : 'Share screen'}
+            </button>
+          )}
           <button
             onClick={() => engine.current?.hangUp()}
             disabled={snap.state === 'ended'}

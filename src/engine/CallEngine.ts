@@ -67,6 +67,15 @@ export class CallEngine {
     };
   }
 
+  private screenNotes: string | undefined;
+
+  /** Notes from the eye agent about the user's shared screen. Cleared with undefined when sharing stops. */
+  setScreen(notes: string | undefined, first = false) {
+    this.screenNotes = notes;
+    // The character reacts the moment it sees something, like a person would.
+    if (notes && first && this.state === 'listening') void this.botTurn('[the user just shared their screen with you]');
+  }
+
   start() {
     this.startedAt = Date.now();
     this.ears.start();
@@ -173,7 +182,7 @@ export class CallEngine {
     try {
       await postSSE(
         '/api/turn',
-        { session: this.session, config: this.config, history, screen: this.screenContext() },
+        { session: this.session, config: this.config, history, screen: this.screenNotes ?? this.screenContext() },
         (event, data) => {
           if (id !== this.turnId) return;
           if (event === 'say') this.onSay((data as { delta: string }).delta);

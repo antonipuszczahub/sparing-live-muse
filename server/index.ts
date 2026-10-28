@@ -1,6 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
 import { audit } from './agents/auditor.ts';
+import { look } from './agents/eye.ts';
 import { characterTurn } from './agents/persona.ts';
 import { buildTwin } from './agents/twin.ts';
 import { BudgetError } from './meta/client.ts';
@@ -40,7 +41,7 @@ const TurnSchema = z.object({
       at: z.number(),
     }),
   ),
-  screen: z.string().max(2000).optional(),
+  screen: z.string().max(4000).optional(),
 });
 
 app.get('/api/health', (_req, res) => {
@@ -128,6 +129,29 @@ app.post('/api/twin', async (req, res) => {
     else if (!ac.signal.aborted) send('error', { message: e instanceof Error ? e.message : 'Research failed' });
   } finally {
     res.end();
+  }
+});
+
+/** The eye agent: notes on the user's shared screen, from one JPEG frame. */
+app.post('/api/eye', async (req, res) => {
+  const parsed = z
+    .object({
+      session: z.string().min(4).max(64),
+      scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
+      topic: z.string().max(400),
+      image: z.string().startsWith('data:image/').max(6_000_000),
+    })
+    .safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  try {
+    const notes = await look({ ...parsed.data, scenario: parsed.data.scenario as never });
+    res.json({ notes });
+  } catch (e) {
+    if (e instanceof BudgetError) res.status(429).json({ error: e.message, budget: e.reason });
+    else res.status(502).json({ error: e instanceof Error ? e.message : 'Eye agent failed' });
   }
 });
 
