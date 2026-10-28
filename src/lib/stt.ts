@@ -34,13 +34,13 @@ export class Ears {
   private running = false;
   onInterim: (text: string) => void = () => {};
   onFinal: (text: string, at: number) => void = () => {};
-  onError: (err: string) => void = () => {};
+  onError: (err: string, fatal: boolean) => void = () => {};
   paused = false;
 
   start() {
     const Ctor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     if (!Ctor) {
-      this.onError('Speech recognition is not supported in this browser. Use Edge or Chrome.');
+      this.onError('Speech recognition is not supported in this browser. Use Edge or Chrome.', true);
       return;
     }
     this.running = true;
@@ -60,7 +60,7 @@ export class Ears {
     rec.onerror = (e) => {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
         this.running = false;
-        this.onError('Microphone permission denied.');
+        this.onError('Microphone permission denied.', true);
       }
     };
     rec.onend = () => {

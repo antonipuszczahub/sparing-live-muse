@@ -1,6 +1,7 @@
 import type { BotReply, Mood, SessionConfig, Turn } from '../../shared/types.ts';
 import { cleanSpeech } from '../../shared/speech.ts';
 import { postSSE } from '../lib/sse.ts';
+import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
 import { pickVoice, Speaker } from '../lib/tts.ts';
@@ -37,7 +38,7 @@ export class CallEngine {
   private error?: string;
   private lastLatencyMs?: number;
 
-  private ears = new Ears();
+  private ears: EarsLike;
   private speaker: Speaker;
   private abort: AbortController | null = null;
   private silenceTimer: number | undefined;
@@ -59,12 +60,24 @@ export class CallEngine {
       if (this.userStoppedAt) this.lastLatencyMs = Date.now() - this.userStoppedAt;
       this.set('speaking');
     };
-    this.ears.onInterim = (t) => this.onInterim(t);
-    this.ears.onFinal = (t) => this.onFinal(t);
-    this.ears.onError = (m) => {
+    this.ears = this.wireEars(new MetaEars(session), true);
+  }
+
+  /** Muse Voice Transcribe is the ears; if it cannot start, fall back to the browser's recognizer. */
+  private wireEars(ears: EarsLike, canFallBack: boolean): EarsLike {
+    ears.onInterim = (t) => this.onInterim(t);
+    ears.onFinal = (t) => this.onFinal(t);
+    ears.onError = (m, fatal) => {
+      if (fatal && canFallBack && this.state !== 'ended') {
+        this.ears.stop();
+        this.ears = this.wireEars(new Ears(), false);
+        this.ears.start();
+        return;
+      }
       this.error = m;
       this.emit();
     };
+    return ears;
   }
 
   private screenNotes: string | undefined;

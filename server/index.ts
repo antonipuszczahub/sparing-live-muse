@@ -1,5 +1,6 @@
 import express from 'express';
 import { z } from 'zod';
+import { attachAsr } from './asr.ts';
 import { audit } from './agents/auditor.ts';
 import { look } from './agents/eye.ts';
 import { characterTurn } from './agents/persona.ts';
@@ -181,4 +182,5 @@ app.post('/api/audit', async (req, res) => {
 });
 
 const port = Number(process.env.PORT) || 8787;
-app.listen(port, () => console.log(`Sparing Live server on http://localhost:${port}`));
+const server = app.listen(port, () => console.log(`Sparing Live server on http://localhost:${port}`));
+attachAsr(server);
