@@ -18,6 +18,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | **A face that reacts** | Muse Image draws the counterpart once and edits the same person into three expressions. The face follows the character's mood during the call. |
 | **Real interruptions** | Full-duplex voice. Talk over the character and it stops mid-sentence; the transcript shows where it was cut off. |
 | **An opponent that learns** | The auditor tags what you keep getting wrong ("dodged price", "vague intro"); the next character aims at it. |
+| **A clip you can post** | One click renders a captioned MP4 of the key moment (their face, their private thoughts, your score) in the browser, with post text ready to copy. |
 | **Measured, not claimed** | Latency, repetition, stage-direction leaks and difficulty behaviour are measured against the live API by `npm run eval`. A budget guard with a persistent ledger caps spend. |
 
 ## Meta models used, and where
@@ -122,4 +123,4 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, open-weights switch (needs a Baseten key). In progress: shareable clip, public deployment.
+Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, open-weights switch (needs a Baseten key). Built and verified: shareable clip (MP4 rendered in the browser), deployment files (Dockerfile, static serving, per-visitor rate limits). Not yet deployed.

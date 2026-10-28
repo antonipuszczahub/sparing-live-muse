@@ -3,6 +3,7 @@ import { measureDelivery, type AuditResult, type Moment } from '../../shared/aud
 import type { FramingEvent } from '../../shared/framing.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { ApiError, requestAudit } from '../lib/api.ts';
+import { ClipMaker } from '../components/ClipMaker.tsx';
 import { recordWeakSpots } from '../lib/memory.ts';
 
 const KIND_STYLE: Record<Moment['kind'], { label: string; color: string }> = {
@@ -169,6 +170,8 @@ export function ReportScreen({
           )}
         </>
       )}
+
+      <ClipMaker session={session} scenario={config.scenario} persona={config.persona} turns={turns} audit={result} />
 
       <section className="mt-8">
         <div className="mb-3 flex items-center justify-between">
