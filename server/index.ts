@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { z } from 'zod';
 import { attachAsr } from './asr.ts';
@@ -8,12 +11,14 @@ import { characterTurn } from './agents/persona.ts';
 import { drawPortraits, type Portraits } from './agents/portrait.ts';
 import { buildTwin } from './agents/twin.ts';
 import { BudgetError, openWeightsConfigured } from './meta/client.ts';
+import { rateLimit } from './limits.ts';
 import { ledger } from './meta/ledger.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
 import { newSeed, rollVariant } from '../shared/variation.ts';
 import type { SessionConfig } from '../shared/types.ts';
 
 const app = express();
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '8mb' }));
 
 const PersonaSchema = z.object({
@@ -54,7 +59,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 /** Start a new call: roll today's variation and the character. */
-app.post('/api/session', (req, res) => {
+app.post('/api/session', rateLimit('session', Number(process.env.SESSIONS_PER_IP_HOUR) || 6), (req, res) => {
   const { scenario, level, topic, focus, provider } = z
     .object({ scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), level: z.number().int().min(1).max(4), topic: z.string().max(400), focus: z.array(z.string().max(80)).max(3).optional(), provider: z.enum(['meta', 'open']).optional() })
     .parse(req.body);
@@ -116,7 +121,7 @@ app.post('/api/turn', async (req, res) => {
  *   event: twin  data: TwinProfile
  *   event: error data: {message, budget?}
  */
-app.post('/api/twin', async (req, res) => {
+app.post('/api/twin', rateLimit('twin', Number(process.env.TWINS_PER_IP_HOUR) || 5), async (req, res) => {
   const parsed = z
     .object({
       session: z.string().min(4).max(64),
@@ -235,6 +240,13 @@ app.post('/api/audit', async (req, res) => {
     else res.status(502).json({ error: e instanceof Error ? e.message : 'Audit failed' });
   }
 });
+
+// Production: the same server serves the built front end.
+const dist = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+if (existsSync(dist)) {
+  app.use(express.static(dist));
+  app.get(/^\/(?!api|ws).*/, (_req, res) => res.sendFile(join(dist, 'index.html')));
+}
 
 const port = Number(process.env.PORT) || 8787;
 const server = app.listen(port, () => console.log(`Sparing Live server on http://localhost:${port}`));

@@ -17,7 +17,8 @@
     "try:portrait": "tsx --env-file=.env scripts/try-portrait.ts",
     "test": "tsx --test tests/*.test.ts",
     "eval": "tsx --env-file=.env scripts/eval.ts",
-    "check:open": "tsx --env-file=.env scripts/check-open.ts"
+    "check:open": "tsx --env-file=.env scripts/check-open.ts",
+    "start": "tsx server/index.ts"
   },
   "dependencies": {
     "express": "^5.3.0",
