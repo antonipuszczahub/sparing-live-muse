@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isNatural, pitchFor, rankVoices, sortVoices } from '../src/lib/tts.ts';
+import { genderOf, isNatural, pitchFor, rankVoices, sortVoices, voicesFor } from '../src/lib/tts.ts';
 
 const v = (name: string, lang = 'pl-PL') => ({ name, lang });
 const EDGE = [
@@ -47,4 +47,13 @@ test('English voices are ranked the same way and an empty list gives no voice', 
   const en = [v('Microsoft Zira - English (United States)', 'en-US'), v('Microsoft Guy Online (Natural) - English (United States)', 'en-US')];
   assert.match(rankVoices(en, 'en', 'm').voice!.name, /Guy/);
   assert.equal(rankVoices([], 'pl', 'f').voice, null);
+});
+
+test('each list offers only the voices that fit the character gender', () => {
+  const all = [...EDGE, v('Some Unknown Voice')];
+  const names = (g: 'm' | 'f') => voicesFor(all, 'pl', g).map((x) => x.name);
+  assert.deepEqual(names('f'), ['Microsoft Paulina - Polish (Poland)', 'Microsoft Zofia Online (Natural) - Polish (Poland)', 'Some Unknown Voice']);
+  assert.deepEqual(names('m'), ['Microsoft Adam - Polish (Poland)', 'Microsoft Marek Online (Natural) - Polish (Poland)', 'Some Unknown Voice']);
+  assert.equal(genderOf(v('Microsoft Zira - English (United States)', 'en-US'), 'en'), 'f');
+  assert.equal(genderOf(v('Microsoft David - English (United States)', 'en-US'), 'en'), 'm');
 });

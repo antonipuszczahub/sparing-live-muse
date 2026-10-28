@@ -1,7 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Lang } from '../../shared/types.ts';
 import { t } from '../i18n/index.ts';
-import { isNatural, pickVoice, pitchFor, previewVoice, saveVoice, savedVoice, sortVoices, voices } from '../lib/tts.ts';
+import type { CloudSpeaker } from '../lib/cloudSpeaker.ts';
+import {
+  cloudAvailable,
+  cloudCatalog,
+  getSource,
+  previewCloud,
+  saveCloudVoice,
+  savedCloudVoice,
+  setSource,
+  voicesForGender,
+  type CloudCatalog,
+  type VoiceSource,
+} from '../lib/cloudVoice.ts';
+import { isNatural, pickVoice, pitchFor, previewVoice, saveVoice, savedVoice, sortVoices, voices, voicesFor } from '../lib/tts.ts';
 
 /** The voices of a language, kept current: browsers load them late, and Edge adds its Natural voices after a moment. */
 export function useVoiceList(lang: Lang) {
@@ -16,15 +29,72 @@ export function useVoiceList(lang: Lang) {
   return state;
 }
 
+const SEGMENT = (on: boolean) =>
+  `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--bg)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`;
+
 /**
- * Lets the user hear and choose the voice of the counterpart. The default is the best voice the browser
- * has, but "best available" can still be a robotic system voice, so the choice is theirs and it is remembered.
+ * Lets the user hear and choose the voice of the counterpart. With an ElevenLabs key on the server the cloud
+ * voices are offered first; otherwise (or by choice) the browser's own voices, filtered by the character's gender.
  */
 export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisVoice[] }) {
   const [, bump] = useState(0);
-  if (!list.length) return null;
+  const [cloud, setCloud] = useState<{ model: string } | null>(null);
+  const [catalog, setCatalog] = useState<CloudCatalog | null>(null);
+  const [source, setSourceState] = useState<VoiceSource>(getSource);
+  const preview = useRef<CloudSpeaker | null>(null);
 
-  const row = (gender: 'm' | 'f') => {
+  useEffect(() => {
+    void cloudAvailable().then(setCloud);
+  }, []);
+  useEffect(() => {
+    if (cloud) void cloudCatalog(lang).then(setCatalog);
+  }, [cloud, lang]);
+  useEffect(() => () => preview.current?.dispose(), []);
+
+  const useCloud = Boolean(cloud && catalog && source === 'cloud');
+  if (!list.length && !useCloud) return null;
+
+  const cloudRow = (gender: 'm' | 'f') => {
+    const options = voicesForGender(catalog!.voices, gender);
+    const saved = savedCloudVoice(lang, gender);
+    const effective = saved && options.some((v) => v.id === saved) ? saved : catalog!.defaults[gender];
+    return (
+      <div key={gender} className="flex flex-wrap items-center gap-2">
+        <span className="w-36 text-sm text-[var(--muted)]">{t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}</span>
+        <select
+          value={saved ?? ''}
+          onChange={(e) => {
+            saveCloudVoice(lang, gender, e.target.value || null);
+            bump((n) => n + 1);
+          }}
+          className="min-w-0 flex-1 rounded-lg border border-[var(--line)] bg-[var(--bg)] px-2 py-1.5 text-sm"
+        >
+          <option value="">
+            {t('voiceAuto')}
+            {effective ? ` → ${options.find((v) => v.id === effective)?.name ?? ''}` : ''}
+          </option>
+          {options.map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.name}
+              {v.accent ? ` · ${v.accent}` : ''}
+            </option>
+          ))}
+        </select>
+        <button
+          disabled={!effective}
+          onClick={() => {
+            preview.current?.dispose();
+            if (effective) preview.current = previewCloud(effective, t('voiceSample'), lang);
+          }}
+          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3a4160] disabled:opacity-40"
+        >
+          {t('voicePreview')}
+        </button>
+      </div>
+    );
+  };
+
+  const browserRow = (gender: 'm' | 'f') => {
     const pick = pickVoice(gender, lang);
     return (
       <div key={gender} className="flex flex-wrap items-center gap-2">
@@ -41,7 +111,7 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
             {t('voiceAuto')}
             {pick.voice ? ` → ${pick.voice.name}` : ''}
           </option>
-          {list.map((v) => (
+          {voicesFor(list, lang, gender).map((v) => (
             <option key={v.name} value={v.name}>
               {v.name}
               {isNatural(v) ? '' : ` (${t('voiceBasic')})`}
@@ -60,12 +130,29 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
 
   return (
     <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
-      <div className="text-sm font-medium">{t('voiceTitle')}</div>
-      <div className="mt-3 space-y-2">
-        {row('f')}
-        {row('m')}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm font-medium">{t('voiceTitle')}</div>
+        {cloud && catalog && (
+          <div role="group" className="flex gap-1">
+            {(['cloud', 'browser'] as const).map((s) => (
+              <button
+                key={s}
+                aria-pressed={source === s}
+                className={SEGMENT(source === s)}
+                onClick={() => {
+                  setSource(s);
+                  setSourceState(s);
+                }}
+              >
+                {t(s === 'cloud' ? 'voiceSourceCloud' : 'voiceSourceBrowser')}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      {!list.some(isNatural) && <p className="mt-3 text-xs text-amber-400">{t('voiceRobotic')}</p>}
+      <div className="mt-3 space-y-2">{(['f', 'm'] as const).map((g) => (useCloud ? cloudRow(g) : browserRow(g)))}</div>
+      {useCloud && <p className="mt-3 text-xs text-[var(--muted)]">{t('voiceCloudNote')}</p>}
+      {!useCloud && !list.some(isNatural) && <p className="mt-3 text-xs text-amber-400">{t('voiceRobotic')}</p>}
     </section>
   );
 }

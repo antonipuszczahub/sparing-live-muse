@@ -28,6 +28,7 @@ const ROLE: Record<string, string> = {
   portrait: 'Face: portrait',
   'portrait-edit': 'Face: expression edit',
   'sam-face': 'Camera framing: face detection',
+  tts: 'Character voice (ElevenLabs)',
   'probe-open': 'Open-weights probe',
   probe: 'API probe',
 };
@@ -70,7 +71,7 @@ export function renderManifest(entries: LedgerEntry[], opts: { generatedAt?: Dat
     const [model, prov] = k.split('|') as [string, string];
     return [
       `\`${model}\``,
-      prov === 'open' ? 'open weights' : 'Meta Model API',
+      prov === 'open' ? 'open weights' : prov === 'elevenlabs' ? 'ElevenLabs' : 'Meta Model API',
       int(es.length),
       int(sum(es, (e) => e.promptTokens)),
       int(sum(es, (e) => e.completionTokens)),
@@ -106,6 +107,23 @@ export function renderManifest(entries: LedgerEntry[], opts: { generatedAt?: Dat
       )}\n\nThese calls were served by an open-weights host and billed by it, outside the Meta cost above.`
     : 'No open-weights calls have been recorded yet. Set a host in `.env` (see `.env.example`), tick **Run the character on open weights** on the start screen, make a call, then run `npm run manifest` again.';
 
+  const voice = entries.filter((e) => provider(e) === 'elevenlabs');
+  const voiceSection = voice.length
+    ? `${table(
+        ['Voice model', 'Requests', 'Characters spoken', 'Estimated cost', 'First audio byte (median)', 'Per session (average)'],
+        [...group(voice, (e) => e.model)].map(([model, es]) => [
+          `\`${model}\``,
+          int(es.length),
+          int(sum(es, (e) => e.chars)),
+          usd(sum(es, (e) => e.externalUsd)),
+          ms(quantile(es.flatMap((e) => present(e.firstTokenMs)), 0.5)),
+          `${int(Math.round(sum(es, (e) => e.chars) / Math.max(1, new Set(es.map((e) => e.session)).size)))} characters`,
+        ]),
+      )}
+
+The cost is an estimate at the configured price per 1,000 characters and is billed by ElevenLabs, outside the Meta cost above. Only the character's lines are sent to it, never the user's audio.`
+    : 'No ElevenLabs voice requests have been recorded. Without \`ELEVENLABS_API_KEY\` the character speaks with the browser voice.';
+
   const metaCost = sum(entries.filter((e) => provider(e) === 'meta'), (e) => e.costUsd);
 
   return `# Manifest
@@ -125,6 +143,10 @@ ${table(['Role', 'Model', 'Calls', 'Cost'], byRole)}
 ## Open weights
 
 ${openSection}
+
+## Voice
+
+${voiceSection}
 
 ## Reproduce
 

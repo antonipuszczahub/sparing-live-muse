@@ -19,6 +19,7 @@
     "eval": "tsx --env-file=.env scripts/eval.ts",
     "check:open": "tsx --env-file=.env scripts/check-open.ts",
     "manifest": "tsx --env-file=.env scripts/manifest.ts",
+    "check:voice": "tsx --env-file=.env scripts/check-voice.ts",
     "start": "tsx server/index.ts"
   },
   "dependencies": {

@@ -38,6 +38,11 @@ export const pl: Dict = {
   voiceSample: 'Dzień dobry, tak brzmię. Przejdźmy do Twojej oferty.',
   voiceRobotic: 'Najlepszy głos w tej przeglądarce to podstawowy głos systemowy i brzmi sztucznie. Microsoft Edge ma dużo lepsze głosy Natural (Zofia, Marek).',
   voiceInUse: (name) => `Głos: ${name}`,
+  voiceSourceCloud: 'Głos ElevenLabs',
+  voiceSourceBrowser: 'Głos przeglądarki',
+  voiceCloudNote: 'Kwestie postaci są wysyłane do ElevenLabs, żeby je wypowiedzieć. Twój własny głos nigdy.',
+  voiceFallback: (code) =>
+    `${({ limit: 'Limit głosu na tę wizytę został wykorzystany', quota: 'Limit ElevenLabs został wyczerpany', auth: 'ElevenLabs nie przyjął klucza', audio: 'Przeglądarka zablokowała odtwarzanie dźwięku dla głosu premium' } as Record<string, string>)[code] ?? 'Głos ElevenLabs jest niedostępny'}, więc mówi głos przeglądarki.`,
   userTitle: 'O Tobie',
   userGender: 'Jestem',
   userMan: 'mężczyzną',

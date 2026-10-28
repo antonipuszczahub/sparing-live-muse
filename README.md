@@ -31,6 +31,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode, language bias per call (English or Polish) | final text 0.36 s after speech ends; a Polish test sentence came back word for word |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | three images in about 30 s, 3 cents |
 | Muse Spark Open | The character can run on open weights: one tick on the start screen, same protocol. Host is configurable (Baseten, Fireworks, Modal or local Ollama); `docs/MANIFEST.md` records which calls ran where | switch and manifest built; no open-weights call recorded yet |
+| ElevenLabs `eleven_v4_turbo` | Optional **voice** of the character (not a Meta model): studio-quality speech in English and Polish, streamed sentence by sentence; the browser's voice is the fallback | about 100 ms model latency; see [Voice and cost](#voice-and-cost) |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
 Notes from measuring the API (they shaped the design): reasoning tokens count against `max_tokens`; `json_schema` output does not stream and returns keys alphabetically (so live turns use a tagged plain-text format and the character decides to hang up *after* it has spoken); web search exists only on the Responses API; the `-contributor` variant of Spark is 2-4x slower than the standard model.
@@ -98,6 +99,7 @@ Wear headphones, so the character does not hear itself.
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
 | `npm run try:audit` | Audits a scripted call (`-- --lang pl` for Polish) |
 | `npm run try:portrait` | Draws the three portraits |
+| `npm run check:voice` | Lists the ElevenLabs voices and saves a sample line per default voice to `data/voice-samples/` |
 | `npm run check:open` | Probes the open-weights host (see `.env.example` for Baseten, Fireworks, Modal, Ollama) |
 | `npm run manifest` | Rebuilds [`docs/MANIFEST.md`](docs/MANIFEST.md) from the budget ledger: models, tokens, cost, latency, open-weights share |
 | `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics, both languages |
@@ -121,13 +123,31 @@ Polish is written for Polish rather than translated line by line: złoty instead
 
 Difficulty still changes behaviour in Polish, but with three seeds per cell the middle levels are noisy: *Realistyczny* hung up on the weak caller 2 times in 3 in one run and 0 in the next, *Twardy* and *Brutalny* 3 in 3 both times. The English evaluation has the same sample size.
 
+## Voice and cost
+
+Meta has no speech-synthesis model (the Model API lists chat, Wonder, Image, SAM and Voice Transcribe only), so the character's *voice* comes from one of two places:
+
+- **The browser's own voices** (no key, no cost). Outside Edge on Windows these are basic system voices and sound robotic; Edge has much better Natural voices. The start screen lists the voices that fit the character's gender, lets you hear them, and warns when only basic ones exist.
+- **ElevenLabs** (optional, set `ELEVENLABS_API_KEY`). The server streams each sentence of the character's reply to ElevenLabs the moment it is written and the browser plays the 24 kHz PCM back to back on the audio clock, so there are no gaps. The next sentence is requested with the previous one as context, so the intonation continues. If the user cuts in, the line is recorded up to the word that had actually played. If ElevenLabs fails mid-call (quota, key, network), the browser voice takes over and the call says so.
+
+What it costs, from the [ElevenLabs API price list](https://elevenlabs.io/pricing/api) checked 2026-10-28: `eleven_v4_turbo` (the model for real time) and Flash are **$0.04 per 1,000 characters**; `eleven_v4` is $0.08. A reply is about 130 to 180 characters and a five-minute call has 10 to 14 replies, so a call is **about 2,000 characters, about 8 cents**. Plans include characters: Starter $6 a month (first month $1) has 150,000 on Turbo, Creator $22 has 550,000, Pro $99 has 2.5 million.
+
+| Use | Calls | Characters | Cost at $0.04 per 1K |
+|---|---|---|---|
+| Development and testing | 50 | 100,000 | $4 |
+| Recording the demo, many takes | 20 | 40,000 | $1.60 |
+| Judges and visitors for two weeks | 300 | 600,000 | $24 |
+| If an X post takes off | 1,500 | 3,000,000 | $120 |
+
+Three guards keep it bounded: 8,000 characters per session, 20,000 per visitor per hour and 150,000 per day (all in `.env`), counted in the same ledger as the Meta calls. Past a cap the call continues with the browser voice, it does not stop. `docs/MANIFEST.md` lists the characters actually spoken and the estimated cost. Only the character's lines go to ElevenLabs, never the user's audio.
+
 ## Evaluation
 
 `npm run eval` plays 24 scripted calls (weak and strong caller, four difficulty levels, three seeds) and writes [`docs/EVAL.md`](docs/EVAL.md). Latest run: 0 repeated turns in 287 pairs, 0 stage directions leaked into speech, 0 failed turns, median time to first spoken word 1.1 s. Difficulty changes behaviour: the friendly character never hangs up on a weak caller, the others do, and no strong caller is ever hung up on. The same evaluation in Polish is in [`docs/EVAL.pl.md`](docs/EVAL.pl.md).
 
 ## Privacy
 
-Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. While free Meta credits are in use, Meta may use content for product improvement; the app says so before the first call. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
+Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. If an ElevenLabs key is set, the character's own lines (never the user's audio) are sent to ElevenLabs to be spoken. While free Meta credits are in use, Meta may use content for product improvement; the app says so before the first call. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
 
 ## Layout
 
@@ -144,4 +164,4 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch (built for Baseten, Fireworks, Modal and Ollama, tested only in unit tests because no host key has been available yet). Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). Not yet deployed.
+Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch (built for Baseten, Fireworks, Modal and Ollama, tested only in unit tests because no host key has been available yet). Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The ElevenLabs voice is built and tested against a stand-in service (streaming playback without gaps, cut-in estimation, fallback to the browser voice, limits, optional fields a model refuses); it has not been heard with a real key yet. Not yet deployed.

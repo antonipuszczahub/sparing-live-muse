@@ -13,6 +13,7 @@ import { researchTwin, twinCache, twinKey } from './agents/twinCache.ts';
 import { BudgetError, openWeightsConfigured, openWeightsInfo } from './meta/client.ts';
 import { rateLimit } from './limits.ts';
 import { ledger } from './meta/ledger.ts';
+import { registerTts, voiceHealth } from './tts/route.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
 import { newSeed, rollVariant } from '../shared/variation.ts';
 import type { SessionConfig } from '../shared/types.ts';
@@ -67,6 +68,7 @@ app.get('/api/health', (_req, res) => {
     openWeights: Boolean(open),
     openHost: open?.label,
     openModel: open?.model,
+    voice: voiceHealth(ledger),
     budget: ledger.summary(),
   });
 });
@@ -285,6 +287,9 @@ app.post('/api/audit', async (req, res) => {
     else res.status(502).json({ error: e instanceof Error ? e.message : 'Audit failed' });
   }
 });
+
+// The character's voice: ElevenLabs when a key is set (the browser's own voices otherwise).
+registerTts(app, { ledger });
 
 // Production: the same server serves the built front end.
 const dist = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
