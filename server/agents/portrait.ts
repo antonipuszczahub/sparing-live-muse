@@ -1,4 +1,4 @@
-import type { Persona, ScenarioId } from '../../shared/types.ts';
+import type { Lang, Persona, ScenarioId } from '../../shared/types.ts';
 import { ledger } from '../meta/ledger.ts';
 import { BudgetError } from '../meta/client.ts';
 import { FLAT_PRICES, MODELS } from '../meta/models.ts';
@@ -28,6 +28,14 @@ async function post(path: string, body: unknown, session: string, kind: string):
   return `data:image/${json.output_format ?? 'webp'};base64,${b64}`;
 }
 
+/** In a Polish call the role is Polish text; the image model is prompted in English from the scenario instead. */
+const ROLE_EN: Record<ScenarioId, string> = {
+  sales: 'small business owner',
+  defense: 'university examiner',
+  salary: 'manager',
+  pitch: 'seed-stage investor',
+};
+
 const SETTING: Record<ScenarioId, string> = {
   sales: 'in their own small office, softly blurred background',
   defense: 'in a university seminar room, softly blurred background',
@@ -39,8 +47,9 @@ const SETTING: Record<ScenarioId, string> = {
  * Muse Image draws the counterpart once, then edits the same face into three expressions
  * so the portrait follows the character's mood during the call. 3 images, about 3 cents.
  */
-export async function drawPortraits(input: { persona: Persona; scenario: ScenarioId; mood: string; session: string }): Promise<Portraits> {
+export async function drawPortraits(input: { persona: Persona; scenario: ScenarioId; mood: string; session: string; lang?: Lang }): Promise<Portraits> {
   const { persona, scenario, session } = input;
+  const role = input.lang === 'pl' ? ROLE_EN[scenario] : persona.role;
   const who = persona.gender === 'f' ? 'woman' : 'man';
   const neutral = await post(
     '/images/generations',
@@ -49,7 +58,7 @@ export async function drawPortraits(input: { persona: Persona; scenario: Scenari
       n: 1,
       size: '1024x1024',
       output_format: 'webp',
-      prompt: `Realistic head-and-shoulders photo of a fictional ${who}, around 45 years old, who is a ${persona.role}, ${SETTING[scenario]}. Natural light, neutral businesslike expression, looking at the camera like on a video call. Photographic, no text, no logos.`,
+      prompt: `Realistic head-and-shoulders photo of a fictional ${who}, around 45 years old, who is a ${role}, ${SETTING[scenario]}. Natural light, neutral businesslike expression, looking at the camera like on a video call. Photographic, no text, no logos.`,
     },
     session,
     'portrait',

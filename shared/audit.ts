@@ -1,4 +1,4 @@
-import type { Turn } from './types.ts';
+import type { Lang, Turn } from './types.ts';
 
 export interface Moment {
   /** Index into the transcript (Turn[]). */
@@ -22,6 +22,16 @@ export interface AuditResult {
   nextFocus: string[];
   /** Short tags that are remembered across sessions and aimed at by the next character. */
   weaknessTags: string[];
+}
+
+/**
+ * The verdict is one sentence for the top of the report. The model occasionally copies the outcome
+ * word ("lost") into it; then the first sentence of the summary is used instead.
+ */
+export function ensureVerdict(result: AuditResult): AuditResult {
+  if (result.verdict.trim().split(/\s+/).filter(Boolean).length >= 3) return result;
+  const first = result.summary.trim().match(/^.+?[.!?…](?=\s|$)/s)?.[0] ?? result.summary.trim();
+  return { ...result, verdict: first.length > 160 ? `${first.slice(0, 157).trimEnd()}…` : first };
 }
 
 export const AUDIT_SCHEMA = {
@@ -83,16 +93,20 @@ export interface DeliveryMetrics {
   durationSec: number;
 }
 
-const FILLER_RE = /\b(um+|uh+|er+|ah+|hmm+|you know|i mean|sort of|kind of|basically|actually|literally|like,)\b/gi;
+const FILLER_RE: Record<Lang, RegExp> = {
+  en: /\b(um+|uh+|er+|ah+|hmm+|you know|i mean|sort of|kind of|basically|actually|literally|like,)\b/gi,
+  // \b does not understand Polish letters, so the edges are checked with Unicode lookarounds.
+  pl: /(?<![\p{L}\p{N}])(y{2,}|e{2,}|m{2,}|hm+|no więc|w sumie|tak jakby|jakby|generalnie|w zasadzie|właściwie|znaczy|wiesz|po prostu|powiedzmy|tak naprawdę)(?![\p{L}\p{N}])/giu,
+};
 
 const wc = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
 /** Delivery numbers measured from the transcript, so the audit cites facts instead of guesses. */
-export function measureDelivery(turns: Turn[], durationMs: number, hungUp: boolean): DeliveryMetrics {
+export function measureDelivery(turns: Turn[], durationMs: number, hungUp: boolean, lang: Lang = 'en'): DeliveryMetrics {
   const user = turns.filter((t) => t.role === 'user');
   const words = user.map((t) => wc(t.text));
   const total = words.reduce((a, b) => a + b, 0);
-  const fillers = user.reduce((n, t) => n + (t.text.match(FILLER_RE)?.length ?? 0), 0);
+  const fillers = user.reduce((n, t) => n + (t.text.match(FILLER_RE[lang])?.length ?? 0), 0);
   return {
     userTurns: user.length,
     userWords: total,

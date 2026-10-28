@@ -36,6 +36,9 @@ class Pcm extends AudioWorkletProcessor {
 registerProcessor('pcm24', Pcm);
 `;
 
+import type { Lang } from '../../shared/types.ts';
+import { translate } from '../i18n/index.ts';
+
 export interface EarsLike {
   onInterim: (text: string) => void;
   onFinal: (text: string, at: number) => void;
@@ -57,11 +60,18 @@ export class MetaEars implements EarsLike {
   private stopped = false;
   private ready = false;
 
-  constructor(private session: string) {}
+  constructor(
+    private session: string,
+    private lang: Lang = 'en',
+  ) {}
+
+  private say(key: Parameters<typeof translate>[1]): string {
+    return translate(this.lang, key as never);
+  }
 
   start() {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${proto}://${location.host}/ws/asr?session=${encodeURIComponent(this.session)}`);
+    const ws = new WebSocket(`${proto}://${location.host}/ws/asr?session=${encodeURIComponent(this.session)}&lang=${this.lang}`);
     ws.binaryType = 'arraybuffer';
     this.ws = ws;
     ws.onmessage = (e) => {
@@ -73,15 +83,15 @@ export class MetaEars implements EarsLike {
       } else if (msg.type === 'speechStart') this.onSpeechStart();
       else if (msg.type === 'transcript' && !(msg as { final?: boolean }).final && msg.transcript) this.onInterim(msg.transcript);
       else if (msg.type === 'speechComplete' && msg.transcript?.trim()) this.onFinal(msg.transcript.trim(), Date.now());
-      else if (msg.type === 'error') this.onError(msg.message ?? 'Speech recognition error', !this.ready);
+      else if (msg.type === 'error') this.onError(msg.message ?? this.say('asrError'), !this.ready);
     };
     ws.onclose = (e) => {
       if (this.stopped) return;
       this.releaseAudio();
-      this.onError(e.code === 4429 ? 'The daily budget is used up.' : 'Speech recognition disconnected.', true);
+      this.onError(e.code === 4429 ? this.say('asrBudget') : this.say('asrDisconnected'), true);
     };
     ws.onerror = () => {
-      if (!this.ready && !this.stopped) this.onError('Could not reach speech recognition.', true);
+      if (!this.ready && !this.stopped) this.onError(this.say('asrUnreachable'), true);
     };
   }
 
@@ -103,7 +113,7 @@ export class MetaEars implements EarsLike {
       src.connect(node);
     } catch (e) {
       const denied = e instanceof DOMException && (e.name === 'NotAllowedError' || e.name === 'NotFoundError');
-      this.onError(denied ? 'Microphone permission denied.' : 'Could not start the microphone.', !denied);
+      this.onError(denied ? this.say('micDenied') : this.say('micFailed'), !denied);
     }
   }
 

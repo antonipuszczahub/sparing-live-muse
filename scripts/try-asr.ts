@@ -24,7 +24,7 @@ ws.onopen = () => {
       audioEncoding: 'PCM_24KHZ',
       model: 'muse-voice-transcribe-1.0',
       mode: 'ENDPOINTING',
-      languageBias: ['English'],
+      languageBias: [process.env.ASR_LANG ?? 'English'],
     }),
   );
 };
@@ -49,7 +49,7 @@ ws.onmessage = async (e) => {
     return;
   }
   if (msg.type === 'audioProgress') return;
-  log(msg.type, JSON.stringify(msg).slice(0, 200));
+  log(msg.type, JSON.stringify(msg).slice(0, msg.type === 'speechComplete' ? 900 : 200));
   if (msg.type === 'speechComplete') {
     log(`end-of-speech to final text: ~${Date.now() - t0 - sentAll} ms after the audio ended`);
     ws.send(JSON.stringify({ type: 'endStream' }));

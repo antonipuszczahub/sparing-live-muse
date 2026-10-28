@@ -1,5 +1,6 @@
 import type { Server } from 'node:http';
 import { WebSocket, WebSocketServer } from 'ws';
+import { isLang, LANG_META } from '../shared/lang.ts';
 import { ledger } from './meta/ledger.ts';
 import { FLAT_PRICES, MODELS } from './meta/models.ts';
 
@@ -16,7 +17,10 @@ export function attachAsr(server: Server) {
   const wss = new WebSocketServer({ server, path: '/ws/asr' });
 
   wss.on('connection', (client, req) => {
-    const session = new URL(req.url ?? '', 'http://localhost').searchParams.get('session') ?? 'asr';
+    const params = new URL(req.url ?? '', 'http://localhost').searchParams;
+    const session = params.get('session') ?? 'asr';
+    const langParam = params.get('lang');
+    const language = LANG_META[isLang(langParam) ? langParam : 'en'].asr;
     const key = process.env.MODEL_API_KEY;
     if (!key) return void client.close(4500, 'MODEL_API_KEY is not set');
     if (!ledger.canSpend(session).ok) return void client.close(4429, 'budget');
@@ -40,7 +44,7 @@ export function attachAsr(server: Server) {
           audioEncoding: 'PCM_24KHZ',
           model: MODELS.transcribe,
           mode: 'ENDPOINTING',
-          languageBias: ['English'],
+          languageBias: [language],
           emitAudioProgress: false,
         }),
       ),

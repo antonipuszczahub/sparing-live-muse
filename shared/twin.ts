@@ -5,6 +5,6 @@ export function applyTwin(config: SessionConfig, twin: TwinProfile): SessionConf
   return {
     ...config,
     twin,
-    persona: { ...config.persona, role: `${twin.buyerRole} at ${twin.company}`, bio: twin.buyerBio },
+    persona: { ...config.persona, role: `${twin.buyerRole} ${config.lang === 'pl' ? 'w' : 'at'} ${twin.company}`, bio: twin.buyerBio },
   };
 }

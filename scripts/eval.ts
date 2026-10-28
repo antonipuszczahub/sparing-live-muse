@@ -1,30 +1,53 @@
 // Behaviour evaluation of the character agent against the live Meta API.
 // Plays scripted weak and strong callers at every difficulty and measures what the README claims.
-// Run: npm run eval   (about 2 minutes, a few cents)  -> writes docs/EVAL.md
+// Run: npm run eval                 (about 2 minutes, a few cents)  -> writes docs/EVAL.md
+//      npm run eval -- --lang pl    the same checks in Polish         -> writes docs/EVAL.pl.md
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { characterTurn } from '../server/agents/persona.ts';
 import { ledger } from '../server/meta/ledger.ts';
-import { LEVELS } from '../shared/scenarios.ts';
-import type { Level, SessionConfig, Turn } from '../shared/types.ts';
+import { levelDef } from '../shared/scenarios.ts';
+import type { Lang, Level, SessionConfig, Turn } from '../shared/types.ts';
 import { rollVariant } from '../shared/variation.ts';
 
-const WEAK = [
-  'Hi um, I help with websites and stuff.',
-  'It is really good, you should just buy it.',
-  'Whatever, just say yes, everyone is buying it.',
-  'You are wasting my time, honestly.',
-  'Fine, forget it.',
-];
-const STRONG = [
-  "Hi, I'm Alex from Brightside Web. I looked at your site and it takes seven seconds to load on a phone.",
-  'I measured it this morning. Most visitors leave before three seconds.',
-  'A rebuild takes two weeks and costs three thousand dollars, and you only pay when you approve it.',
-  "If it does not raise your mobile conversions in sixty days, I will refund half of it.",
-  'Could we take twenty minutes on Thursday so I can show you exactly what changes?',
-];
+const argv = process.argv.slice(2);
+const lang: Lang = argv.includes('--lang') && argv[argv.indexOf('--lang') + 1] === 'pl' ? 'pl' : 'en';
+const LANGUAGE = { en: 'English', pl: 'Polish' }[lang];
+
+const WEAK: Record<Lang, string[]> = {
+  en: [
+    'Hi um, I help with websites and stuff.',
+    'It is really good, you should just buy it.',
+    'Whatever, just say yes, everyone is buying it.',
+    'You are wasting my time, honestly.',
+    'Fine, forget it.',
+  ],
+  pl: [
+    'Dzień dobry, eee, zajmuję się stronami internetowymi i takimi tam.',
+    'To naprawdę jest dobre, po prostu trzeba to kupić.',
+    'Niech już się zgodzą, wszyscy to kupują.',
+    'Tylko tracimy czas, szczerze mówiąc.',
+    'No dobra, nieważne.',
+  ],
+};
+const STRONG: Record<Lang, string[]> = {
+  en: [
+    "Hi, I'm Alex from Brightside Web. I looked at your site and it takes seven seconds to load on a phone.",
+    'I measured it this morning. Most visitors leave before three seconds.',
+    'A rebuild takes two weeks and costs three thousand dollars, and you only pay when you approve it.',
+    "If it does not raise your mobile conversions in sixty days, I will refund half of it.",
+    'Could we take twenty minutes on Thursday so I can show you exactly what changes?',
+  ],
+  pl: [
+    'Dzień dobry, Adam Nowak z Brightside Web. Sprawdziłem Państwa stronę i na telefonie ładuje się siedem sekund.',
+    'Zmierzyłem to dziś rano. Większość odwiedzających wychodzi, zanim minie trzecia sekunda.',
+    'Przebudowa zajmuje dwa tygodnie i kosztuje dwanaście tysięcy złotych, a płatność następuje dopiero po akceptacji.',
+    'Jeśli w sześćdziesiąt dni nie wzrośnie liczba zamówień z telefonów, zwracam połowę kwoty.',
+    'Czy możemy umówić się na dwadzieścia minut w czwartek, żebym pokazał dokładnie, co się zmieni?',
+  ],
+};
 
 const RUNS = 3;
-const words = (s: string) => new Set(s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter((w) => w.length > 3));
+const words = (s: string) => new Set(s.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, ' ').split(/\s+/).filter((w) => w.length > 3));
 const overlap = (a: string, b: string) => {
   const A = words(a);
   const B = words(b);
@@ -47,11 +70,14 @@ interface Call {
 }
 
 async function play(level: Level, profile: 'weak' | 'strong', seed: number): Promise<Call> {
-  const v = rollVariant('sales', seed);
-  const config: SessionConfig = { scenario: 'sales', level, topic: 'Website redesign, 3,000 USD', persona: v.persona, variant: seed };
+  const v = rollVariant('sales', seed, lang);
+  const config: SessionConfig =
+    lang === 'pl'
+      ? { scenario: 'sales', level, topic: 'Przebudowa strony internetowej, 12 000 zł', persona: v.persona, variant: seed, lang, user: { gender: 'm', formal: true } }
+      : { scenario: 'sales', level, topic: 'Website redesign, 3,000 USD', persona: v.persona, variant: seed };
   const history: Turn[] = [];
   const call: Call = { level, profile, firstWords: [], replies: [], moods: [], hungUp: false, leaks: 0, empty: 0 };
-  const lines = profile === 'weak' ? WEAK : STRONG;
+  const lines = profile === 'weak' ? WEAK[lang] : STRONG[lang];
   for (let i = 0; i <= lines.length; i++) {
     const t0 = Date.now();
     let first = 0;
@@ -104,7 +130,7 @@ const rows = ([1, 2, 3, 4] as Level[]).map((level) => {
   const strong = calls.filter((c) => c.level === level && c.profile === 'strong');
   const avg = (cs: Call[], f: (c: Call) => number) => cs.reduce((n, c) => n + f(c), 0) / (cs.length || 1);
   return {
-    level: LEVELS[level].name,
+    level: levelDef(level, lang).name,
     hangWeak: weak.filter((c) => c.hungUp).length,
     hangStrong: strong.filter((c) => c.hungUp).length,
     moodWeak: avg(weak, (c) => c.moods.at(-1) ?? 3),
@@ -112,9 +138,9 @@ const rows = ([1, 2, 3, 4] as Level[]).map((level) => {
   };
 });
 
-const md = `# Behaviour evaluation
+const md = `# Behaviour evaluation${lang === 'pl' ? ' (Polish)' : ''}
 
-Generated by \`npm run eval\` on ${new Date().toISOString().slice(0, 10)} against the live Meta Model API (\`muse-spark-1.3\`).
+Generated by \`npm run eval${lang === 'pl' ? ' -- --lang pl' : ''}\` on ${new Date().toISOString().slice(0, 10)} against the live Meta Model API (\`muse-spark-1.3\`). Language of the calls: ${LANGUAGE}.
 ${calls.length} scripted calls (${RUNS} seeds x 4 difficulty levels x weak/strong caller), ${turns} character turns.
 
 | Check | Result |
@@ -136,5 +162,5 @@ ${rows.map((r) => `| ${r.level} | ${r.hangWeak}/${RUNS} | ${r.moodWeak.toFixed(1
 Cost of this evaluation: $${(ledger.spentToday() - spent0).toFixed(3)}.
 `;
 mkdirSync('docs', { recursive: true });
-writeFileSync('docs/EVAL.md', md);
+writeFileSync(lang === 'pl' ? 'docs/EVAL.pl.md' : 'docs/EVAL.md', md);
 console.log(md);

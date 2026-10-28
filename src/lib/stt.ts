@@ -1,3 +1,7 @@
+import { LANG_META } from '../../shared/lang.ts';
+import type { Lang } from '../../shared/types.ts';
+import { t } from '../i18n/index.ts';
+
 interface SRResult {
   isFinal: boolean;
   0: { transcript: string };
@@ -37,15 +41,17 @@ export class Ears {
   onError: (err: string, fatal: boolean) => void = () => {};
   paused = false;
 
+  constructor(private lang: Lang = 'en') {}
+
   start() {
     const Ctor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     if (!Ctor) {
-      this.onError('Speech recognition is not supported in this browser. Use Edge or Chrome.', true);
+      this.onError(t('sttUnsupported'), true);
       return;
     }
     this.running = true;
     const rec = new Ctor();
-    rec.lang = 'en-US';
+    rec.lang = LANG_META[this.lang].speech;
     rec.continuous = true;
     rec.interimResults = true;
     rec.onresult = (e) => {
@@ -60,7 +66,7 @@ export class Ears {
     rec.onerror = (e) => {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
         this.running = false;
-        this.onError('Microphone permission denied.', true);
+        this.onError(t('micDenied'), true);
       }
     };
     rec.onend = () => {

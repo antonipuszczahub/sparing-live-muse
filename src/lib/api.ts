@@ -1,6 +1,7 @@
 import type { AuditResult } from '../../shared/audit.ts';
 import type { FramingEvent } from '../../shared/framing.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
+import { t } from '../i18n/index.ts';
 
 export class ApiError extends Error {
   constructor(message: string, public budget?: 'daily' | 'session') {
@@ -32,14 +33,14 @@ export async function requestAudit(body: {
         await wait(3000);
         continue;
       }
-      throw new ApiError(err.error ?? `Audit failed (${res.status})`, err.budget);
+      throw new ApiError(err.error ?? t('auditFailed', res.status), err.budget);
     } catch (e) {
       if (e instanceof ApiError) throw e;
       if (attempt === 0) {
         await wait(3000);
         continue;
       }
-      throw new ApiError('Could not reach the server.');
+      throw new ApiError(t('serverUnreachable'));
     }
   }
 }

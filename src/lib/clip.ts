@@ -1,5 +1,6 @@
 import type { AuditResult } from '../../shared/audit.ts';
-import type { Mood, Persona, Turn } from '../../shared/types.ts';
+import type { Lang, Mood, Persona, Turn } from '../../shared/types.ts';
+import { moodLabel, translate } from '../i18n/index.ts';
 
 /**
  * Renders a short captioned clip of the most telling moment of a call: the counterpart's face
@@ -12,6 +13,10 @@ export interface ClipInput {
   audit: AuditResult | null;
   portraits: { neutral: string; cold: string; warm: string } | null;
   siteLabel: string;
+  /** Language of the call: captions, mood labels and the first-person intro. */
+  lang?: Lang;
+  /** The user's gender, for the Polish first-person intro ("Przećwiczyłem" / "Przećwiczyłam"). */
+  userGender?: 'm' | 'f';
   onProgress?: (fraction: number) => void;
 }
 
@@ -24,7 +29,6 @@ export interface ClipResult {
 const W = 720;
 const H = 900;
 const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
-const MOOD_LABEL = ['', 'Hostile', 'Cold', 'Neutral', 'Warming up', 'Won over'];
 
 interface Step {
   turn: Turn;
@@ -123,6 +127,8 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
   rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   const done = new Promise<void>((r) => (rec.onstop = () => r()));
 
+  const lang = input.lang ?? 'en';
+  const say = (key: Parameters<typeof translate>[1], ...args: unknown[]) => (translate as (l: Lang, k: unknown, ...a: unknown[]) => string)(lang, key, ...args);
   const first = input.persona.name.split(' ')[0]!;
   const initials = input.persona.name.split(' ').map((w) => w[0]).join('');
   let mood: Mood = (turns.find((t) => t.role === 'bot' && t.mood)?.mood ?? 3) as Mood;
@@ -147,7 +153,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     ctx.fillStyle = '#8a93a8';
     ctx.font = '18px Inter, system-ui, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('built on Meta Muse', W - 36, 50);
+    ctx.fillText(say('clipBuilt'), W - 36, 50);
 
     // face
     const fx = 190;
@@ -183,7 +189,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     ctx.fillText(input.persona.name, W / 2, fy + fs + 46);
     ctx.fillStyle = MOOD_COLOR[mood]!;
     ctx.font = '22px Inter, system-ui, sans-serif';
-    ctx.fillText(MOOD_LABEL[mood]!, W / 2, fy + fs + 80);
+    ctx.fillText(moodLabel(mood, lang, input.persona.gender), W / 2, fy + fs + 80);
     for (let i = 1; i <= 5; i++) {
       ctx.fillStyle = i <= mood ? MOOD_COLOR[mood]! : '#232838';
       roundRect(ctx, W / 2 - 130 + (i - 1) * 54, fy + fs + 96, 48, 8, 4);
@@ -196,8 +202,8 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
       ctx.textAlign = 'center';
       ctx.fillStyle = '#e8ebf3';
       ctx.font = '600 38px Inter, system-ui, sans-serif';
-      ctx.fillText('I rehearsed this call', W / 2, bodyTop + 60);
-      ctx.fillText('with an AI that hides its thoughts', W / 2, bodyTop + 108);
+      ctx.fillText(say('clipIntro1', input.userGender ?? 'm'), W / 2, bodyTop + 60);
+      ctx.fillText(say('clipIntro2'), W / 2, bodyTop + 108);
       return;
     }
 
@@ -206,7 +212,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
       ctx.textAlign = 'center';
       ctx.fillStyle = '#e8ebf3';
       ctx.font = '600 70px Inter, system-ui, sans-serif';
-      ctx.fillText(a ? `${a.score}/100` : 'Call over', W / 2, bodyTop + 66);
+      ctx.fillText(a ? `${a.score}/100` : say('clipOver'), W / 2, bodyTop + 66);
       if (a) {
         ctx.fillStyle = '#c3c9d8';
         ctx.font = '26px Inter, system-ui, sans-serif';
@@ -216,7 +222,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
       }
       ctx.fillStyle = '#6aa6ff';
       ctx.font = '600 24px Inter, system-ui, sans-serif';
-      ctx.fillText(`Practice yours: ${input.siteLabel}`, W / 2, H - 50);
+      ctx.fillText(say('clipPractice', input.siteLabel), W / 2, H - 50);
       return;
     }
 
@@ -239,13 +245,13 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     lines.forEach((l, i) => ctx.fillText(l, bx + 24, bodyTop + 50 + i * 40));
     ctx.fillStyle = '#8a93a8';
     ctx.font = '16px Inter, system-ui, sans-serif';
-    ctx.fillText(bot ? first : 'You', bx + 24, bodyTop + 22);
+    ctx.fillText(bot ? first : say('you'), bx + 24, bodyTop + 22);
 
     if (bot && turn.thought && t >= step.typeEnd) {
       const k = Math.min(1, (t - step.typeEnd) / 0.35);
       ctx.globalAlpha = k;
       ctx.font = 'italic 27px Inter, system-ui, sans-serif';
-      const tl = wrap(ctx, `thinks: ${turn.thought}`, W - 120).slice(0, 3);
+      const tl = wrap(ctx, `${say('thinks')} ${turn.thought}`, W - 120).slice(0, 3);
       ctx.fillStyle = MOOD_COLOR[turn.mood ?? 3]!;
       tl.forEach((l, i) => ctx.fillText(l, 52, bodyTop + boxH + 52 + i * 36));
       ctx.globalAlpha = 1;

@@ -1,4 +1,5 @@
-import type { Level, ScenarioId } from './types.ts';
+import { LEVELS_PL, SCENARIOS_PL } from './scenarios.pl.ts';
+import type { Lang, Level, ScenarioId } from './types.ts';
 
 export interface ScenarioDef {
   id: ScenarioId;
@@ -7,6 +8,8 @@ export interface ScenarioDef {
   /** Placeholder for the "what are you selling / defending" field. */
   topicLabel: string;
   topicExample: string;
+  /** Hint under "rehearse with a real company". */
+  twinExample: string;
   /** What the user is doing, from the character's point of view. */
   situation: string;
   /** What the character does first when the call connects. */
@@ -24,6 +27,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     tagline: 'Cold or warm call to a business owner who has heard it all.',
     topicLabel: 'What are you selling?',
     topicExample: 'A redesign of their website, 3,000 USD, two weeks',
+    twinExample: 'e.g. basecamp.com, or the website of the company you will call',
     situation: 'The user is calling you to sell something. You did not ask for this call.',
     opening: 'You pick up the phone, busy, and say who is speaking. You do not know why they are calling.',
     winCondition: 'Earn a concrete next step (a meeting or a trial), not a polite brush-off.',
@@ -35,6 +39,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     tagline: 'Defend a thesis, capstone or technical project in front of a committee.',
     topicLabel: 'What are you defending?',
     topicExample: 'A mobile app that predicts bus delays, engineering thesis',
+    twinExample: '',
     situation: 'The user is defending their work in front of you. You have read it and have questions.',
     opening: 'You welcome the candidate, glance at the notes, and ask them to begin with what they consider the most important result.',
     winCondition: 'Defend decisions with reasons, admit real limits, and never bluff.',
@@ -46,6 +51,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     tagline: 'Ask for a raise or negotiate an offer with a manager who has a budget.',
     topicLabel: 'What are you asking for?',
     topicExample: 'A 15% raise after two years as a backend developer',
+    twinExample: 'e.g. the company you work for or are joining',
     situation: 'The user booked this meeting to ask you for money.',
     opening: 'You greet them and say you have a few minutes; you ask what they wanted to talk about.',
     winCondition: 'Leave with a number or a dated, written commitment, without an ultimatum.',
@@ -57,6 +63,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     tagline: 'Three minutes to convince someone who writes checks for a living.',
     topicLabel: 'What is your startup?',
     topicExample: 'B2B tool that automates invoice reconciliation for logistics firms',
+    twinExample: 'e.g. the fund you are pitching, such as ycombinator.com',
     situation: 'The user is pitching you for seed funding. You get pitched every day.',
     opening: 'You say you have about ten minutes and ask them to start with the problem.',
     winCondition: 'Get a second meeting by showing real customers, real money and a credible team.',
@@ -123,3 +130,9 @@ export const LEVELS: Record<Level, LevelDef> = {
 };
 
 export const SCENARIO_IDS = Object.keys(SCENARIOS) as ScenarioId[];
+
+/** The scenario in the language of the call. */
+export const scenarioDef = (id: ScenarioId, lang: Lang = 'en'): ScenarioDef => (lang === 'pl' ? SCENARIOS_PL : SCENARIOS)[id];
+
+/** The difficulty level in the language of the call. */
+export const levelDef = (level: Level, lang: Lang = 'en'): LevelDef => (lang === 'pl' ? LEVELS_PL : LEVELS)[level];

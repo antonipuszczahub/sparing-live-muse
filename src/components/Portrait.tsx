@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { Mood, Persona, ScenarioId } from '../../shared/types.ts';
+import type { Lang, Mood, Persona, ScenarioId } from '../../shared/types.ts';
+import { t } from '../i18n/index.ts';
 
 interface Portraits {
   neutral: string;
@@ -10,14 +11,14 @@ interface Portraits {
 const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
 
 /** Loads the three Muse Image portraits in the background so the call is never delayed. */
-function usePortraits(session: string, scenario: ScenarioId, persona: Persona) {
+function usePortraits(session: string, scenario: ScenarioId, persona: Persona, lang: Lang) {
   const [p, setP] = useState<Portraits | null>(null);
   useEffect(() => {
     let live = true;
     fetch('/api/portraits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session, scenario, persona }),
+      body: JSON.stringify({ session, scenario, persona, lang }),
     })
       .then((r) => (r.ok ? (r.json() as Promise<Portraits>) : null))
       .then((j) => live && j && setP(j))
@@ -25,7 +26,7 @@ function usePortraits(session: string, scenario: ScenarioId, persona: Persona) {
     return () => {
       live = false;
     };
-  }, [session, scenario, persona]);
+  }, [session, scenario, persona, lang]);
   return p;
 }
 
@@ -33,8 +34,8 @@ function usePortraits(session: string, scenario: ScenarioId, persona: Persona) {
  * The counterpart's face. Three expressions of the same person are cross-faded
  * according to their mood, with the initials shown until the images arrive.
  */
-export function Portrait({ session, scenario, persona, mood, className = '' }: { session: string; scenario: ScenarioId; persona: Persona; mood: Mood; className?: string }) {
-  const portraits = usePortraits(session, scenario, persona);
+export function Portrait({ session, scenario, persona, mood, lang = 'en', className = '' }: { session: string; scenario: ScenarioId; persona: Persona; mood: Mood; lang?: Lang; className?: string }) {
+  const portraits = usePortraits(session, scenario, persona, lang);
   const shown: keyof Portraits = mood <= 2 ? 'cold' : mood >= 4 ? 'warm' : 'neutral';
   const initials = persona.name
     .split(' ')
@@ -46,7 +47,7 @@ export function Portrait({ session, scenario, persona, mood, className = '' }: {
       {!portraits && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[var(--muted)]">
           <span className="text-3xl font-semibold">{initials}</span>
-          <span className="text-[10px]">drawing portrait…</span>
+          <span className="text-[10px]">{t('drawingPortrait')}</span>
         </div>
       )}
       {portraits &&

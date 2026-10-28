@@ -2,7 +2,7 @@
 
 **Rehearse the conversation you are afraid of, against someone who talks back like a real person.**
 
-Sparing Live is a real-time voice system built on Meta's Muse models. You call a counterpart (a skeptical buyer, a thesis examiner, your manager, an investor). It listens, thinks, interrupts you, reads your shared screen, changes its face with its mood, and can hang up. Afterwards a reviewer shows you exactly where you lost them, using what the character was privately thinking.
+Sparing Live is a real-time voice system built on Meta's Muse models, in English and in Polish. You call a counterpart (a skeptical buyer, a thesis examiner, your manager, an investor). It listens, thinks, interrupts you, reads your shared screen, changes its face with its mood, and can hang up. Afterwards a reviewer shows you exactly where you lost them, using what the character was privately thinking.
 
 It is not a chatbot with a persona prompt. It is a pipeline of specialised agents with hidden state, a full-duplex voice loop, and measured guarantees (see [Evaluation](#evaluation)).
 
@@ -19,6 +19,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | **Real interruptions** | Full-duplex voice. Talk over the character and it stops mid-sentence; the transcript shows where it was cut off. |
 | **An opponent that learns** | The auditor tags what you keep getting wrong ("dodged price", "vague intro"); the next character aims at it. |
 | **A clip you can post** | One click renders a captioned MP4 of the key moment (their face, their private thoughts, your score) in the browser, with post text ready to copy. |
+| **English and Polish** | One switch changes everything: the interface, the character and its private thoughts, the company research, the review, speech recognition and the voice. Polish is written for Polish, with gender and "Pan/Pani" handled (see [Two languages](#two-languages)). |
 | **Measured, not claimed** | Latency, repetition, stage-direction leaks and difficulty behaviour are measured against the live API by `npm run eval`. A budget guard with a persistent ledger caps spend. |
 
 ## Meta models used, and where
@@ -27,7 +28,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 |---|---|---|
 | `muse-spark-1.3` | Live counterpart (streamed, tagged format); the **eye** agent (vision) | first spoken word median 1.1 s; screen read in 2.7 s |
 | `muse-wonder-1.0` | **Twin research** with live web search (Responses API); **post-call audit** (JSON schema) | twin about 30 s; audit about 13 s |
-| `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode | final text 0.36 s after speech ends |
+| `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode, language bias per call (English or Polish) | final text 0.36 s after speech ends; a Polish test sentence came back word for word |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | three images in about 30 s, 3 cents |
 | Muse Spark Open | The character can run on open weights: one tick on the start screen, same protocol. Host is configurable (Baseten, Fireworks, Modal or local Ollama); `docs/MANIFEST.md` records which calls ran where | switch and manifest built; no open-weights call recorded yet |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
@@ -93,18 +94,36 @@ Wear headphones, so the character does not hear itself.
 | Command | What it does |
 |---|---|
 | `npm run check:meta` | Probes the API: chat, streaming, JSON schema, Wonder |
-| `npm run try:turn` | Plays a short scripted call and prints latency per turn |
+| `npm run try:turn` | Plays a short scripted call and prints latency per turn (`-- --lang pl` for Polish) |
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
-| `npm run try:audit` | Audits a scripted call |
+| `npm run try:audit` | Audits a scripted call (`-- --lang pl` for Polish) |
 | `npm run try:portrait` | Draws the three portraits |
 | `npm run check:open` | Probes the open-weights host (see `.env.example` for Baseten, Fireworks, Modal, Ollama) |
 | `npm run manifest` | Rebuilds [`docs/MANIFEST.md`](docs/MANIFEST.md) from the budget ledger: models, tokens, cost, latency, open-weights share |
-| `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics |
-| `npm run eval` | Behaviour evaluation against the live model, writes `docs/EVAL.md` |
+| `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics, both languages |
+| `npm run eval` | Behaviour evaluation against the live model, writes `docs/EVAL.md` (`-- --lang pl` writes `docs/EVAL.pl.md`) |
+
+## Two languages
+
+The product runs in English and Polish. The switch is on the start screen (it starts in the browser's language) and covers the interface, the character and its private thoughts, the company research, the post-call review, speech recognition, the voice and the clip.
+
+Polish is written for Polish rather than translated line by line: złoty instead of dollars, a defence in front of a *komisja*, a manager who may be addressed as *Pan/Pani* or by *ty*. Three things make a Polish conversation believable that an English one does not need:
+
+- **Gender.** Polish verbs and adjectives carry gender (*zrobiłem* / *zrobiłam*). Every character has one, and its sheet, difficulty rules and daily circumstances are written with `{m|f}` markers that are resolved for it. The start screen also asks for the user's gender and whether you address each other formally or by *ty*, so the character says *Pani* and *sprawdziłaś* to a woman and the auditor writes its "say this instead" lines in the user's gender. The company research is told the gender of the character too, so the profile it writes agrees with the person you call. When a scripted caller got this wrong in testing, the character noticed: *"Powiedziała do mnie Pan"*.
+- **Letters.** A `[a-z]` regex cuts Polish words in half at *ł* or *ż*, so echo detection, filler counting and stop words work on Unicode letters. Polish fillers (*yyy, no więc, w sumie, jakby*) are counted as whole words only.
+- **Voice.** Edge's Natural voices (Zofia, Marek) or Windows' Paulina; if the browser has no voice of the right gender, the pitch is shifted instead. The start screen warns when no Polish voice exists.
+
+| Piece | Measured in Polish |
+|---|---|
+| Speech recognition | A synthesised Polish sentence with *Dzień, Dzwonię, państwa, ładuje* came back word for word through our relay with `languageBias: Polish` (with the English bias only *Pan* lost its capital) |
+| Character | `npm run eval -- --lang pl`: 0 repeated turns in 306 pairs, 0 leaked stage directions, 0 failed turns; median first word 1.6 s (English 1.1 s: Polish takes more tokens, so the private thought is capped at 12 words), p95 2.8 s. See [`docs/EVAL.pl.md`](docs/EVAL.pl.md) |
+| Review | The Polish audit quotes what was said, ties it to the character's thoughts and writes in the user's gender; the delivery numbers (filler words, interruptions) are measured, not guessed |
+
+Difficulty still changes behaviour in Polish, but with three seeds per cell the middle levels are noisy: *Realistyczny* hung up on the weak caller 2 times in 3 in one run and 0 in the next, *Twardy* and *Brutalny* 3 in 3 both times. The English evaluation has the same sample size.
 
 ## Evaluation
 
-`npm run eval` plays 24 scripted calls (weak and strong caller, four difficulty levels, three seeds) and writes [`docs/EVAL.md`](docs/EVAL.md). Latest run: 0 repeated turns in 287 pairs, 0 stage directions leaked into speech, 0 failed turns, median time to first spoken word 1.1 s. Difficulty changes behaviour: the friendly character never hangs up on a weak caller, the others do, and no strong caller is ever hung up on.
+`npm run eval` plays 24 scripted calls (weak and strong caller, four difficulty levels, three seeds) and writes [`docs/EVAL.md`](docs/EVAL.md). Latest run: 0 repeated turns in 287 pairs, 0 stage directions leaked into speech, 0 failed turns, median time to first spoken word 1.1 s. Difficulty changes behaviour: the friendly character never hangs up on a weak caller, the others do, and no strong caller is ever hung up on. The same evaluation in Polish is in [`docs/EVAL.pl.md`](docs/EVAL.pl.md).
 
 ## Privacy
 
@@ -113,15 +132,16 @@ Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transc
 ## Layout
 
 ```
-server/agents/   character, twin, eye, auditor, portrait
+server/agents/   character, twin, eye, auditor, portrait (each with its Polish prompt)
 server/meta/     API clients, pricing table, budget ledger
 server/asr.ts    realtime transcription relay
-shared/          types, scenarios, variation, audit schema, speech cleaning
+shared/          types, scenarios, variation, audit schema, speech cleaning, language helpers (*.pl.ts hold the Polish content)
 src/engine/      CallEngine: turn taking, barge-in, silence, hang-up
 src/screens/     setup, twin research, call, review
+src/i18n/        interface text: English defines the keys, Polish is typed with them, so a missing string does not compile
 tests/           unit tests    scripts/  probes and evaluation
 ```
 
 ## Status
 
-Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch (built for Baseten, Fireworks, Modal and Ollama, tested only in unit tests because no host key has been available yet). Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). Not yet deployed.
+Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch (built for Baseten, Fireworks, Modal and Ollama, tested only in unit tests because no host key has been available yet). Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). Not yet deployed.

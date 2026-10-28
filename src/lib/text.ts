@@ -1,14 +1,22 @@
-const STOP = new Set('a an the and or but so to of in on at for with is are was were be been it its this that i you we they he she my your our not no yes do does did have has had just about from as if then than really very okay ok well like'.split(' '));
+import type { Lang } from '../../shared/types.ts';
 
-const words = (s: string) => s.toLowerCase().replace(/[^a-z0-9' ]+/g, ' ').split(/\s+/).filter(Boolean);
+const STOP: Record<Lang, Set<string>> = {
+  en: new Set('a an the and or but so to of in on at for with is are was were be been it its this that i you we they he she my your our not no yes do does did have has had just about from as if then than really very okay ok well like'.split(' ')),
+  pl: new Set(
+    'i a w z na do to jest są był była było będzie się nie tak ale czy że jak co ten ta te tu tam ja ty my wy on ona ono oni one mnie mi cię ci go ją jej ich nas was wam już jeszcze też tylko bardzo no więc dobrze ok oczywiście proszę pan pani państwo mam masz ma mamy macie mają mój twój nasz wasz po za od przez dla bez o u'.split(' '),
+  ),
+};
+
+// Letters, not [a-z]: "ą", "ł" or "ż" must stay inside words or every Polish word would be cut in pieces.
+const words = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean);
 
 /**
  * Words in `heard` that the bot itself did not just say. Used to tell the user's
  * real voice apart from the bot's own speech leaking back through the microphone.
  */
-export function novelWords(heard: string, botText: string): string[] {
+export function novelWords(heard: string, botText: string, lang: Lang = 'en'): string[] {
   const bot = new Set(words(botText));
-  return words(heard).filter((w) => !bot.has(w) && !STOP.has(w));
+  return words(heard).filter((w) => !bot.has(w) && !STOP[lang].has(w));
 }
 
 /** Split text into complete sentences and a remainder. */

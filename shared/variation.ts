@@ -1,4 +1,6 @@
-import type { Persona, ScenarioId } from './types.ts';
+import { gendered } from './lang.ts';
+import type { Lang, Persona, ScenarioId } from './types.ts';
+import { POOLS_PL } from './variation.pl.ts';
 
 /** Small deterministic PRNG so a call can be replayed from its seed. */
 export function rng(seed: number) {
@@ -18,17 +20,27 @@ function pick<T>(r: () => number, xs: readonly T[]): T {
   return xs[Math.floor(r() * xs.length)] as T;
 }
 
-const NAMES = {
+const NAMES_EN = {
   m: ['Greg Holloway', 'Raj Patel', 'Tomas Rivera', 'Daniel Okafor', 'Marcus Lindqvist', 'Victor Hale', 'Sam Whitfield', 'Ahmed Karim'],
   f: ['Dana Whitfield', 'Priya Nair', 'Elena Moretti', 'Claire Okonkwo', 'Hannah Brandt', 'Maya Reyes', 'Ingrid Solberg', 'Leah Cohen'],
 };
 
-interface RolePool {
+export interface RolePool {
   role: string;
   bios: string[];
 }
 
-const ROLES: Record<ScenarioId, RolePool> = {
+/** Everything that varies from call to call, in one language. Polish text may carry {m|f} gender markers. */
+export interface Pools {
+  names: { m: string[]; f: string[] };
+  roles: Record<ScenarioId, RolePool>;
+  circumstances: Record<ScenarioId, string[]>;
+  agendas: Record<ScenarioId, string[]>;
+  moods: readonly string[];
+  tics: readonly string[];
+}
+
+const ROLES_EN: Record<ScenarioId, RolePool> = {
   sales: {
     role: 'owner of a small company',
     bios: [
@@ -67,7 +79,7 @@ const ROLES: Record<ScenarioId, RolePool> = {
   },
 };
 
-const CIRCUMSTANCES: Record<ScenarioId, string[]> = {
+const CIRCUMSTANCES_EN: Record<ScenarioId, string[]> = {
   sales: [
     'A delivery crisis is going on in the background and you keep half-watching your phone.',
     'It is end of month and cash is tight, so every cost sounds heavier than usual.',
@@ -95,7 +107,7 @@ const CIRCUMSTANCES: Record<ScenarioId, string[]> = {
   ],
 };
 
-const AGENDAS: Record<ScenarioId, string[]> = {
+const AGENDAS_EN: Record<ScenarioId, string[]> = {
   sales: [
     'You are secretly looking for a reason to say yes, but only if they make you feel safe on price.',
     'You will not decide today under any circumstances; you want to see whether they push anyway.',
@@ -119,14 +131,25 @@ const AGENDAS: Record<ScenarioId, string[]> = {
   ],
 };
 
-const MOODS = ['neutral and businesslike', 'a little impatient', 'warm but guarded', 'tired and terse', 'curious but skeptical'] as const;
-const TICS = [
+const MOODS_EN = ['neutral and businesslike', 'a little impatient', 'warm but guarded', 'tired and terse', 'curious but skeptical'] as const;
+const TICS_EN = [
   'says "look," before disagreeing',
   'asks short follow-up questions',
   'repeats the last two words back before answering',
   'sighs before bad news',
   'uses concrete numbers instead of adjectives',
 ] as const;
+
+const POOLS_EN: Pools = {
+  names: NAMES_EN,
+  roles: ROLES_EN,
+  circumstances: CIRCUMSTANCES_EN,
+  agendas: AGENDAS_EN,
+  moods: MOODS_EN,
+  tics: TICS_EN,
+};
+
+const POOLS: Record<Lang, Pools> = { en: POOLS_EN, pl: POOLS_PL };
 
 export interface Variant {
   persona: Persona;
@@ -136,15 +159,18 @@ export interface Variant {
   tic: string;
 }
 
-export function rollVariant(scenario: ScenarioId, seed: number): Variant {
+/** The same seed gives the same character and day in a language; the draw order does not depend on the language. */
+export function rollVariant(scenario: ScenarioId, seed: number, lang: Lang = 'en'): Variant {
   const r = rng(seed);
+  const pools = POOLS[lang];
   const gender: 'm' | 'f' = r() < 0.5 ? 'm' : 'f';
-  const pool = ROLES[scenario];
+  const pool = pools.roles[scenario];
+  const g = (text: string) => (lang === 'pl' ? gendered(text, gender) : text);
   return {
-    persona: { name: pick(r, NAMES[gender]), role: pool.role, gender, bio: pick(r, pool.bios) },
-    circumstance: pick(r, CIRCUMSTANCES[scenario]),
-    agenda: pick(r, AGENDAS[scenario]),
-    mood: pick(r, MOODS),
-    tic: pick(r, TICS),
+    persona: { name: pick(r, pools.names[gender]), role: g(pool.role), gender, bio: g(pick(r, pool.bios)) },
+    circumstance: g(pick(r, pools.circumstances[scenario])),
+    agenda: g(pick(r, pools.agendas[scenario])),
+    mood: g(pick(r, pools.moods)),
+    tic: g(pick(r, pools.tics)),
   };
 }

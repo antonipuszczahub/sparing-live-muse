@@ -1,4 +1,6 @@
 export type ScenarioId = 'sales' | 'defense' | 'salary' | 'pitch';
+/** Language of the whole call: interface, character, research, review and speech recognition. */
+export type Lang = 'en' | 'pl';
 export type Level = 1 | 2 | 3 | 4;
 
 export interface Persona {
@@ -40,6 +42,13 @@ export interface SessionConfig {
   focus?: string[];
   /** Which weights run the character: Meta Model API (default) or open weights on Baseten. */
   provider?: 'meta' | 'open';
+  /** Language of the call. Missing means English. */
+  lang?: Lang;
+  /**
+   * Polish only: who the user is and how the character addresses them. Polish verbs carry gender
+   * ("powiedziałeś" / "powiedziałaś") and the address form changes the whole register ("Pan" / "ty").
+   */
+  user?: { gender: 'm' | 'f'; formal: boolean };
 }
 
 export type Mood = 1 | 2 | 3 | 4 | 5;

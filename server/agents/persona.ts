@@ -1,9 +1,12 @@
-import { LEVELS, SCENARIOS } from '../../shared/scenarios.ts';
+import { langOf } from '../../shared/lang.ts';
+import { beginNote } from '../../shared/notes.ts';
+import { levelDef, scenarioDef } from '../../shared/scenarios.ts';
 import { cleanSpeech } from '../../shared/speech.ts';
 import { rollVariant } from '../../shared/variation.ts';
 import type { BotReply, Mood, SessionConfig, Turn } from '../../shared/types.ts';
 import { MODELS } from '../meta/models.ts';
 import { stream, type ChatMessage } from '../meta/client.ts';
+import { buildSystemPromptPl } from './persona.pl.ts';
 
 /*
  * Live turns use a tagged plain-text format instead of JSON mode. Measured on the Meta API:
@@ -18,8 +21,9 @@ SAY: <exactly what you say out loud>
 HANGUP: <yes only if this reply ends the call, otherwise no>`;
 
 export function buildSystemPrompt(config: SessionConfig, extras: { screen?: string } = {}): string {
-  const sc = SCENARIOS[config.scenario];
-  const lv = LEVELS[config.level];
+  if (langOf(config) === 'pl') return buildSystemPromptPl(config, extras);
+  const sc = scenarioDef(config.scenario);
+  const lv = levelDef(config.level);
   const v = rollVariant(config.scenario, config.variant);
   const p = config.persona;
   const twin = config.twin;
@@ -121,7 +125,8 @@ export interface TurnInput {
 /** One character turn. Streams the spoken text through onSay and resolves with the full structured reply. */
 export async function characterTurn(input: TurnInput, onSay: (delta: string) => void): Promise<BotReply> {
   const system = buildSystemPrompt(input.config, { screen: input.screen });
-  const opening = input.history.length === 0 ? `[${SCENARIOS[input.config.scenario].opening} Begin now.]` : undefined;
+  const lang = langOf(input.config);
+  const opening = input.history.length === 0 ? beginNote(scenarioDef(input.config.scenario, lang).opening, lang) : undefined;
   const say = new SayStream();
   const raw = await stream(
     {

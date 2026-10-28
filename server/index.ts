@@ -28,6 +28,9 @@ const PersonaSchema = z.object({
   bio: z.string(),
 });
 
+const LangSchema = z.enum(['en', 'pl']);
+const UserSchema = z.object({ gender: z.enum(['m', 'f']), formal: z.boolean() });
+
 const ConfigSchema = z.object({
   scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
   level: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
@@ -37,6 +40,8 @@ const ConfigSchema = z.object({
   variant: z.number().int().nonnegative(),
   focus: z.array(z.string().max(80)).max(3).optional(),
   provider: z.enum(['meta', 'open']).optional(),
+  lang: LangSchema.optional(),
+  user: UserSchema.optional(),
 });
 
 const TurnSchema = z.object({
@@ -68,16 +73,35 @@ app.get('/api/health', (_req, res) => {
 
 /** Start a new call: roll today's variation and the character. */
 app.post('/api/session', rateLimit('session', Number(process.env.SESSIONS_PER_IP_HOUR) || 6), (req, res) => {
-  const { scenario, level, topic, focus, provider } = z
-    .object({ scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), level: z.number().int().min(1).max(4), topic: z.string().max(400), focus: z.array(z.string().max(80)).max(3).optional(), provider: z.enum(['meta', 'open']).optional() })
+  const { scenario, level, topic, focus, provider, lang, user } = z
+    .object({
+      scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
+      level: z.number().int().min(1).max(4),
+      topic: z.string().max(400),
+      focus: z.array(z.string().max(80)).max(3).optional(),
+      provider: z.enum(['meta', 'open']).optional(),
+      lang: LangSchema.optional(),
+      user: UserSchema.optional(),
+    })
     .parse(req.body);
   const variant = newSeed();
-  const v = rollVariant(scenario as never, variant);
-  const config: SessionConfig = { scenario: scenario as never, level: level as never, topic, persona: v.persona, variant, focus, provider: provider === 'open' && openWeightsConfigured() ? 'open' : undefined };
+  const v = rollVariant(scenario as never, variant, lang);
+  const config: SessionConfig = {
+    scenario: scenario as never,
+    level: level as never,
+    topic,
+    persona: v.persona,
+    variant,
+    focus,
+    provider: provider === 'open' && openWeightsConfigured() ? 'open' : undefined,
+    // English is the default and stays out of the config, so old and new clients agree.
+    lang: lang === 'pl' ? 'pl' : undefined,
+    user: lang === 'pl' ? user : undefined,
+  };
   const session = `s_${variant.toString(36)}_${Date.now().toString(36)}`;
   // Start drawing the face now: by the time the call connects (after twin research, if any) it is ready.
   if (ledger.canSpend(session).ok && process.env.MODEL_API_KEY) {
-    const job = drawPortraits({ persona: v.persona, scenario: scenario as never, mood: '', session });
+    const job = drawPortraits({ persona: v.persona, scenario: scenario as never, mood: '', session, lang });
     portraitCache.set(session, job);
     job.catch(() => portraitCache.delete(session));
   }
@@ -137,6 +161,8 @@ app.post('/api/twin', async (req, res) => {
       company: z.string().min(2).max(200),
       scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
       topic: z.string().max(400),
+      lang: LangSchema.optional(),
+      gender: z.enum(['m', 'f']).optional(),
     })
     .safeParse(req.body);
   if (!parsed.success) {
@@ -175,6 +201,7 @@ app.post('/api/eye', async (req, res) => {
       scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
       topic: z.string().max(400),
       image: z.string().startsWith('data:image/').max(6_000_000),
+      lang: LangSchema.optional(),
     })
     .safeParse(req.body);
   if (!parsed.success) {
@@ -195,16 +222,16 @@ const portraitCache = new Map<string, Promise<Portraits>>();
 /** Muse Image draws the counterpart in three moods. Cached per session; the client loads it in the background. */
 app.post('/api/portraits', async (req, res) => {
   const parsed = z
-    .object({ session: z.string().min(4).max(64), scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), persona: PersonaSchema })
+    .object({ session: z.string().min(4).max(64), scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), persona: PersonaSchema, lang: LangSchema.optional() })
     .safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { session, scenario, persona } = parsed.data;
+  const { session, scenario, persona, lang } = parsed.data;
   let job = portraitCache.get(session);
   if (!job) {
-    job = drawPortraits({ persona, scenario: scenario as never, mood: '', session });
+    job = drawPortraits({ persona, scenario: scenario as never, mood: '', session, lang });
     portraitCache.set(session, job);
     job.catch(() => portraitCache.delete(session));
   }

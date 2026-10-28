@@ -1,3 +1,5 @@
+import type { Lang } from './types.ts';
+
 export interface FaceBox {
   x1: number;
   y1: number;
@@ -15,6 +17,24 @@ export interface FramingEvent {
 
 const fmtSec = (ms: number) => `${Math.round(ms / 1000)} s`;
 
+/** Polish uses noun forms on purpose: the camera does not know the user's gender. */
+const TEXT = {
+  en: {
+    left: 'Left the frame',
+    back: (sec: string) => `Back in frame after ${sec}`,
+    off: 'Drifted out of position in the frame',
+    away: 'Leaned back from the camera',
+    near: 'Leaned in close to the camera',
+  },
+  pl: {
+    left: 'Wyjście z kadru',
+    back: (sec: string) => `Powrót do kadru po ${sec}`,
+    off: 'Przesunięcie się poza środek kadru',
+    away: 'Odsunięcie się od kamery',
+    near: 'Przysunięcie się do kamery',
+  },
+} as const;
+
 /**
  * Turns a stream of "where is the face in this frame" samples into a few plain facts about framing:
  * left the frame, drifted out of position, leaned back, leaned in. These describe what the camera saw
@@ -27,6 +47,11 @@ export class FramingTracker {
   private streak = { off: 0, back: 0, near: 0 };
   private since = { off: 0, back: 0, near: 0 };
   private active = { off: false, back: false, near: false };
+  private text;
+
+  constructor(lang: Lang = 'en') {
+    this.text = TEXT[lang];
+  }
 
   /** Samples are expected every few seconds; a condition must hold for two samples in a row. */
   push(at: number, faces: FaceBox[]): FramingEvent[] {
@@ -38,11 +63,11 @@ export class FramingTracker {
       this.missing.n += 1;
       if (this.missing.n >= 2 && !this.missing.reported) {
         this.missing.reported = true;
-        out.push({ at: this.missing.since, text: 'Left the frame' });
+        out.push({ at: this.missing.since, text: this.text.left });
       }
       return out;
     }
-    if (this.missing?.reported) out.push({ at, text: `Back in frame after ${fmtSec(at - this.missing.since)}` });
+    if (this.missing?.reported) out.push({ at, text: this.text.back(fmtSec(at - this.missing.since)) });
     this.missing = null;
 
     const a = area(face);
@@ -58,9 +83,9 @@ export class FramingTracker {
 
     const ratio = a / this.base.area;
     const conds = {
-      off: { on: Math.abs(cx - this.base.cx) > 0.25, clear: Math.abs(cx - this.base.cx) < 0.15, text: 'Drifted out of position in the frame' },
-      back: { on: ratio < 0.55, clear: ratio > 0.75, text: 'Leaned back from the camera' },
-      near: { on: ratio > 1.7, clear: ratio < 1.3, text: 'Leaned in close to the camera' },
+      off: { on: Math.abs(cx - this.base.cx) > 0.25, clear: Math.abs(cx - this.base.cx) < 0.15, text: this.text.off },
+      back: { on: ratio < 0.55, clear: ratio > 0.75, text: this.text.away },
+      near: { on: ratio > 1.7, clear: ratio < 1.3, text: this.text.near },
     } as const;
     for (const k of ['off', 'back', 'near'] as const) {
       const c = conds[k];

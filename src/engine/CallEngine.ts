@@ -1,5 +1,8 @@
-import type { BotReply, Mood, SessionConfig, Turn } from '../../shared/types.ts';
+import { langOf } from '../../shared/lang.ts';
+import { simNote } from '../../shared/notes.ts';
+import type { BotReply, Lang, Mood, SessionConfig, Turn } from '../../shared/types.ts';
 import { cleanSpeech } from '../../shared/speech.ts';
+import { translate } from '../i18n/index.ts';
 import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
@@ -47,6 +50,7 @@ export class CallEngine {
   private sentenceBuf = '';
   private userStoppedAt = 0;
   private turnId = 0;
+  private lang: Lang;
 
   constructor(
     private config: SessionConfig,
@@ -54,13 +58,17 @@ export class CallEngine {
     private onChange: (s: CallSnapshot) => void,
     private screenContext: () => string | undefined = () => undefined,
   ) {
-    this.speaker = new Speaker(pickVoice(config.persona.gender).voice);
+    this.lang = langOf(config);
+    // A browser may have no voice of the right gender (Windows ships a single Polish voice): shift the pitch instead.
+    const pick = pickVoice(config.persona.gender, this.lang);
+    const pitch = pick.matched ? 1 : config.persona.gender === 'm' ? 0.8 : 1.1;
+    this.speaker = new Speaker(pick.voice, this.lang, pitch);
     this.speaker.onIdle = () => this.onSpeechIdle();
     this.speaker.onStart = () => {
       if (this.userStoppedAt) this.lastLatencyMs = Date.now() - this.userStoppedAt;
       this.set('speaking');
     };
-    this.ears = this.wireEars(new MetaEars(session), true);
+    this.ears = this.wireEars(new MetaEars(session, this.lang), true);
   }
 
   /** Muse Voice Transcribe is the ears; if it cannot start, fall back to the browser's recognizer. */
@@ -70,7 +78,7 @@ export class CallEngine {
     ears.onError = (m, fatal) => {
       if (fatal && canFallBack && this.state !== 'ended') {
         this.ears.stop();
-        this.ears = this.wireEars(new Ears(), false);
+        this.ears = this.wireEars(new Ears(this.lang), false);
         this.ears.start();
         return;
       }
@@ -86,7 +94,7 @@ export class CallEngine {
   setScreen(notes: string | undefined, first = false) {
     this.screenNotes = notes;
     // The character reacts the moment it sees something, like a person would.
-    if (notes && first && this.state === 'listening') void this.botTurn('[the user just shared their screen with you]');
+    if (notes && first && this.state === 'listening') void this.botTurn(simNote('screen-shared', this.lang));
   }
 
   start() {
@@ -145,7 +153,7 @@ export class CallEngine {
     this.liveUser = text;
     this.emit();
     // Barge-in: the user talks over the character. Echo of the character's own voice is filtered out.
-    if ((this.state === 'speaking' || this.state === 'thinking') && novelWords(text, this.botText()).length >= MIN_BARGE_WORDS) {
+    if ((this.state === 'speaking' || this.state === 'thinking') && novelWords(text, this.botText(), this.lang).length >= MIN_BARGE_WORDS) {
       this.interruptBot();
     }
   }
@@ -153,7 +161,7 @@ export class CallEngine {
   private onFinal(text: string) {
     if (this.state === 'ended') return;
     this.liveUser = '';
-    if (this.state === 'speaking' && novelWords(text, this.botText()).length < MIN_BARGE_WORDS) return; // echo
+    if (this.state === 'speaking' && novelWords(text, this.botText(), this.lang).length < MIN_BARGE_WORDS) return; // echo
     if (this.state === 'speaking' || this.state === 'thinking') this.interruptBot();
     this.userStoppedAt = Date.now();
     this.turns.push({ role: 'user', text, at: this.now() });
@@ -210,7 +218,7 @@ export class CallEngine {
       );
     } catch (e) {
       if (ac.signal.aborted || id !== this.turnId) return;
-      this.error = e instanceof Error ? e.message : 'Connection lost';
+      this.error = e instanceof Error ? e.message : translate(this.lang, 'connectionLost');
       this.finish('error');
     }
   }
@@ -258,7 +266,7 @@ export class CallEngine {
     window.clearTimeout(this.silenceTimer);
     this.silenceTimer = window.setTimeout(() => {
       if (this.state !== 'listening') return;
-      void this.botTurn('[the user has been silent for a while]');
+      void this.botTurn(simNote('silent', this.lang));
     }, SILENCE_MS);
   }
 

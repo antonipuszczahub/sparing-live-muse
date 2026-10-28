@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { ScenarioId, TwinProfile } from '../../shared/types.ts';
+import type { Lang, ScenarioId, TwinProfile } from '../../shared/types.ts';
 import type { ResponseStep } from '../meta/responses.ts';
 import { buildTwin, type TwinInput } from './twin.ts';
 
@@ -23,9 +23,12 @@ export function normalizeCompany(input: string): string {
   return s.replace(/^[a-z]+:\/\//, '').replace(/^www\./, '').replace(/[/?#].*$/, '');
 }
 
-export function twinKey(input: { company: string; scenario: ScenarioId; topic: string }): string {
+/** The research is written up in the call's language, so it is part of the key; English keys are unchanged. */
+export function twinKey(input: { company: string; scenario: ScenarioId; topic: string; lang?: Lang; gender?: 'm' | 'f' }): string {
   const topic = input.topic.trim().toLowerCase().replace(/\s+/g, ' ');
-  return createHash('sha1').update(`${input.scenario}|${normalizeCompany(input.company)}|${topic}`).digest('hex').slice(0, 16);
+  // Polish text about a person agrees with their gender, so a woman's profile is not served to a man.
+  const lang = input.lang && input.lang !== 'en' ? `|${input.lang}|${input.gender ?? ''}` : '';
+  return createHash('sha1').update(`${input.scenario}|${normalizeCompany(input.company)}|${topic}${lang}`).digest('hex').slice(0, 16);
 }
 
 export class TwinCache {
@@ -70,10 +73,16 @@ export const twinCache = new TwinCache(process.env.TWIN_CACHE_DIR || 'data/twins
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-function ago(ms: number): string {
+function ago(ms: number, lang: Lang): string {
   const min = Math.max(1, Math.round(ms / 60000));
+  if (lang === 'pl') return min < 90 ? `${min} min temu` : `${Math.round(min / 60)} godz. temu`;
   return min < 90 ? `${min} min ago` : `${Math.round(min / 60)} h ago`;
 }
+
+const REPLAY_NOTE: Record<Lang, (when: string) => string> = {
+  en: (when) => `Using the research done ${when}. The web was not searched again.`,
+  pl: (when) => `Korzystam z badania wykonanego ${when}. Sieć nie była przeszukiwana ponownie.`,
+};
 
 export interface Research {
   twin: TwinProfile;
@@ -96,7 +105,8 @@ export async function researchTwin(input: TwinInput, onStep: (s: ResponseStep) =
 
   const hit = cache?.get(key);
   if (hit) {
-    onStep({ kind: 'note', text: `Using the research done ${ago(Date.now() - hit.at)}. The web was not searched again.` });
+    const lang = input.lang ?? 'en';
+    onStep({ kind: 'note', text: REPLAY_NOTE[lang](ago(Date.now() - hit.at, lang)) });
     const pace = opts.paceMs ?? Math.min(250, 3000 / Math.max(1, hit.steps.length));
     for (const s of hit.steps) {
       if (input.signal?.aborted) break;
