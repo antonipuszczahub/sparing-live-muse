@@ -136,6 +136,7 @@ export function CallScreen({
           <div className="text-sm text-[var(--muted)]">
             {p.role} · {sc.title}
           </div>
+          {engine.current?.voiceName && <div className="mt-0.5 truncate text-[11px] text-[var(--muted)]">{t('voiceInUse', engine.current.voiceName)}</div>}
           {config.provider === 'open' && (
             <div className="mt-1 inline-block rounded-full border border-[var(--accent)] px-2 py-0.5 text-[11px] text-[var(--accent)]">{t('openBadge')}</div>
           )}

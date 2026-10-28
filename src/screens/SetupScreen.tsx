@@ -6,7 +6,7 @@ import { setLang, t, useLang } from '../i18n/index.ts';
 import { clearWeakSpots, topWeakSpots } from '../lib/memory.ts';
 import { loadUser, saveUser, type UserProfile } from '../lib/profile.ts';
 import { sttSupported } from '../lib/stt.ts';
-import { voices } from '../lib/tts.ts';
+import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
 
 interface Health {
   ok: boolean;
@@ -19,19 +19,6 @@ interface Health {
 
 const SEGMENT = (on: boolean) =>
   `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`;
-
-/** True once the browser has loaded its voices and none of them speaks the language. */
-function useMissingVoice(lang: 'en' | 'pl') {
-  const [missing, setMissing] = useState(false);
-  useEffect(() => {
-    if (typeof speechSynthesis === 'undefined') return;
-    const check = () => setMissing(speechSynthesis.getVoices().length > 0 && voices(lang).length === 0);
-    check();
-    speechSynthesis.addEventListener('voiceschanged', check);
-    return () => speechSynthesis.removeEventListener('voiceschanged', check);
-  }, [lang]);
-  return missing;
-}
 
 export function SetupScreen({
   onStart,
@@ -52,7 +39,8 @@ export function SetupScreen({
   const [useMemory, setUseMemory] = useState(true);
   const [openWeights, setOpenWeights] = useState(false);
   const [user, setUser] = useState<UserProfile>(loadUser);
-  const missingVoice = useMissingVoice(lang);
+  const { list: voiceList, total: voiceTotal } = useVoiceList(lang);
+  const missingVoice = voiceTotal > 0 && voiceList.length === 0;
   const sc = scenarioDef(scenario, lang);
 
   useEffect(() => {
@@ -200,6 +188,8 @@ export function SetupScreen({
           <p className="mt-3 text-xs text-[var(--muted)]">{t('userWhy')}</p>
         </section>
       )}
+
+      <VoicePicker lang={lang} list={voiceList} />
 
       {weak.length > 0 && (
         <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">

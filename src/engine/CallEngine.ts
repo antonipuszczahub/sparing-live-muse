@@ -7,7 +7,7 @@ import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
-import { pickVoice, Speaker } from '../lib/tts.ts';
+import { pickVoice, pitchFor, Speaker } from '../lib/tts.ts';
 
 export type CallState = 'connecting' | 'listening' | 'thinking' | 'speaking' | 'ended';
 
@@ -51,6 +51,8 @@ export class CallEngine {
   private userStoppedAt = 0;
   private turnId = 0;
   private lang: Lang;
+  /** Name of the browser voice the character speaks with (empty when the browser has none). */
+  readonly voiceName: string;
 
   constructor(
     private config: SessionConfig,
@@ -61,8 +63,8 @@ export class CallEngine {
     this.lang = langOf(config);
     // A browser may have no voice of the right gender (Windows ships a single Polish voice): shift the pitch instead.
     const pick = pickVoice(config.persona.gender, this.lang);
-    const pitch = pick.matched ? 1 : config.persona.gender === 'm' ? 0.8 : 1.1;
-    this.speaker = new Speaker(pick.voice, this.lang, pitch);
+    this.voiceName = pick.voice?.name ?? '';
+    this.speaker = new Speaker(pick.voice, this.lang, pitchFor(pick.matched, config.persona.gender));
     this.speaker.onIdle = () => this.onSpeechIdle();
     this.speaker.onStart = () => {
       if (this.userStoppedAt) this.lastLatencyMs = Date.now() - this.userStoppedAt;

@@ -1,13 +1,15 @@
 import { LANG_META } from '../../shared/lang.ts';
 import type { Lang } from '../../shared/types.ts';
 
-export interface VoicePick {
-  voice: SpeechSynthesisVoice | null;
-  /** A neural ("Natural") voice, which sounds far less robotic. */
+export interface VoicePick<V = SpeechSynthesisVoice> {
+  voice: V | null;
+  /** A neural ("Natural") voice, which sounds far less robotic than the basic system voices. */
   natural: boolean;
   /** The voice's name fits the character's gender. If not, the speaker lowers or raises the pitch a little. */
   matched: boolean;
 }
+
+type VoiceLike = { name: string; lang: string };
 
 // Names of the voices that ship with Edge, Windows and Chrome, by gender. Browsers do not report gender.
 const NAMES: Record<Lang, { m: RegExp; f: RegExp }> = {
@@ -21,19 +23,68 @@ const NAMES: Record<Lang, { m: RegExp; f: RegExp }> = {
   },
 };
 
+export const isNatural = (v: VoiceLike) => /natural|neural/i.test(v.name);
+
 export function voices(lang: Lang = 'en'): SpeechSynthesisVoice[] {
   return speechSynthesis.getVoices().filter((v) => new RegExp(`^${lang}`, 'i').test(v.lang));
 }
 
-export function pickVoice(gender: 'm' | 'f', lang: Lang = 'en'): VoicePick {
-  const vs = voices(lang);
-  const natural = vs.filter((v) => /natural|neural/i.test(v.name));
+/** Natural voices first, then the rest by name, so the list in the picker starts with the best ones. */
+export function sortVoices<V extends VoiceLike>(vs: V[]): V[] {
+  return [...vs].sort((a, b) => Number(isNatural(b)) - Number(isNatural(a)) || a.name.localeCompare(b.name));
+}
+
+/**
+ * The voice for a character: the one the user chose if it is still there, otherwise a Natural voice of the
+ * right gender, otherwise any Natural voice, otherwise a basic one of the right gender, otherwise the first.
+ */
+export function rankVoices<V extends VoiceLike>(vs: V[], lang: Lang, gender: 'm' | 'f', saved?: string | null): VoicePick<V> {
+  const chosen = saved ? vs.find((v) => v.name === saved) : undefined;
+  if (chosen) return { voice: chosen, natural: isNatural(chosen), matched: true };
+  const natural = vs.filter(isNatural);
   const pool = natural.length ? natural : vs;
   const re = NAMES[lang][gender];
   const named = pool.find((v) => re.test(v.name));
   const exact = pool.find((v) => v.lang.replace('_', '-').toLowerCase() === LANG_META[lang].speech.toLowerCase());
   const voice = named ?? exact ?? pool[0] ?? null;
-  return { voice, natural: !!voice && /natural|neural/i.test(voice.name), matched: !!named };
+  return { voice, natural: !!voice && isNatural(voice), matched: !!named };
+}
+
+const STORE = 'sl.voice.v1';
+const slot = (lang: Lang, gender: 'm' | 'f') => `${lang}:${gender}`;
+
+/** The voice the user picked for a language and gender, remembered in this browser. */
+export function savedVoice(lang: Lang, gender: 'm' | 'f'): string | null {
+  try {
+    return (JSON.parse(localStorage.getItem(STORE) ?? '{}') as Record<string, string>)[slot(lang, gender)] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveVoice(lang: Lang, gender: 'm' | 'f', name: string | null) {
+  try {
+    const all = JSON.parse(localStorage.getItem(STORE) ?? '{}') as Record<string, string>;
+    if (name) all[slot(lang, gender)] = name;
+    else delete all[slot(lang, gender)];
+    localStorage.setItem(STORE, JSON.stringify(all));
+  } catch {
+    /* the choice just is not remembered */
+  }
+}
+
+export function pickVoice(gender: 'm' | 'f', lang: Lang = 'en'): VoicePick {
+  return rankVoices(voices(lang), lang, gender, savedVoice(lang, gender));
+}
+
+/** Says a short sample with a voice, for the picker. */
+export function previewVoice(voice: SpeechSynthesisVoice | null, text: string, lang: Lang, pitch = 1) {
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (voice) u.voice = voice;
+  u.lang = voice?.lang ?? LANG_META[lang].speech;
+  u.pitch = pitch;
+  speechSynthesis.speak(u);
 }
 
 /** Speaks sentences one after another and reports what has actually been spoken. */
@@ -134,3 +185,6 @@ export class Speaker {
     }, 1500);
   }
 }
+
+/** Pitch correction for a voice that does not fit the character's gender (Windows ships one Polish voice per gender at best). */
+export const pitchFor = (matched: boolean, gender: 'm' | 'f'): number => (matched ? 1 : gender === 'm' ? 0.8 : 1.1);
