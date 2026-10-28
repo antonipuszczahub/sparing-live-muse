@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LEVELS, SCENARIOS, SCENARIO_IDS } from '../../shared/scenarios.ts';
 import type { Level, ScenarioId, SessionConfig } from '../../shared/types.ts';
+import { clearWeakSpots, topWeakSpots } from '../lib/memory.ts';
 import { sttSupported } from '../lib/stt.ts';
 
 const TWIN_EXAMPLE: Record<ScenarioId, string> = {
@@ -30,6 +31,8 @@ export function SetupScreen({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [health, setHealth] = useState<Health | null>(null);
+  const [weak, setWeak] = useState<string[]>(() => topWeakSpots(3));
+  const [useMemory, setUseMemory] = useState(true);
   const sc = SCENARIOS[scenario];
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export function SetupScreen({
       const r = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario, level, topic: topic.trim() || sc.topicExample }),
+        body: JSON.stringify({ scenario, level, topic: topic.trim() || sc.topicExample, focus: useMemory ? weak : undefined }),
       });
       if (!r.ok) throw new Error('Could not start a session');
       const { session, config } = (await r.json()) as { session: string; config: SessionConfig };
@@ -128,7 +131,35 @@ export function SetupScreen({
         <p className="mt-2 text-sm text-[var(--muted)]">{LEVELS[level].blurb}</p>
       </section>
 
-      {!sttSupported() && <p className="mt-6 text-sm text-amber-400">Voice input needs Microsoft Edge or Google Chrome.</p>}
+      {weak.length > 0 && (
+        <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium">Your recurring weak spots</div>
+            <button
+              onClick={() => {
+                clearWeakSpots();
+                setWeak([]);
+              }}
+              className="text-xs text-[var(--muted)] hover:text-[var(--text)]"
+            >
+              Forget them
+            </button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {weak.map((w) => (
+              <span key={w} className="rounded-full border border-[var(--line)] px-3 py-1 text-xs">
+                {w}
+              </span>
+            ))}
+          </div>
+          <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-[var(--muted)]">
+            <input type="checkbox" checked={useMemory} onChange={(e) => setUseMemory(e.target.checked)} />
+            Let the next character aim at these
+          </label>
+        </section>
+      )}
+
+      {!sttSupported() &&<p className="mt-6 text-sm text-amber-400">Voice input needs Microsoft Edge or Google Chrome.</p>}
       {health && !health.keyConfigured && <p className="mt-6 text-sm text-amber-400">MODEL_API_KEY is missing in .env, so the server cannot reach the Meta models yet.</p>}
       {error && <p className="mt-6 text-sm text-red-400">{error}</p>}
 

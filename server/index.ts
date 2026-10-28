@@ -28,6 +28,7 @@ const ConfigSchema = z.object({
   persona: PersonaSchema,
   twin: z.any().optional(),
   variant: z.number().int().nonnegative(),
+  focus: z.array(z.string().max(80)).max(3).optional(),
 });
 
 const TurnSchema = z.object({
@@ -51,12 +52,12 @@ app.get('/api/health', (_req, res) => {
 
 /** Start a new call: roll today's variation and the character. */
 app.post('/api/session', (req, res) => {
-  const { scenario, level, topic } = z
-    .object({ scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), level: z.number().int().min(1).max(4), topic: z.string().max(400) })
+  const { scenario, level, topic, focus } = z
+    .object({ scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), level: z.number().int().min(1).max(4), topic: z.string().max(400), focus: z.array(z.string().max(80)).max(3).optional() })
     .parse(req.body);
   const variant = newSeed();
   const v = rollVariant(scenario as never, variant);
-  const config: SessionConfig = { scenario: scenario as never, level: level as never, topic, persona: v.persona, variant };
+  const config: SessionConfig = { scenario: scenario as never, level: level as never, topic, persona: v.persona, variant, focus };
   res.json({ session: `s_${variant.toString(36)}_${Date.now().toString(36)}`, config });
 });
 

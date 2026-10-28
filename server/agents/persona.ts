@@ -32,6 +32,9 @@ export function buildSystemPrompt(config: SessionConfig, extras: { screen?: stri
       : '',
     `# Today (this specific call)\n${v.circumstance}\nYour mood: ${v.mood}. Your habit: ${v.tic}.\nHidden agenda, never state it: ${v.agenda}`,
     `# Difficulty: ${lv.name}\n${lv.rules.map((r) => `- ${r}`).join('\n')}`,
+    config.focus?.length
+      ? `# Where this user has struggled before\n${config.focus.map((f) => `- ${f}`).join('\n')}\nWork these in naturally when the moment fits. Never say you know about earlier calls.`
+      : '',
     extras.screen ? `# The user's shared screen right now\n${extras.screen}\nReact to it like a person who can see it.` : '',
     `# How you speak
 - Spoken English, short. At most ${lv.maxWords} words in SAY. No lists, no headings, no emojis. Never write actions or sounds in asterisks or brackets (no *sigh*, no (pause)): only words you would actually say.

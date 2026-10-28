@@ -36,6 +36,8 @@ export interface SessionConfig {
   twin?: TwinProfile;
   /** Seed for today's variation (circumstance, mood, hidden agenda). */
   variant: number;
+  /** Weak spots from earlier calls that this character should probe. */
+  focus?: string[];
 }
 
 export type Mood = 1 | 2 | 3 | 4 | 5;

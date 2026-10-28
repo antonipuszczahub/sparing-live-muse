@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { measureDelivery, type AuditResult, type Moment } from '../../shared/audit.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { ApiError, requestAudit } from '../lib/api.ts';
+import { recordWeakSpots } from '../lib/memory.ts';
 
 const KIND_STYLE: Record<Moment['kind'], { label: string; color: string }> = {
   strength: { label: 'Strength', color: '#22c55e' },
@@ -49,7 +50,11 @@ export function ReportScreen({
   useEffect(() => {
     let live = true;
     requestAudit({ session, config, turns, durationMs, hungUp })
-      .then((r) => live && setResult(r))
+      .then((r) => {
+        if (!live) return;
+        recordWeakSpots(r.weaknessTags);
+        setResult(r);
+      })
       .catch((e) => live && setError(e instanceof ApiError && e.budget ? 'The daily budget is used up. Come back tomorrow.' : (e as Error).message));
     return () => {
       live = false;
