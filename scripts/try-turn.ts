@@ -29,7 +29,7 @@ console.log(`${v.persona.name} (${v.persona.role}), level ${level}. Today: ${v.c
 async function bot() {
   const start = Date.now();
   let first = 0;
-  const r = await characterTurn({ config, history, session: 'try', dev: process.env.DEV_MODEL === '1' }, () => {
+  const r = await characterTurn({ config, history, session: 'try' }, () => {
     first ||= Date.now() - start;
   });
   console.log(`  [thought] ${r.thought}`);

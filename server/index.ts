@@ -82,7 +82,6 @@ app.post('/api/turn', async (req, res) => {
         history: history as never,
         session,
         screen,
-        dev: process.env.DEV_MODEL === '1',
         signal: ac.signal,
       },
       (delta) => send('say', { delta }),

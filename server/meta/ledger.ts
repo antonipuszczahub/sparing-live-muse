@@ -1,4 +1,4 @@
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 /**
@@ -25,8 +25,22 @@ const SESSION_LIMIT = Number(process.env.SESSION_BUDGET_USD) || 1;
 
 const day = (t: number) => new Date(t).toISOString().slice(0, 10);
 
+/** Today's spend must survive a server restart, otherwise restarting would reset the limit. */
+function loadToday(): LedgerEntry[] {
+  try {
+    const today = day(Date.now());
+    return readFileSync(FILE, 'utf8')
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => JSON.parse(l) as LedgerEntry)
+      .filter((e) => day(e.t) === today);
+  } catch {
+    return [];
+  }
+}
+
 class Ledger {
-  private entries: LedgerEntry[] = [];
+  private entries: LedgerEntry[] = loadToday();
 
   record(e: Omit<LedgerEntry, 't'>): LedgerEntry {
     const entry = { t: Date.now(), ...e };
