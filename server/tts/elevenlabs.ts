@@ -98,7 +98,7 @@ export function toCloudVoices(raw: RawVoice[], lang: Lang, tier?: string): Cloud
  * from its seed, so the same person always has the same voice and different calls sound like different people.
  * ELEVENLABS_VOICES_F / ELEVENLABS_VOICES_M ("Sarah,Jessica") replace the lists.
  */
-const APPROVED: Record<'m' | 'f', string[]> = { f: ['Sarah', 'Jessica', 'Laura'], m: [] };
+const APPROVED: Record<'m' | 'f', string[]> = { f: ['Sarah', 'Jessica', 'Laura'], m: ['Eric', 'Daniel', 'George'] };
 
 /** The usable voices of a gender, approved ones first (in the approved order), then the rest as the catalog ranks them. */
 export function voicePool(voices: CloudVoice[], env: NodeJS.ProcessEnv = process.env): { m: string[]; f: string[] } {

@@ -210,6 +210,9 @@ const VOICES = toCloudVoices(
     { voice_id: 'ali00000001', name: 'Alice - Clear', category: 'premade', labels: { gender: 'female' } },
     { voice_id: 'kin00000001', name: 'Kinga - Warm', category: 'professional', labels: { gender: 'female' } },
     { voice_id: 'bri00000001', name: 'Brian - Deep', category: 'premade', labels: { gender: 'male' } },
+    { voice_id: 'eri00000001', name: 'Eric - Smooth', category: 'premade', labels: { gender: 'male' } },
+    { voice_id: 'dan00000001', name: 'Daniel - Steady', category: 'premade', labels: { gender: 'male' } },
+    { voice_id: 'geo00000001', name: 'George - Warm', category: 'premade', labels: { gender: 'male' } },
   ],
   'pl',
   'free',
@@ -217,7 +220,8 @@ const VOICES = toCloudVoices(
 
 test('the approved voices form the pool, in the order they were approved, and nothing else is in it', () => {
   assert.deepEqual(voicePool(VOICES, {}).f, ['sar00000001', 'jes00000001', 'lau00000001']);
-  assert.deepEqual(voicePool(VOICES, {}).m, ['bri00000001'], 'with no approved male voice the first usable one stands in');
+  assert.deepEqual(voicePool(VOICES, {}).m, ['eri00000001', 'dan00000001', 'geo00000001'], 'approved, not merely available');
+  assert.deepEqual(voicePool(VOICES, { ELEVENLABS_VOICES_M: 'Nobody' }).m, ['bri00000001'], 'with no approved voice available the first usable one stands in');
   assert.deepEqual(voicePool(VOICES, { ELEVENLABS_VOICES_F: 'Laura, Alice' }).f, ['lau00000001', 'ali00000001'], 'the list can be replaced');
   assert.deepEqual(voicePool(VOICES, { ELEVENLABS_VOICES_F: 'Kinga' }).f, voicePool(VOICES, NONE).f, 'a locked approved voice is skipped, the rest of the catalog stands in');
 });
