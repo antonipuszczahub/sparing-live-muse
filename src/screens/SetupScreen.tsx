@@ -173,6 +173,9 @@ export function SetupScreen({
         </button>
         <span className="text-sm text-[var(--muted)]">Use headphones so the character does not hear itself.</span>
       </div>
+      <p className="mt-4 max-w-xl text-xs leading-relaxed text-[var(--muted)]">
+        Privacy: your voice is relayed to Meta's speech model and your words go to Meta's Muse models. While free Meta credits are in use, Meta may use this content to improve its products. This app stores no audio or transcripts; it keeps only a cost log, and your weak spots stay in this browser.
+      </p>
       {health && (
         <p className="mt-10 text-xs text-[var(--muted)]">
           Budget today: ${health.budget.spentToday.toFixed(2)} of ${health.budget.dailyLimit.toFixed(2)}
