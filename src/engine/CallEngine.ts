@@ -233,6 +233,21 @@ export class CallEngine {
 
   private finish(reason: NonNullable<CallSnapshot['endReason']>) {
     if (this.state === 'ended') return;
+    // Hanging up while the character is talking: keep what it was saying in the transcript.
+    if (this.state === 'speaking' || this.state === 'thinking') {
+      const text = this.pendingFinal?.reply ?? (this.speaker.spokenText || this.liveBot);
+      if (text.trim()) {
+        const cut = !this.pendingFinal && text.trim() !== this.liveBot.trim();
+        this.turns.push({
+          role: 'bot',
+          text: text.trim() + (cut ? ' —' : ''),
+          thought: this.pendingFinal?.thought,
+          mood: this.mood,
+          at: this.now(),
+        });
+      }
+      this.liveBot = '';
+    }
     this.turnId++;
     this.abort?.abort();
     this.speaker.cancel();

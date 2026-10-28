@@ -15,7 +15,7 @@ export function CallScreen({
 }: {
   session: string;
   config: SessionConfig;
-  onEnd: (turns: Turn[], durationMs: number) => void;
+  onEnd: (turns: Turn[], durationMs: number, hungUp: boolean) => void;
 }) {
   const [snap, setSnap] = useState<CallSnapshot | null>(null);
   const [typed, setTyped] = useState('');
@@ -37,7 +37,7 @@ export function CallScreen({
   useEffect(() => {
     if (snap?.state === 'ended' && !ended.current) {
       ended.current = true;
-      const t = window.setTimeout(() => onEnd(snap.turns, snap.elapsedMs), snap.endReason === 'hangup' ? 2500 : 600);
+      const t = window.setTimeout(() => onEnd(snap.turns, snap.elapsedMs, snap.endReason === 'hangup'), snap.endReason === 'hangup' ? 2500 : 600);
       return () => window.clearTimeout(t);
     }
   }, [snap, onEnd]);

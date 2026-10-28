@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import type { SessionConfig, Turn } from '../shared/types.ts';
 import { CallScreen } from './screens/CallScreen.tsx';
+import { ReportScreen } from './screens/ReportScreen.tsx';
 import { SetupScreen } from './screens/SetupScreen.tsx';
 
 type View =
   | { name: 'setup' }
   | { name: 'call'; session: string; config: SessionConfig }
-  | { name: 'done'; session: string; config: SessionConfig; turns: Turn[]; durationMs: number };
+  | { name: 'done'; session: string; config: SessionConfig; turns: Turn[]; durationMs: number; hungUp: boolean };
 
 export function App() {
   const [view, setView] = useState<View>({ name: 'setup' });
@@ -20,17 +21,19 @@ export function App() {
         key={view.session}
         session={view.session}
         config={view.config}
-        onEnd={(turns, durationMs) => setView({ name: 'done', session: view.session, config: view.config, turns, durationMs })}
+        onEnd={(turns, durationMs, hungUp) => setView({ name: 'done', session: view.session, config: view.config, turns, durationMs, hungUp })}
       />
     );
   }
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <h1 className="text-2xl font-semibold">Call ended</h1>
-      <p className="mt-2 text-[var(--muted)]">{view.turns.length} turns, {Math.round(view.durationMs / 1000)} s. The audit comes next.</p>
-      <button className="mt-6 rounded-lg bg-[var(--accent)] px-4 py-2 font-medium text-black" onClick={() => setView({ name: 'setup' })}>
-        New call
-      </button>
-    </main>
+    <ReportScreen
+      key={view.session}
+      session={view.session}
+      config={view.config}
+      turns={view.turns}
+      durationMs={view.durationMs}
+      hungUp={view.hungUp}
+      onAgain={() => setView({ name: 'setup' })}
+    />
   );
 }

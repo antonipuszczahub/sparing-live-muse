@@ -1,5 +1,6 @@
 import express from 'express';
 import { z } from 'zod';
+import { audit } from './agents/auditor.ts';
 import { characterTurn } from './agents/persona.ts';
 import { BudgetError } from './meta/client.ts';
 import { ledger } from './meta/ledger.ts';
@@ -92,6 +93,31 @@ app.post('/api/turn', async (req, res) => {
     else if (!ac.signal.aborted) send('error', { message: e instanceof Error ? e.message : 'Unknown error' });
   } finally {
     res.end();
+  }
+});
+
+const AuditSchema = z.object({
+  session: z.string().min(4).max(64),
+  config: ConfigSchema,
+  turns: TurnSchema.shape.history,
+  durationMs: z.number().nonnegative(),
+  hungUp: z.boolean(),
+});
+
+/** Post-call audit by Muse Wonder. Takes tens of seconds, so the client shows progress. */
+app.post('/api/audit', async (req, res) => {
+  const parsed = AuditSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  try {
+    const { config, turns, ...rest } = parsed.data;
+    const result = await audit({ config: config as SessionConfig, turns: turns as never, ...rest });
+    res.json(result);
+  } catch (e) {
+    if (e instanceof BudgetError) res.status(429).json({ error: e.message, budget: e.reason });
+    else res.status(502).json({ error: e instanceof Error ? e.message : 'Audit failed' });
   }
 });
 
