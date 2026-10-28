@@ -12,6 +12,8 @@ export interface CloudVoice {
   gender: 'm' | 'f' | null;
   accent?: string;
   native: boolean;
+  /** Needs a paid ElevenLabs plan, so it is shown but cannot be chosen. */
+  locked?: boolean;
 }
 
 export interface CloudCatalog {

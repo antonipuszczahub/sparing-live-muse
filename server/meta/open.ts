@@ -66,3 +66,14 @@ export function openHost(env: Record<string, string | undefined> = process.env):
   const reasoningEffort = env.OPEN_REASONING_EFFORT?.trim() || p.effort;
   return { id, label: env.OPEN_LABEL || p.label || labelFor(baseURL), baseURL, apiKey, model, ...(reasoningEffort && reasoningEffort !== 'default' ? { reasoningEffort } : {}) };
 }
+
+/** Open weights are the default when a host is configured (same speed, and the Meta budget is spared); OPEN_BY_DEFAULT=0 turns it off. */
+export function openByDefault(env: Record<string, string | undefined> = process.env): boolean {
+  return openHost(env) !== null && env.OPEN_BY_DEFAULT !== '0';
+}
+
+/** Whether a new session runs on open weights: what the visitor chose, else the default of this deployment. */
+export function wantsOpenWeights(requested: 'meta' | 'open' | undefined, env: Record<string, string | undefined> = process.env): boolean {
+  if (!openHost(env)) return false;
+  return requested ? requested === 'open' : openByDefault(env);
+}

@@ -33,6 +33,7 @@ export const en = {
   voiceMan: 'Male character',
   voiceAuto: 'Automatic (best available)',
   voiceBasic: 'basic',
+  voicePaid: 'needs a paid plan',
   voicePreview: 'Listen',
   voiceSample: 'Hello, this is how I sound. Let us get to your pitch.',
   voiceRobotic: 'The best voice in this browser is a basic system voice and sounds robotic. Microsoft Edge has much better Natural voices.',
@@ -41,7 +42,7 @@ export const en = {
   voiceSourceBrowser: 'Browser voice',
   voiceCloudNote: "The character's lines are sent to ElevenLabs to be voiced. Your own voice never is.",
   voiceFallback: (code: string) =>
-    `${({ limit: 'The voice allowance for this visit is used up', quota: 'The ElevenLabs quota is used up', auth: 'ElevenLabs did not accept the key', audio: 'The browser blocked audio playback for the premium voice' } as Record<string, string>)[code] ?? 'The ElevenLabs voice is unavailable'}, so the browser voice takes over.`,
+    `${({ limit: 'The voice allowance for this visit is used up', plan: 'This ElevenLabs voice needs a paid plan', quota: 'The ElevenLabs quota is used up', auth: 'ElevenLabs did not accept the key', audio: 'The browser blocked audio playback for the premium voice' } as Record<string, string>)[code] ?? 'The ElevenLabs voice is unavailable'}, so the browser voice takes over.`,
   userTitle: 'About you',
   userGender: 'I am',
   userMan: 'a man',

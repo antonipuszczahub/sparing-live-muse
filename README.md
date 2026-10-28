@@ -34,6 +34,8 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | ElevenLabs `eleven_v4_turbo` | Optional **voice** of the character (not a Meta model): studio-quality speech in English and Polish, streamed sentence by sentence; the browser's voice is the fallback | about 100 ms model latency; see [Voice and cost](#voice-and-cost) |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
+With a host configured the character runs on open weights **by default** (the start screen ticks the box; `OPEN_BY_DEFAULT=0` turns it off): the speed is the same and the Meta budget is spared.
+
 Muse Spark Open always reasons, and Baseten's default depth (`xhigh`) is too slow to speak: measured over the same 24 calls, `xhigh` gave a median 3.4 s to the first word (p95 7.1 s), about 930 output tokens per turn and 3 empty replies when the reasoning used the whole budget, while `reasoning_effort: low` gives 1.2 s (p95 2.2 s), about 170 tokens and no failures. The Baseten preset therefore sends `low`. The host allows 100 requests a minute, which one call uses a small part of; if the host fails or limits a turn before the character has spoken, that turn is asked again from Meta's hosted Spark with the same prompt and the call says so.
 
 Notes from measuring the API (they shaped the design): reasoning tokens count against `max_tokens`; `json_schema` output does not stream and returns keys alphabetically (so live turns use a tagged plain-text format and the character decides to hang up *after* it has spoken); web search exists only on the Responses API; the `-contributor` variant of Spark is 2-4x slower than the standard model.
@@ -140,6 +142,8 @@ What it costs, from the [ElevenLabs API price list](https://elevenlabs.io/pricin
 | Recording the demo, many takes | 20 | 40,000 | $1.60 |
 | Judges and visitors for two weeks | 300 | 600,000 | $24 |
 | If an X post takes off | 1,500 | 3,000,000 | $120 |
+
+On the **free plan** (10,000 credits a month, a handful of calls) only ElevenLabs' standard voices work through the API; library voices, which include the voices made for Polish, need a paid plan or $5 of credits. The server reads the plan, shows such voices as locked and never picks one by default, and a refused voice is reported as a plan problem, not as a used-up quota.
 
 Three guards keep it bounded: 8,000 characters per session, 20,000 per visitor per hour and 150,000 per day (all in `.env`), counted in the same ledger as the Meta calls. Past a cap the call continues with the browser voice, it does not stop. `docs/MANIFEST.md` lists the characters actually spoken and the estimated cost. Only the character's lines go to ElevenLabs, never the user's audio.
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { openHost } from '../server/meta/open.ts';
+import { openByDefault, openHost, wantsOpenWeights } from '../server/meta/open.ts';
 
 test('nothing configured means no open weights', () => {
   assert.equal(openHost({}), null);
@@ -51,4 +51,20 @@ test('the reasoning effort can be changed or left to the host, and other hosts g
   assert.equal('reasoningEffort' in openHost({ BASETEN_API_KEY: 'k', OPEN_REASONING_EFFORT: 'default' })!, false);
   assert.equal('reasoningEffort' in openHost({ FIREWORKS_API_KEY: 'k', OPEN_MODEL: 'm' })!, false);
   assert.equal(openHost({ FIREWORKS_API_KEY: 'k', OPEN_MODEL: 'm', OPEN_REASONING_EFFORT: 'low' })!.reasoningEffort, 'low');
+});
+
+test('open weights are the default when a host is configured, and the visitor can say otherwise', () => {
+  const on = { BASETEN_API_KEY: 'k' };
+  assert.equal(openByDefault(on), true);
+  assert.equal(wantsOpenWeights(undefined, on), true);
+  assert.equal(wantsOpenWeights('meta', on), false, 'the visitor unticked it');
+  assert.equal(wantsOpenWeights('open', on), true);
+  assert.equal(wantsOpenWeights(undefined, { ...on, OPEN_BY_DEFAULT: '0' }), false, 'a deployment can turn the default off');
+  assert.equal(wantsOpenWeights('open', { ...on, OPEN_BY_DEFAULT: '0' }), true);
+});
+
+test('without a host nothing runs on open weights, whatever is asked', () => {
+  assert.equal(openByDefault({}), false);
+  assert.equal(wantsOpenWeights('open', {}), false);
+  assert.equal(wantsOpenWeights(undefined, {}), false);
 });

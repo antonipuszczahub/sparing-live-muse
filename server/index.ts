@@ -10,7 +10,8 @@ import { findFaces } from './agents/sam.ts';
 import { characterTurn } from './agents/persona.ts';
 import { drawPortraits, type Portraits } from './agents/portrait.ts';
 import { researchTwin, twinCache, twinKey } from './agents/twinCache.ts';
-import { BudgetError, openWeightsConfigured, openWeightsInfo } from './meta/client.ts';
+import { BudgetError, openWeightsInfo } from './meta/client.ts';
+import { openByDefault, wantsOpenWeights } from './meta/open.ts';
 import { rateLimit } from './limits.ts';
 import { ledger } from './meta/ledger.ts';
 import { registerTts, voiceHealth } from './tts/route.ts';
@@ -75,6 +76,7 @@ app.get('/api/health', (_req, res) => {
     openWeights: Boolean(open),
     openHost: open?.label,
     openModel: open?.model,
+    openDefault: openByDefault(),
     voice: voiceHealth(ledger),
     budget: ledger.summary(),
   });
@@ -102,7 +104,7 @@ app.post('/api/session', rateLimit('session', Number(process.env.SESSIONS_PER_IP
     persona: v.persona,
     variant,
     focus,
-    provider: provider === 'open' && openWeightsConfigured() ? 'open' : undefined,
+    provider: wantsOpenWeights(provider) ? 'open' : undefined,
     // English is the default and stays out of the config, so old and new clients agree.
     lang: lang === 'pl' ? 'pl' : undefined,
     user: lang === 'pl' ? user : undefined,

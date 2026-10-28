@@ -172,3 +172,29 @@ test('an error that names no optional field is not retried', async () => {
     s.close();
   }
 });
+
+test('on the free plan library voices are locked and never the default; on a paid plan they are', () => {
+  const raw = [
+    { voice_id: 'lib00000001', name: 'Kinga', category: 'professional', labels: { gender: 'female' }, verified_languages: [{ language: 'pl' }] },
+    { voice_id: 'pre00000001', name: 'Alice', category: 'premade', labels: { gender: 'female', accent: 'british' } },
+  ];
+  const free = toCloudVoices(raw, 'pl', 'free');
+  assert.deepEqual(free.map((v) => [v.name, v.locked]), [['Kinga', true], ['Alice', false]]);
+  assert.equal(defaultVoices(free, 'pl', {}).f, 'pre00000001', 'the voice the plan cannot use is skipped');
+  const paid = toCloudVoices(raw, 'pl', 'starter');
+  assert.ok(paid.every((v) => !v.locked));
+  assert.equal(defaultVoices(paid, 'pl', {}).f, 'lib00000001', 'the native Polish voice wins once it can be used');
+  assert.ok(toCloudVoices(raw, 'pl').every((v) => !v.locked), 'an unreadable plan locks nothing');
+});
+
+test('a library voice refused for the plan is reported as a plan problem, not as a used-up quota', async () => {
+  const detail = '{"detail":{"type":"payment_required","code":"paid_plan_required","message":"Free users cannot use library voices via the API."}}';
+  const s = await boot({ ELEVENLABS_API_KEY: 'k', ELEVENLABS_MODEL: 'plan-model' }, () => new Response(detail, { status: 402 }));
+  try {
+    const res = await s.post(GOOD);
+    assert.equal(res.status, 402);
+    assert.equal(((await res.json()) as { code: string }).code, 'plan');
+  } finally {
+    s.close();
+  }
+});

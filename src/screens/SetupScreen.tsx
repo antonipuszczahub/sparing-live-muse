@@ -12,6 +12,8 @@ interface Health {
   ok: boolean;
   keyConfigured: boolean;
   openWeights?: boolean;
+  /** The server runs the character on open weights unless the visitor unticks the box. */
+  openDefault?: boolean;
   openHost?: string;
   openModel?: string;
   budget: { spentToday: number; dailyLimit: number };
@@ -46,7 +48,10 @@ export function SetupScreen({
   useEffect(() => {
     fetch('/api/health')
       .then((r) => r.json())
-      .then(setHealth)
+      .then((h: Health) => {
+        setHealth(h);
+        if (h.openDefault) setOpenWeights(true);
+      })
       .catch(() => setHealth(null));
   }, []);
 
@@ -76,7 +81,7 @@ export function SetupScreen({
           level,
           topic: topic.trim() || sc.topicExample,
           focus: useMemory && weak.length ? weak : undefined,
-          provider: openWeights ? 'open' : undefined,
+          provider: health?.openWeights ? (openWeights ? 'open' : 'meta') : undefined,
           lang,
           user: lang === 'pl' ? user : undefined,
         }),

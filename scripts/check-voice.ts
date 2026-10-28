@@ -1,6 +1,7 @@
 // Checks the ElevenLabs voice: lists the voices, speaks a sample line in each default voice and saves it as WAV.
 // Run: npm run check:voice            (needs ELEVENLABS_API_KEY in .env; costs about 1 cent)
-//      npm run check:voice -- --voice <id> --lang pl   speak the sample with one specific voice
+//      npm run check:voice -- --voice <id>[,<id>...] --lang pl   speak the sample with specific voices
+//      npm run check:voice -- --gender f --lang pl      speak it with every voice of that gender in the account
 import { mkdirSync, writeFileSync } from 'node:fs';
 import type { Lang } from '../shared/types.ts';
 import { defaultVoices, listVoices, speak, ttsConfig, ttsCostUsd } from '../server/tts/elevenlabs.ts';
@@ -58,15 +59,17 @@ async function say(lang: Lang, id: string, label: string) {
 }
 
 console.log(`Model ${cfg.model}\n`);
-const one = arg('--voice');
+const ids = arg('--voice')?.split(',').filter(Boolean);
+const gender = arg('--gender');
 const langs: Lang[] = arg('--lang') ? [arg('--lang') as Lang] : ['pl', 'en'];
 for (const lang of langs) {
   const voices = await listVoices(cfg, lang);
   console.log(`${lang}: ${voices.length} voices in the account`);
   for (const v of voices.slice(0, 12)) console.log(`  ${v.native ? '*' : ' '} ${v.name.padEnd(18)} ${String(v.gender ?? '?').padEnd(2)} ${(v.accent ?? '').padEnd(12)} ${v.id}`);
   if (voices.length > 12) console.log(`  ... and ${voices.length - 12} more (* = made for ${lang})`);
-  if (one) {
-    await say(lang, one, one.slice(0, 8));
+  if (ids || gender) {
+    const picked = ids ? ids.map((id) => voices.find((v) => v.id === id) ?? { id, name: id.slice(0, 8), gender: null }) : voices.filter((v) => v.gender === gender && !v.locked);
+    for (const v of picked) await say(lang, v.id, `${v.gender ?? 'x'}-${v.name.split(' ')[0]!.replace(/[^\p{L}]/gu, '')}`);
     continue;
   }
   const d = defaultVoices(voices, lang);

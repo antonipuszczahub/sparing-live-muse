@@ -74,9 +74,10 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
             {effective ? ` → ${options.find((v) => v.id === effective)?.name ?? ''}` : ''}
           </option>
           {options.map((v) => (
-            <option key={v.id} value={v.id}>
+            <option key={v.id} value={v.id} disabled={v.locked}>
               {v.name}
               {v.accent ? ` · ${v.accent}` : ''}
+              {v.locked ? ` (${t('voicePaid')})` : ''}
             </option>
           ))}
         </select>

@@ -34,11 +34,15 @@ export interface CloudVoice {
   /** The voice is verified for the language, as opposed to an English voice that is made to speak it. */
   native: boolean;
   previewUrl?: string;
+  /** The voice cannot be used with this account's plan (library voices on the free plan). */
+  locked?: boolean;
+  /** One of ElevenLabs' standard voices, available on every plan. */
+  premade?: boolean;
 }
 
 export class TtsError extends Error {
   constructor(
-    public code: 'auth' | 'quota' | 'limit' | 'unavailable',
+    public code: 'auth' | 'quota' | 'limit' | 'plan' | 'unavailable',
     message: string,
     public status = 502,
   ) {
@@ -55,11 +59,14 @@ interface RawVoice {
   verified_languages?: { language?: string; locale?: string; accent?: string }[];
 }
 
+/** Library voices (everything but the premade ones) need a paid plan to be used through the API. */
+export const FREE_TIER = 'free';
+
 /** The accents voices are labelled with, and the language each one speaks natively. */
 const ACCENT_LANG: [string, Lang][] = [['polish', 'pl'], ['american', 'en'], ['british', 'en'], ['australian', 'en'], ['irish', 'en'], ['canadian', 'en'], ['scottish', 'en']];
 
 /** Turns the API's voice list into what the picker needs. Pure, so it is tested without the network. */
-export function toCloudVoices(raw: RawVoice[], lang: Lang): CloudVoice[] {
+export function toCloudVoices(raw: RawVoice[], lang: Lang, tier?: string): CloudVoice[] {
   const rank = new Map<string, number>();
   const voices = raw
     .filter((v) => v.voice_id && v.name)
@@ -79,6 +86,8 @@ export function toCloudVoices(raw: RawVoice[], lang: Lang): CloudVoice[] {
         accent: v.labels?.accent,
         native,
         previewUrl: v.preview_url,
+        premade: v.category === 'premade',
+        locked: tier === FREE_TIER && v.category !== 'premade',
       };
     });
   return voices.sort((a, b) => rank.get(b.id)! - rank.get(a.id)! || a.name.localeCompare(b.name));
@@ -88,17 +97,24 @@ export function toCloudVoices(raw: RawVoice[], lang: Lang): CloudVoice[] {
 export function defaultVoices(voices: CloudVoice[], lang: Lang, env: NodeJS.ProcessEnv = process.env): { m: string | null; f: string | null } {
   const pick = (g: 'm' | 'f') => {
     const override = env[`ELEVENLABS_VOICE_${lang.toUpperCase()}_${g.toUpperCase()}`]?.trim();
-    return override || voices.find((v) => v.gender === g)?.id || null;
+    return override || voices.find((v) => v.gender === g && !v.locked)?.id || null;
   };
   return { m: pick('m'), f: pick('f') };
 }
 
-const cache = new Map<string, { at: number; voices: RawVoice[] }>();
+const cache = new Map<string, { at: number; voices: RawVoice[]; tier?: string }>();
+
+/** The plan of the account ("free", "starter", ...), or undefined when it cannot be read. */
+async function planOf(cfg: TtsConfig, fetchFn: typeof fetch): Promise<string | undefined> {
+  const res = await fetchFn(`${cfg.baseUrl}/v1/user/subscription`, { headers: { 'xi-api-key': cfg.key } }).catch(() => null);
+  if (!res?.ok) return undefined;
+  return ((await res.json().catch(() => ({}))) as { tier?: string }).tier;
+}
 
 /** The voices of the account, kept for ten minutes. Tries the current endpoint, then the older one. */
 export async function listVoices(cfg: TtsConfig, lang: Lang, fetchFn: typeof fetch = fetch): Promise<CloudVoice[]> {
   const hit = cache.get(cfg.baseUrl);
-  if (hit && Date.now() - hit.at < 600_000) return toCloudVoices(hit.voices, lang);
+  if (hit && Date.now() - hit.at < 600_000) return toCloudVoices(hit.voices, lang, hit.tier);
   let raw: RawVoice[] | null = null;
   for (const path of ['/v2/voices?page_size=100', '/v1/voices']) {
     const res = await fetchFn(`${cfg.baseUrl}${path}`, { headers: { 'xi-api-key': cfg.key } }).catch(() => null);
@@ -109,8 +125,9 @@ export async function listVoices(cfg: TtsConfig, lang: Lang, fetchFn: typeof fet
     break;
   }
   if (!raw) throw new TtsError('unavailable', 'Could not list the ElevenLabs voices');
-  cache.set(cfg.baseUrl, { at: Date.now(), voices: raw });
-  return toCloudVoices(raw, lang);
+  const tier = await planOf(cfg, fetchFn);
+  cache.set(cfg.baseUrl, { at: Date.now(), voices: raw, tier });
+  return toCloudVoices(raw, lang, tier);
 }
 
 export interface SpeakInput {
@@ -162,6 +179,7 @@ export async function speak(cfg: TtsConfig, input: SpeakInput, fetchFn: typeof f
   if (res.ok) return res;
   const detail = (await res.text().catch(() => '')).slice(0, 200);
   if (res.status === 401) throw new TtsError('auth', 'ElevenLabs rejected the API key');
+  if (/paid_plan_required|library voices/i.test(detail)) throw new TtsError('plan', 'This voice needs a paid ElevenLabs plan', 402);
   if (res.status === 402 || res.status === 429 || /quota/i.test(detail)) throw new TtsError('quota', 'The ElevenLabs quota is used up', 429);
   throw new TtsError('unavailable', `ElevenLabs ${res.status}: ${detail}`);
 }
