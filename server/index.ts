@@ -4,6 +4,7 @@ import { attachAsr } from './asr.ts';
 import { audit } from './agents/auditor.ts';
 import { look } from './agents/eye.ts';
 import { characterTurn } from './agents/persona.ts';
+import { drawPortraits, type Portraits } from './agents/portrait.ts';
 import { buildTwin } from './agents/twin.ts';
 import { BudgetError } from './meta/client.ts';
 import { ledger } from './meta/ledger.ts';
@@ -58,7 +59,14 @@ app.post('/api/session', (req, res) => {
   const variant = newSeed();
   const v = rollVariant(scenario as never, variant);
   const config: SessionConfig = { scenario: scenario as never, level: level as never, topic, persona: v.persona, variant, focus };
-  res.json({ session: `s_${variant.toString(36)}_${Date.now().toString(36)}`, config });
+  const session = `s_${variant.toString(36)}_${Date.now().toString(36)}`;
+  // Start drawing the face now: by the time the call connects (after twin research, if any) it is ready.
+  if (ledger.canSpend(session).ok && process.env.MODEL_API_KEY) {
+    const job = drawPortraits({ persona: v.persona, scenario: scenario as never, mood: '', session });
+    portraitCache.set(session, job);
+    job.catch(() => portraitCache.delete(session));
+  }
+  res.json({ session, config });
 });
 
 /**
@@ -154,6 +162,32 @@ app.post('/api/eye', async (req, res) => {
   } catch (e) {
     if (e instanceof BudgetError) res.status(429).json({ error: e.message, budget: e.reason });
     else res.status(502).json({ error: e instanceof Error ? e.message : 'Eye agent failed' });
+  }
+});
+
+const portraitCache = new Map<string, Promise<Portraits>>();
+
+/** Muse Image draws the counterpart in three moods. Cached per session; the client loads it in the background. */
+app.post('/api/portraits', async (req, res) => {
+  const parsed = z
+    .object({ session: z.string().min(4).max(64), scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), persona: PersonaSchema })
+    .safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const { session, scenario, persona } = parsed.data;
+  let job = portraitCache.get(session);
+  if (!job) {
+    job = drawPortraits({ persona, scenario: scenario as never, mood: '', session });
+    portraitCache.set(session, job);
+    job.catch(() => portraitCache.delete(session));
+  }
+  try {
+    res.json(await job);
+  } catch (e) {
+    if (e instanceof BudgetError) res.status(429).json({ error: e.message, budget: e.reason });
+    else res.status(502).json({ error: e instanceof Error ? e.message : 'Portrait failed' });
   }
 });
 

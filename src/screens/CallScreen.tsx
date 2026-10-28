@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { SCENARIOS } from '../../shared/scenarios.ts';
 import { CallEngine, type CallSnapshot } from '../engine/CallEngine.ts';
+import { Portrait } from '../components/Portrait.tsx';
 import { ScreenShare } from '../lib/screen.ts';
 
 const MOOD_LABEL = ['', 'Hostile', 'Cold', 'Neutral', 'Warming up', 'Won over'];
@@ -93,28 +94,30 @@ export function CallScreen({
   }[snap.state];
 
   return (
-    <main className="mx-auto flex h-full max-w-3xl flex-col px-6 py-6">
-      <header className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
-        <div>
-          <div className="text-lg font-medium">{p.name}</div>
+    <main className="mx-auto grid h-full max-w-5xl gap-4 px-6 py-6 md:grid-cols-[260px_1fr]">
+      <aside className="flex items-center gap-4 md:flex-col md:items-stretch md:gap-3">
+        <Portrait session={session} scenario={config.scenario} persona={p} mood={snap.mood} className="h-20 w-20 shrink-0 md:h-auto md:w-full md:aspect-square" />
+        <div className="min-w-0 flex-1 md:flex-none">
+          <div className="text-lg font-medium leading-tight">{p.name}</div>
           <div className="text-sm text-[var(--muted)]">
             {p.role} · {sc.title}
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-sm" style={{ color: MOOD_COLOR[snap.mood] }}>
-            {MOOD_LABEL[snap.mood]}
+          <div className="mt-2 flex items-center gap-3">
+            <div className="text-sm" style={{ color: MOOD_COLOR[snap.mood] }}>
+              {MOOD_LABEL[snap.mood]}
+            </div>
+            <div className="text-xs tabular-nums text-[var(--muted)]">{fmt(snap.elapsedMs)}</div>
           </div>
-          <div className="mt-1 flex justify-end gap-1">
+          <div className="mt-1 flex gap-1">
             {[1, 2, 3, 4, 5].map((i) => (
-              <span key={i} className="h-1.5 w-6 rounded-full" style={{ background: i <= snap.mood ? MOOD_COLOR[snap.mood] : '#232838' }} />
+              <span key={i} className="h-1.5 flex-1 rounded-full" style={{ background: i <= snap.mood ? MOOD_COLOR[snap.mood] : '#232838', transition: 'background .6s' }} />
             ))}
           </div>
-          <div className="mt-1 text-xs tabular-nums text-[var(--muted)]">{fmt(snap.elapsedMs)}</div>
         </div>
-      </header>
+      </aside>
 
-      <div ref={scroller} className="my-4 flex-1 space-y-3 overflow-y-auto pr-1">
+      <section className="flex min-h-0 flex-col">
+      <div ref={scroller} className="mb-4 flex-1 space-y-3 overflow-y-auto pr-1">
         {snap.turns.map((t, i) => (
           <Bubble key={i} turn={t} name={p.name.split(' ')[0]!} />
         ))}
@@ -171,6 +174,7 @@ export function CallScreen({
           />
         </form>
       </footer>
+      </section>
     </main>
   );
 }
