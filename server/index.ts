@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { attachAsr } from './asr.ts';
 import { audit } from './agents/auditor.ts';
 import { look } from './agents/eye.ts';
+import { findFaces } from './agents/sam.ts';
 import { characterTurn } from './agents/persona.ts';
 import { drawPortraits, type Portraits } from './agents/portrait.ts';
 import { buildTwin } from './agents/twin.ts';
@@ -192,12 +193,30 @@ app.post('/api/portraits', async (req, res) => {
   }
 });
 
+/** Camera framing: SAM 3.1 finds the face in one JPEG frame. Only boxes leave the server. */
+app.post('/api/camera', async (req, res) => {
+  const parsed = z
+    .object({ session: z.string().min(4).max(64), image: z.string().startsWith('data:image/').max(2_000_000) })
+    .safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  try {
+    res.json({ faces: await findFaces(parsed.data.image, parsed.data.session) });
+  } catch (e) {
+    if (e instanceof BudgetError) res.status(429).json({ error: e.message, budget: e.reason });
+    else res.status(502).json({ error: e instanceof Error ? e.message : 'Camera analysis failed' });
+  }
+});
+
 const AuditSchema = z.object({
   session: z.string().min(4).max(64),
   config: ConfigSchema,
   turns: TurnSchema.shape.history,
   durationMs: z.number().nonnegative(),
   hungUp: z.boolean(),
+  camera: z.array(z.object({ at: z.number().nonnegative(), text: z.string().max(80) })).max(40).optional(),
 });
 
 /** Post-call audit by Muse Wonder. Takes tens of seconds, so the client shows progress. */

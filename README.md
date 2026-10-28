@@ -28,8 +28,8 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | `muse-wonder-1.0` | **Twin research** with live web search (Responses API); **post-call audit** (JSON schema) | twin about 30 s; audit about 13 s |
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode | final text 0.36 s after speech ends |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | three images in about 30 s, 3 cents |
-| Muse Spark Open / Glimmer | Open-weight provider switch | planned |
-| `sam-3.1` | Moments from the camera | planned |
+| Muse Spark Open (Baseten) | The character can run on open weights: one switch, same protocol | switch built; needs a Baseten key |
+| `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
 Notes from measuring the API (they shaped the design): reasoning tokens count against `max_tokens`; `json_schema` output does not stream and returns keys alphabetically (so live turns use a tagged plain-text format and the character decides to hang up *after* it has spoken); web search exists only on the Responses API; the `-contributor` variant of Spark is 2-4x slower than the standard model.
 
@@ -96,6 +96,7 @@ Wear headphones, so the character does not hear itself.
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
 | `npm run try:audit` | Audits a scripted call |
 | `npm run try:portrait` | Draws the three portraits |
+| `npm run check:open` | Probes the open-weights provider (needs `BASETEN_API_KEY`) |
 | `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics |
 | `npm run eval` | Behaviour evaluation against the live model, writes `docs/EVAL.md` |
 
@@ -121,4 +122,4 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. In progress: camera moments with SAM 3.1, open-weight provider (Muse Spark Open on Baseten), shareable clip, public deployment.
+Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, open-weights switch (needs a Baseten key). In progress: shareable clip, public deployment.

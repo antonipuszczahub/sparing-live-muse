@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import type { FaceBox, FramingEvent } from '../../shared/framing.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { SCENARIOS } from '../../shared/scenarios.ts';
 import { CallEngine, type CallSnapshot } from '../engine/CallEngine.ts';
 import { Portrait } from '../components/Portrait.tsx';
+import { CameraWatch } from '../lib/camera.ts';
 import { ScreenShare } from '../lib/screen.ts';
 
 const MOOD_LABEL = ['', 'Hostile', 'Cold', 'Neutral', 'Warming up', 'Won over'];
@@ -17,7 +19,7 @@ export function CallScreen({
 }: {
   session: string;
   config: SessionConfig;
-  onEnd: (turns: Turn[], durationMs: number, hungUp: boolean) => void;
+  onEnd: (turns: Turn[], durationMs: number, hungUp: boolean, camera: FramingEvent[]) => void;
 }) {
   const [snap, setSnap] = useState<CallSnapshot | null>(null);
   const [typed, setTyped] = useState('');
@@ -27,6 +29,12 @@ export function CallScreen({
   const share = useRef<ScreenShare | null>(null);
   const [sharing, setSharing] = useState(false);
   const [seen, setSeen] = useState('');
+  const cam = useRef<CameraWatch | null>(null);
+  const cameraEvents = useRef<FramingEvent[]>([]);
+  const callStart = useRef(Date.now());
+  const [camOn, setCamOn] = useState(false);
+  const [face, setFace] = useState<FaceBox | null>(null);
+  const selfView = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const e = new CallEngine(config, session, setSnap);
@@ -35,6 +43,7 @@ export function CallScreen({
     return () => {
       e.dispose();
       share.current?.stop();
+      cam.current?.stop();
     };
   }, [config, session]);
 
@@ -70,6 +79,27 @@ export function CallScreen({
   }
 
 
+  async function toggleCamera() {
+    if (cam.current?.stream) {
+      cam.current.stop();
+      setCamOn(false);
+      setFace(null);
+      return;
+    }
+    const c = new CameraWatch(session, () => Date.now() - callStart.current);
+    c.onFace = setFace;
+    c.onEvents = (ev) => {
+      cameraEvents.current = [...cameraEvents.current, ...ev];
+    };
+    cam.current = c;
+    const ok = await c.start();
+    setCamOn(ok);
+  }
+
+  useEffect(() => {
+    if (selfView.current && camOn) selfView.current.srcObject = cam.current?.stream ?? null;
+  }, [camOn]);
+
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' });
   }, [snap?.turns.length, snap?.liveBot, snap?.liveUser]);
@@ -77,7 +107,7 @@ export function CallScreen({
   useEffect(() => {
     if (snap?.state === 'ended' && !ended.current) {
       ended.current = true;
-      const t = window.setTimeout(() => onEnd(snap.turns, snap.elapsedMs, snap.endReason === 'hangup'), snap.endReason === 'hangup' ? 2500 : 600);
+      const t = window.setTimeout(() => onEnd(snap.turns, snap.elapsedMs, snap.endReason === 'hangup', cameraEvents.current), snap.endReason === 'hangup' ? 2500 : 600);
       return () => window.clearTimeout(t);
     }
   }, [snap, onEnd]);
@@ -114,6 +144,24 @@ export function CallScreen({
             ))}
           </div>
         </div>
+        {camOn && (
+          <div className="relative hidden aspect-[4/3] overflow-hidden rounded-xl border border-[var(--line)] bg-black md:block">
+            <video ref={selfView} autoPlay muted playsInline className="h-full w-full -scale-x-100 object-cover" />
+            {face && (
+              <div
+                className="absolute rounded border-2 border-[var(--accent)]"
+                style={{
+                  left: `${(1 - face.x2 / face.w) * 100}%`,
+                  top: `${(face.y1 / face.h) * 100}%`,
+                  width: `${((face.x2 - face.x1) / face.w) * 100}%`,
+                  height: `${((face.y2 - face.y1) / face.h) * 100}%`,
+                  transition: 'all .4s',
+                }}
+              />
+            )}
+            <span className="absolute bottom-1 left-2 text-[10px] text-white/70">SAM 3.1 framing</span>
+          </div>
+        )}
       </aside>
 
       <section className="flex min-h-0 flex-col">
@@ -141,11 +189,20 @@ export function CallScreen({
             {statusText}
             {snap.lastLatencyMs != null && <span className="ml-2 text-xs">first word {(snap.lastLatencyMs / 1000).toFixed(1)} s</span>}
           </div>
+          {CameraWatch.supported() && (
+            <button
+              onClick={toggleCamera}
+              disabled={snap.state === 'ended'}
+              className={`ml-auto mr-2 rounded-lg border px-3 py-2 text-sm transition ${camOn ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`}
+            >
+              {camOn ? 'Camera off' : 'Camera'}
+            </button>
+          )}
           {ScreenShare.supported() && (
             <button
               onClick={toggleShare}
               disabled={snap.state === 'ended'}
-              className={`ml-auto mr-2 rounded-lg border px-3 py-2 text-sm transition ${sharing ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`}
+              className={`mr-2 rounded-lg border px-3 py-2 text-sm transition ${sharing ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`}
             >
               {sharing ? 'Stop sharing' : 'Share screen'}
             </button>

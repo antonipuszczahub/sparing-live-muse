@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { measureDelivery, type AuditResult, type Moment } from '../../shared/audit.ts';
+import type { FramingEvent } from '../../shared/framing.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { ApiError, requestAudit } from '../lib/api.ts';
 import { recordWeakSpots } from '../lib/memory.ts';
@@ -31,6 +32,7 @@ export function ReportScreen({
   turns,
   durationMs,
   hungUp,
+  camera,
   onAgain,
 }: {
   session: string;
@@ -38,6 +40,7 @@ export function ReportScreen({
   turns: Turn[];
   durationMs: number;
   hungUp: boolean;
+  camera: FramingEvent[];
   onAgain: () => void;
 }) {
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -49,7 +52,7 @@ export function ReportScreen({
 
   useEffect(() => {
     let live = true;
-    requestAudit({ session, config, turns, durationMs, hungUp })
+    requestAudit({ session, config, turns, durationMs, hungUp, camera })
       .then((r) => {
         if (!live) return;
         recordWeakSpots(r.weaknessTags);
@@ -59,7 +62,7 @@ export function ReportScreen({
     return () => {
       live = false;
     };
-  }, [session, config, turns, durationMs, hungUp]);
+  }, [session, config, turns, durationMs, hungUp, camera]);
 
   useEffect(() => {
     if (result || error) return;
@@ -140,6 +143,19 @@ export function ReportScreen({
               <MoodLine turns={turns} onPick={jump} />
             </div>
           </section>
+
+          {camera.length > 0 && (
+            <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
+              <div className="mb-2 text-sm text-[var(--muted)]">Camera moments <span className="text-xs">(framing only, from SAM 3.1)</span></div>
+              <ul className="space-y-1 text-sm">
+                {camera.map((e, i) => (
+                  <li key={i}>
+                    <span className="tabular-nums text-[var(--muted)]">{fmt(e.at)}</span> {e.text}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {result.nextFocus.length > 0 && (
             <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">

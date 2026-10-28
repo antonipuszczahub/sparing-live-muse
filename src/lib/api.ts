@@ -1,4 +1,5 @@
 import type { AuditResult } from '../../shared/audit.ts';
+import type { FramingEvent } from '../../shared/framing.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 
 export class ApiError extends Error {
@@ -16,6 +17,7 @@ export async function requestAudit(body: {
   turns: Turn[];
   durationMs: number;
   hungUp: boolean;
+  camera?: FramingEvent[];
 }): Promise<AuditResult> {
   for (let attempt = 0; ; attempt++) {
     try {

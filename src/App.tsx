@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { FramingEvent } from '../shared/framing.ts';
 import type { SessionConfig, Turn } from '../shared/types.ts';
 import { CallScreen } from './screens/CallScreen.tsx';
 import { ReportScreen } from './screens/ReportScreen.tsx';
@@ -9,7 +10,7 @@ type View =
   | { name: 'setup' }
   | { name: 'twin'; session: string; config: SessionConfig; company: string }
   | { name: 'call'; session: string; config: SessionConfig }
-  | { name: 'done'; session: string; config: SessionConfig; turns: Turn[]; durationMs: number; hungUp: boolean };
+  | { name: 'done'; session: string; config: SessionConfig; turns: Turn[]; durationMs: number; hungUp: boolean; camera: FramingEvent[] };
 
 export function App() {
   const [view, setView] = useState<View>({ name: 'setup' });
@@ -39,7 +40,7 @@ export function App() {
         key={view.session}
         session={view.session}
         config={view.config}
-        onEnd={(turns, durationMs, hungUp) => setView({ name: 'done', session: view.session, config: view.config, turns, durationMs, hungUp })}
+        onEnd={(turns, durationMs, hungUp, camera) => setView({ name: 'done', session: view.session, config: view.config, turns, durationMs, hungUp, camera })}
       />
     );
   }
@@ -51,6 +52,7 @@ export function App() {
       turns={view.turns}
       durationMs={view.durationMs}
       hungUp={view.hungUp}
+      camera={view.camera}
       onAgain={() => setView({ name: 'setup' })}
     />
   );

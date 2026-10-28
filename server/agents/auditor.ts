@@ -11,6 +11,8 @@ export interface AuditInput {
   durationMs: number;
   hungUp: boolean;
   session: string;
+  /** Framing facts from the optional camera (SAM 3.1). */
+  camera?: { at: number; text: string }[];
 }
 
 /**
@@ -47,7 +49,13 @@ Character: ${config.persona.name}, ${config.persona.role}. Today's situation: ${
 Difficulty level: ${config.level} of 4.${input.hungUp ? '\nThe character hung up on the user.' : ''}
 
 Measured delivery: ${JSON.stringify(delivery)}
-
+${
+  input.camera?.length
+    ? `\nCamera framing facts (from SAM 3.1 face detection, with times in the call):\n${input.camera
+        .map((e) => `- ${Math.floor(e.at / 60000)}:${String(Math.floor(e.at / 1000) % 60).padStart(2, '0')} ${e.text}`)
+        .join('\n')}\nMention one only where it lines up with a transcript moment. These are framing facts, never evidence of emotion or personality: do not guess what the user felt.\n`
+    : ''
+}
 Transcript:
 ${transcript}`;
 
