@@ -31,7 +31,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode, language bias per call (English or Polish) | final text 0.36 s after speech ends; a Polish test sentence came back word for word |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | three images in about 30 s, 3 cents |
 | Muse Spark Open | The character can run on **open weights**: one tick on the start screen, same protocol, served by Baseten (or Fireworks, Modal, local Ollama); `docs/MANIFEST.md` records which calls ran where, and a failing host falls back to Spark | median first word 1.2 s, 0 failures in 24 scripted calls ([`docs/EVAL.open.md`](docs/EVAL.open.md)); 512 open-weights calls in the manifest |
-| ElevenLabs `eleven_v4_turbo` | Optional **voice** of the character (not a Meta model): studio-quality speech in English and Polish, streamed sentence by sentence; the browser's voice is the fallback | about 100 ms model latency; see [Voice and cost](#voice-and-cost) |
+| Browser speech synthesis (not a model) | The character's **voice**: the OS/browser feature, chosen per character gender; see [Voice](#voice-what-is-a-meta-model-and-what-is-not) | no model call |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
 Muse Spark Open always reasons, and Baseten's default depth (`xhigh`) is too slow to speak: measured over the same 24 calls, `xhigh` gave a median 3.4 s to the first word (p95 7.1 s), about 930 output tokens per turn and 3 empty replies when the reasoning used the whole budget, while `reasoning_effort: low` gives 1.2 s (p95 2.2 s), about 170 tokens and no failures. The Baseten preset therefore sends `low`. The host allows 100 requests a minute, which one call uses a small part of; if the host fails or limits a turn before the character has spoken, that turn is asked again from Meta's hosted Spark with the same prompt and the call says so.
@@ -107,7 +107,7 @@ Wear headphones, so the character does not hear itself.
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
 | `npm run try:audit` | Audits a scripted call (`-- --lang pl` for Polish) |
 | `npm run try:portrait` | Draws the three portraits |
-| `npm run check:voice` | Lists the ElevenLabs voices and saves a sample line per default voice to `data/voice-samples/` |
+| `npm run check:voice` | Experimental, needs an ElevenLabs key: lists its voices and saves a sample line per voice to `data/voice-samples/` (not part of the submission) |
 | `npm run check:open` | Probes the open-weights host (see `.env.example` for Baseten, Fireworks, Modal, Ollama) |
 | `npm run manifest` | Rebuilds [`docs/MANIFEST.md`](docs/MANIFEST.md) from the budget ledger: models, tokens, cost, latency, open-weights share |
 | `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics, both languages |
@@ -131,23 +131,19 @@ Polish is written for Polish rather than translated line by line: złoty instead
 
 Difficulty still changes behaviour in Polish, but with three seeds per cell the middle levels are noisy: *Realistyczny* hung up on the weak caller 2 times in 3 in one run and 0 in the next, *Twardy* and *Brutalny* 3 in 3 both times. The English evaluation has the same sample size.
 
-## Voice and cost
+## Voice: what is a Meta model and what is not
 
-Meta has no speech-synthesis model (the Model API lists chat, Wonder, Image, SAM and Voice Transcribe only), so the character's *voice* comes from one of two places:
+The hackathon allows only Meta models at runtime, and Meta has no speech-synthesis model (the Model API lists chat, Wonder, Image, SAM and Voice Transcribe only). So the character's *voice* is **not a model call**: it is the speech synthesis built into the browser and the operating system (`speechSynthesis`; Edge's Natural voices are the best of them). The start screen lists the voices that fit the character's gender, lets you hear them, and warns when only basic ones exist.
 
-- **The browser's own voices** (no key, no cost). Outside Edge on Windows these are basic system voices and sound robotic; Edge has much better Natural voices. The start screen lists the voices that fit the character's gender, lets you hear them, and warns when only basic ones exist.
-- **ElevenLabs** (optional, set `ELEVENLABS_API_KEY`). The server streams each sentence of the character's reply to ElevenLabs the moment it is written and the browser plays the 24 kHz PCM back to back on the audio clock, so there are no gaps. The next sentence is requested with the previous one as context, so the intonation continues. If the user cuts in, the line is recorded up to the word that had actually played. If ElevenLabs fails mid-call (quota, key, network), the browser voice takes over and the call says so.
+| Part | Where it runs | Meta model? |
+|---|---|---|
+| The character, the twin, the eye, the audit | Muse Spark, Muse Spark Open, Muse Wonder | yes |
+| Ears (speech to text) | Muse Voice Transcribe | yes |
+| Portraits | Muse Image | yes |
+| Camera framing | SAM 3.1 | yes |
+| **Speaking the character's lines** | **the browser's own voice (OS feature)** | **no, and not an AI model call** |
 
-What it costs, from the [ElevenLabs API price list](https://elevenlabs.io/pricing/api) checked 2026-10-28: `eleven_v4_turbo` (the model for real time) and Flash are **$0.04 per 1,000 characters**; `eleven_v4` is $0.08. A reply is about 130 to 180 characters and a five-minute call has 10 to 14 replies, so a call is **about 2,000 characters, about 8 cents**. Plans include characters: Starter $6 a month (first month $1) has 150,000 on Turbo, Creator $22 has 550,000, Pro $99 has 2.5 million.
-
-| Use | Calls | Characters | Cost at $0.04 per 1K |
-|---|---|---|---|
-| Development and testing | 50 | 100,000 | $4 |
-| Recording the demo, many takes | 20 | 40,000 | $1.60 |
-| Judges and visitors for two weeks | 300 | 600,000 | $24 |
-| If an X post takes off | 1,500 | 3,000,000 | $120 |
-
-Three guards keep it bounded: 8,000 characters per session, 20,000 per visitor per hour and 150,000 per day (all in `.env`), counted in the same ledger as the Meta calls. Past a cap the call continues with the browser voice, it does not stop. `docs/MANIFEST.md` lists the characters actually spoken and the estimated cost. Only the character's lines go to ElevenLabs, never the user's audio.
+An optional ElevenLabs path exists in the code from earlier experiments. ElevenLabs is not a Meta model, so it is **off in this submission**: even with `ELEVENLABS_API_KEY` set, the server ignores it unless `THIRD_PARTY_VOICE=on` is also set, and that switch is not set on the demo or on the hosted link. Nothing the character says is sent to any non-Meta service.
 
 ## Evaluation
 
@@ -155,7 +151,7 @@ Three guards keep it bounded: 8,000 characters per session, 20,000 per visitor p
 
 ## Privacy
 
-Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. If an ElevenLabs key is set, the character's own lines (never the user's audio) are sent to ElevenLabs to be spoken. The hackathon credits only cover the standard Contributor variants of Meta's models: content sent to them (your voice for transcription, the text of the call, and, if you turn them on, screenshots of the screen you share and frames from the camera) may be used to train future Meta models, the opt-out variants are not covered by these credits, and zero data retention cannot be enabled for them. The app says so before the first call, and screen sharing and the camera are both off until you start them. With the open-weights tick on, the text of the live turns goes to the open-weights host (Baseten in the default setup) instead of Meta's hosted Spark; that host's own terms apply and are not checked here. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
+Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. The character's lines are spoken by the browser's own voice and are not sent anywhere for that. The hackathon credits only cover the standard Contributor variants of Meta's models: content sent to them (your voice for transcription, the text of the call, and, if you turn them on, screenshots of the screen you share and frames from the camera) may be used to train future Meta models, the opt-out variants are not covered by these credits, and zero data retention cannot be enabled for them. The app says so before the first call, and screen sharing and the camera are both off until you start them. With the open-weights tick on, the text of the live turns goes to the open-weights host (Baseten in the default setup) instead of Meta's hosted Spark; that host's own terms apply and are not checked here. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
 
 ## Layout
 
@@ -172,4 +168,4 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The ElevenLabs voice is built and tested against a stand-in service (streaming playback without gaps, cut-in estimation, fallback to the browser voice, limits, optional fields a model refuses); it has not been heard with a real key yet. Not yet deployed.
+Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); an optional ElevenLabs path is built but switched off in this submission because the hackathon allows only Meta models at runtime. Not yet deployed.

@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import express from 'express';
 import { Allowance } from '../server/limits.ts';
 import { defaultVoices, toCloudVoices, ttsConfig, ttsCostUsd } from '../server/tts/elevenlabs.ts';
-import { registerTts, voiceHealth } from '../server/tts/route.ts';
+import { registerTts, thirdPartyVoiceEnv, voiceHealth } from '../server/tts/route.ts';
 
 const RAW = [
   { voice_id: 'enm00000001', name: 'Brian', labels: { gender: 'male', accent: 'american' } },
@@ -47,6 +47,14 @@ test('the per-visitor allowance counts characters inside a window', () => {
 test('health says whether the voice is on and how much of today is left', () => {
   assert.equal(voiceHealth({ charsToday: () => 0 }, {}), null);
   assert.deepEqual(voiceHealth({ charsToday: () => 50000 }, { ELEVENLABS_API_KEY: 'k', TTS_DAILY_CHARS: '60000' }), { provider: 'elevenlabs', model: 'eleven_v4_turbo', charsLeftToday: 10000 });
+});
+
+test('the third-party voice is off for a submission unless THIRD_PARTY_VOICE=on is set', () => {
+  const withKey = { ELEVENLABS_API_KEY: 'k' };
+  assert.equal(ttsConfig(thirdPartyVoiceEnv(withKey)), null, 'a key alone does not switch the voice on');
+  assert.equal(voiceHealth({ charsToday: () => 0 }, thirdPartyVoiceEnv(withKey)), null);
+  assert.equal(ttsConfig(thirdPartyVoiceEnv({ ...withKey, THIRD_PARTY_VOICE: 'yes' })), null, 'only the exact value counts');
+  assert.ok(ttsConfig(thirdPartyVoiceEnv({ ...withKey, THIRD_PARTY_VOICE: 'on' })), 'explicitly on for local experiments');
 });
 
 function pcm(bytes = 4800) {

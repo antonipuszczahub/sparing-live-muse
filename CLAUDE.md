@@ -36,10 +36,11 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   addressed to a character carries `{m|f}` gender markers resolved with `gendered()` (`shared/lang.ts`). The start
   screen asks the user's gender and Pan/Pani vs ty because Polish verbs carry gender. UI text is in `src/i18n/`:
   `en.ts` defines the keys and `pl.ts` is typed with them, so a missing string does not compile.
-- **Voice of the character.** Meta has no speech synthesis. Either the browser's voices (`src/lib/tts.ts`, picker in
-  `VoicePicker.tsx`, lists filtered by gender) or ElevenLabs (`server/tts/`, `src/lib/cloudSpeaker.ts`): sentences are
-  requested as they stream in, played back to back on the audio clock, with the browser voice as fallback. Caps in
-  characters per session, visitor and day.
+- **Voice of the character.** Meta has no speech synthesis, and the hackathon allows only Meta models at runtime, so the
+  submitted voice is the browser's own (`src/lib/tts.ts`, picker in `VoicePicker.tsx`, lists filtered by gender; Edge
+  Natural voices rank first). The ElevenLabs path (`server/tts/`, `src/lib/cloudSpeaker.ts`) stays in the code but is OFF
+  unless `THIRD_PARTY_VOICE=on` (`thirdPartyVoiceEnv` in `server/tts/route.ts`); never set it on the hosted link or while
+  recording the demo. README says which parts are OS/browser features and which are Meta model calls.
 - **Open weights.** `server/meta/open.ts` picks the host (Baseten, Fireworks, Modal, Ollama). Muse Spark Open always
   reasons; the Baseten preset sends `reasoning_effort: low` (xhigh is 3x slower and sometimes returns nothing). A failing
   host falls back to Spark before the character has spoken, and the call says so.
