@@ -15,6 +15,8 @@ interface Health {
   ok: boolean;
   keyConfigured: boolean;
   openWeights?: boolean;
+  openHost?: string;
+  openModel?: string;
   budget: { spentToday: number; dailyLimit: number };
 }
 
@@ -157,6 +159,20 @@ export function SetupScreen({
           <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-[var(--muted)]">
             <input type="checkbox" checked={useMemory} onChange={(e) => setUseMemory(e.target.checked)} />
             Let the next character aim at these
+          </label>
+        </section>
+      )}
+
+      {health?.openWeights && (
+        <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
+          <label className="flex cursor-pointer items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-1" checked={openWeights} onChange={(e) => setOpenWeights(e.target.checked)} />
+            <span>
+              <span className="font-medium">Run the character on open weights</span>
+              <span className="block text-[var(--muted)]">
+                Open weights model {health.openModel}, served by {health.openHost}. Same call, same protocol. The post-call review, research and faces still use Meta's hosted models.
+              </span>
+            </span>
           </label>
         </section>
       )}

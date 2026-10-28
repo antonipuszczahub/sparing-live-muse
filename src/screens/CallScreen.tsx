@@ -132,6 +132,9 @@ export function CallScreen({
           <div className="text-sm text-[var(--muted)]">
             {p.role} · {sc.title}
           </div>
+          {config.provider === 'open' && (
+            <div className="mt-1 inline-block rounded-full border border-[var(--accent)] px-2 py-0.5 text-[11px] text-[var(--accent)]">Open weights</div>
+          )}
           <div className="mt-2 flex items-center gap-3">
             <div className="text-sm" style={{ color: MOOD_COLOR[snap.mood] }}>
               {MOOD_LABEL[snap.mood]}

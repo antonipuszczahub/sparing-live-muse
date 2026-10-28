@@ -1,9 +1,13 @@
+import { openHost } from './open.ts';
+
 // Model IDs and prices from https://dev.meta.ai/docs/models and /docs/pricing-rate-limits (checked 2026-10-27).
 export const MODELS = {
   /** Live counterpart, screen understanding. */
   spark: process.env.SPARK_MODEL || 'muse-spark-1.3',
-  /** Open weights served by Baseten (hackathon-specific id, not the one in Baseten's own docs). */
-  open: process.env.OPEN_MODEL || 'meta-models/muse-spark-open-1026',
+  /** Open weights on whichever host is configured (see open.ts). Billed by that host, not from the Meta budget. */
+  get open(): string {
+    return openHost()?.model ?? 'meta-models/muse-spark-open-1026';
+  },
   /** Cheap twin for development only: Meta may train on prompts. Never used for juror sessions. */
   sparkDev: 'muse-spark-1.3-contributor',
   /** Research (digital twin) and post-call audit. */

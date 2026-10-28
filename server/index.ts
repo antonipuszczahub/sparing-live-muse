@@ -9,8 +9,8 @@ import { look } from './agents/eye.ts';
 import { findFaces } from './agents/sam.ts';
 import { characterTurn } from './agents/persona.ts';
 import { drawPortraits, type Portraits } from './agents/portrait.ts';
-import { buildTwin } from './agents/twin.ts';
-import { BudgetError, openWeightsConfigured } from './meta/client.ts';
+import { researchTwin, twinCache, twinKey } from './agents/twinCache.ts';
+import { BudgetError, openWeightsConfigured, openWeightsInfo } from './meta/client.ts';
 import { rateLimit } from './limits.ts';
 import { ledger } from './meta/ledger.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
@@ -55,7 +55,15 @@ const TurnSchema = z.object({
 });
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, keyConfigured: Boolean(process.env.MODEL_API_KEY), openWeights: openWeightsConfigured(), budget: ledger.summary() });
+  const open = openWeightsInfo();
+  res.json({
+    ok: true,
+    keyConfigured: Boolean(process.env.MODEL_API_KEY),
+    openWeights: Boolean(open),
+    openHost: open?.label,
+    openModel: open?.model,
+    budget: ledger.summary(),
+  });
 });
 
 /** Start a new call: roll today's variation and the character. */
@@ -121,7 +129,8 @@ app.post('/api/turn', async (req, res) => {
  *   event: twin  data: TwinProfile
  *   event: error data: {message, budget?}
  */
-app.post('/api/twin', rateLimit('twin', Number(process.env.TWINS_PER_IP_HOUR) || 5), async (req, res) => {
+const twinLimit = rateLimit('twin', Number(process.env.TWINS_PER_IP_HOUR) || 5);
+app.post('/api/twin', async (req, res) => {
   const parsed = z
     .object({
       session: z.string().min(4).max(64),
@@ -134,12 +143,21 @@ app.post('/api/twin', rateLimit('twin', Number(process.env.TWINS_PER_IP_HOUR) ||
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  const wanted = { ...parsed.data, scenario: parsed.data.scenario as never };
+  // A cached twin costs nothing, so only a fresh research counts against the visitor's limit.
+  if (!twinCache.has(twinKey(wanted))) {
+    let allowed = false;
+    twinLimit(req, res, () => {
+      allowed = true;
+    });
+    if (!allowed) return;
+  }
   res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
   const send = (event: string, data: unknown) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   const ac = new AbortController();
   res.on('close', () => ac.abort());
   try {
-    const twin = await buildTwin({ ...parsed.data, scenario: parsed.data.scenario as never, signal: ac.signal }, (step) => send('step', step));
+    const { twin } = await researchTwin({ ...wanted, signal: ac.signal }, (step) => send('step', step));
     send('twin', twin);
   } catch (e) {
     if (e instanceof BudgetError) send('error', { message: e.message, budget: e.reason });

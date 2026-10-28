@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { ledger } from './ledger.ts';
 import { tokenCost } from './models.ts';
+import { openHost } from './open.ts';
 
 export type ChatMessage = ChatCompletionMessageParam;
 
@@ -11,22 +12,28 @@ export class BudgetError extends Error {
   }
 }
 
-/** meta = Meta Model API. open = Muse Spark Open weights served by Baseten (same OpenAI-compatible protocol). */
+/** meta = Meta Model API. open = Muse Spark Open weights on the host chosen in server/meta/open.ts (same OpenAI-compatible protocol). */
 export type Provider = 'meta' | 'open';
 
 const clients: Partial<Record<Provider, OpenAI>> = {};
 
 export function openWeightsConfigured(): boolean {
-  return Boolean(process.env.BASETEN_API_KEY);
+  return openHost() !== null;
+}
+
+/** Which host and model the open-weights provider points at, for the UI and the manifest. */
+export function openWeightsInfo(): { host: string; label: string; model: string } | null {
+  const h = openHost();
+  return h ? { host: h.id, label: h.label, model: h.model } : null;
 }
 
 export function meta(provider: Provider = 'meta'): OpenAI {
   let client = clients[provider];
   if (!client) {
     if (provider === 'open') {
-      const apiKey = process.env.BASETEN_API_KEY;
-      if (!apiKey) throw new Error('BASETEN_API_KEY is not set (see .env.example)');
-      client = new OpenAI({ baseURL: process.env.OPEN_BASE_URL || 'https://inference.baseten.co/v1', apiKey });
+      const host = openHost();
+      if (!host) throw new Error('Open weights are not configured (see .env.example)');
+      client = new OpenAI({ baseURL: host.baseURL, apiKey: host.apiKey });
     } else {
       const apiKey = process.env.MODEL_API_KEY;
       if (!apiKey) throw new Error('MODEL_API_KEY is not set (see .env.example)');

@@ -29,7 +29,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | `muse-wonder-1.0` | **Twin research** with live web search (Responses API); **post-call audit** (JSON schema) | twin about 30 s; audit about 13 s |
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode | final text 0.36 s after speech ends |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | three images in about 30 s, 3 cents |
-| Muse Spark Open (Baseten) | The character can run on open weights: one switch, same protocol | switch built; needs a Baseten key |
+| Muse Spark Open | The character can run on open weights: one tick on the start screen, same protocol. Host is configurable (Baseten, Fireworks, Modal or local Ollama); `docs/MANIFEST.md` records which calls ran where | switch and manifest built; no open-weights call recorded yet |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
 Notes from measuring the API (they shaped the design): reasoning tokens count against `max_tokens`; `json_schema` output does not stream and returns keys alphabetically (so live turns use a tagged plain-text format and the character decides to hang up *after* it has spoken); web search exists only on the Responses API; the `-contributor` variant of Spark is 2-4x slower than the standard model.
@@ -97,7 +97,8 @@ Wear headphones, so the character does not hear itself.
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
 | `npm run try:audit` | Audits a scripted call |
 | `npm run try:portrait` | Draws the three portraits |
-| `npm run check:open` | Probes the open-weights provider (needs `BASETEN_API_KEY`) |
+| `npm run check:open` | Probes the open-weights host (see `.env.example` for Baseten, Fireworks, Modal, Ollama) |
+| `npm run manifest` | Rebuilds [`docs/MANIFEST.md`](docs/MANIFEST.md) from the budget ledger: models, tokens, cost, latency, open-weights share |
 | `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics |
 | `npm run eval` | Behaviour evaluation against the live model, writes `docs/EVAL.md` |
 
@@ -107,7 +108,7 @@ Wear headphones, so the character does not hear itself.
 
 ## Privacy
 
-Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. While free Meta credits are in use, Meta may use content for product improvement; the app says so before the first call. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click.
+Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. While free Meta credits are in use, Meta may use content for product improvement; the app says so before the first call. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
 
 ## Layout
 
@@ -123,4 +124,4 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, open-weights switch (needs a Baseten key). Built and verified: shareable clip (MP4 rendered in the browser), deployment files (Dockerfile, static serving, per-visitor rate limits). Not yet deployed.
+Working: voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch (built for Baseten, Fireworks, Modal and Ollama, tested only in unit tests because no host key has been available yet). Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). Not yet deployed.

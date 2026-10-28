@@ -1,16 +1,16 @@
-// Probes the open-weights provider (Muse Spark Open on Baseten). Run: npm run check:open
-import { stream, openWeightsConfigured } from '../server/meta/client.ts';
-import { MODELS } from '../server/meta/models.ts';
+// Probes the open-weights provider (Muse Spark Open on Baseten, Fireworks, Modal or local Ollama). Run: npm run check:open
+import { stream, openWeightsConfigured, openWeightsInfo } from '../server/meta/client.ts';
 
-if (!openWeightsConfigured()) {
-  console.log('BASETEN_API_KEY is not set in .env, skipping.');
+const info = openWeightsInfo();
+if (!openWeightsConfigured() || !info) {
+  console.log('No open-weights host is configured in .env (BASETEN_API_KEY, FIREWORKS_API_KEY + OPEN_MODEL, OPEN_HOST=ollama + OPEN_MODEL, or OPEN_BASE_URL + OPEN_API_KEY + OPEN_MODEL). Skipping.');
   process.exit(0);
 }
 const t0 = Date.now();
 let first = 0;
 const text = await stream(
   {
-    model: MODELS.open,
+    model: info.model,
     provider: 'open',
     kind: 'probe-open',
     maxTokens: 400,
@@ -18,4 +18,4 @@ const text = await stream(
   },
   () => (first ||= Date.now() - t0),
 );
-console.log(`model ${MODELS.open}\nfirst token ${first} ms, total ${Date.now() - t0} ms\n${text}`);
+console.log(`host ${info.label}\nmodel ${info.model}\nfirst token ${first} ms, total ${Date.now() - t0} ms\n${text}`);

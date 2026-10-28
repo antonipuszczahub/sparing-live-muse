@@ -18,6 +18,7 @@
     "test": "tsx --test tests/*.test.ts",
     "eval": "tsx --env-file=.env scripts/eval.ts",
     "check:open": "tsx --env-file=.env scripts/check-open.ts",
+    "manifest": "tsx --env-file=.env scripts/manifest.ts",
     "start": "tsx server/index.ts"
   },
   "dependencies": {

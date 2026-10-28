@@ -10,7 +10,7 @@ export interface LedgerEntry {
   t: number;
   kind: string;
   model: string;
-  /** "open" = open weights on Baseten, billed outside the Meta budget. */
+  /** "open" = open weights on the configured host, billed by that host outside the Meta budget. */
   provider?: string;
   session?: string;
   promptTokens?: number;
