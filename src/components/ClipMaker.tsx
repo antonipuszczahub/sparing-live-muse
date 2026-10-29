@@ -86,7 +86,7 @@ export function ClipMaker({
             <a
               href={clip.url}
               download={`sparing-live-clip.${clip.ext}`}
-              className="inline-block rounded-lg border border-[var(--line)] px-4 py-2 text-sm hover:border-[#3a4160]"
+              className="inline-block rounded-lg border border-[var(--line)] px-4 py-2 text-sm hover:border-[#3f5a47]"
             >
               {t('download', clip.ext, (clip.blob.size / 1024 / 1024).toFixed(1), Math.round(clip.seconds))}
             </a>
@@ -104,7 +104,7 @@ export function ClipMaker({
                   setTimeout(() => setCopied(false), 1500);
                 });
               }}
-              className="mt-2 rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3a4160]"
+              className="mt-2 rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3f5a47]"
             >
               {copied ? t('copied') : t('copyPost')}
             </button>

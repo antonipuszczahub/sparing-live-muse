@@ -20,7 +20,7 @@ interface Health {
 }
 
 const SEGMENT = (on: boolean) =>
-  `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`;
+  `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3f5a47]'}`;
 
 export function SetupScreen({
   onStart,
@@ -118,7 +118,7 @@ export function SetupScreen({
             key={id}
             onClick={() => setScenario(id)}
             className={`rounded-xl border p-4 text-left transition ${
-              scenario === id ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3a4160]'
+              scenario === id ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3f5a47]'
             }`}
           >
             <div className="font-medium">{scenarioDef(id, lang).title}</div>
@@ -159,7 +159,7 @@ export function SetupScreen({
               key={l}
               onClick={() => setLevel(l)}
               className={`rounded-lg border px-2 py-2 text-sm transition ${
-                level === l ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3a4160]'
+                level === l ? 'border-[var(--accent)] bg-[var(--panel)]' : 'border-[var(--line)] hover:border-[#3f5a47]'
               }`}
             >
               {levelDef(l, lang).name}

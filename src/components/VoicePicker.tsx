@@ -30,7 +30,7 @@ export function useVoiceList(lang: Lang) {
 }
 
 const SEGMENT = (on: boolean) =>
-  `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--bg)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`;
+  `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--bg)]' : 'border-[var(--line)] hover:border-[#3f5a47]'}`;
 
 /**
  * Lets the user hear and choose the voice of the counterpart. With an ElevenLabs key on the server the cloud
@@ -88,7 +88,7 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
             preview.current?.dispose();
             if (effective) preview.current = previewCloud(effective, t('voiceSample'), lang);
           }}
-          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3a4160] disabled:opacity-40"
+          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3f5a47] disabled:opacity-40"
         >
           {t('voicePreview')}
         </button>
@@ -122,7 +122,7 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
         </select>
         <button
           onClick={() => previewVoice(pick.voice, t('voiceSample'), lang, pitchFor(pick.matched, gender))}
-          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3a4160]"
+          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3f5a47]"
         >
           {t('voicePreview')}
         </button>

@@ -28,7 +28,7 @@ export interface ClipResult {
 
 const W = 720;
 const H = 900;
-const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
+const MOOD_COLOR = ['', '#e0644a', '#e0a13c', '#a3ad95', '#8fcf5a', '#5fd08a'];
 
 interface Step {
   turn: Turn;
@@ -137,7 +137,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
   const face = (m: Mood) => (m <= 2 ? 'cold' : m >= 4 ? 'warm' : 'neutral') as 'cold' | 'neutral' | 'warm';
 
   function frame(t: number) {
-    ctx.fillStyle = '#0b0d12';
+    ctx.fillStyle = '#0d1610';
     ctx.fillRect(0, 0, W, H);
 
     const step = plan.steps.find((s) => t >= s.start && t < s.end) ?? (t >= plan.total - plan.outro ? null : plan.steps.filter((s) => s.end <= t).at(-1) ?? null);
@@ -146,11 +146,11 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     for (const k of ['cold', 'neutral', 'warm'] as const) alpha[k] += ((face(mood) === k ? 1 : 0) - alpha[k]) * 0.12;
 
     // brand
-    ctx.fillStyle = '#e8ebf3';
+    ctx.fillStyle = '#e7ecdd';
     ctx.font = '600 26px Inter, system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Sparing Live', 36, 52);
-    ctx.fillStyle = '#8a93a8';
+    ctx.fillStyle = '#8da38b';
     ctx.font = '18px Inter, system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(say('clipBuilt'), W - 36, 50);
@@ -162,7 +162,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     ctx.save();
     roundRect(ctx, fx, fy, fs, fs, 28);
     ctx.clip();
-    ctx.fillStyle = '#131722';
+    ctx.fillStyle = '#15231a';
     ctx.fillRect(fx, fy, fs, fs);
     if (imgs) {
       for (const k of ['neutral', 'cold', 'warm'] as const) {
@@ -171,7 +171,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
       }
       ctx.globalAlpha = 1;
     } else {
-      ctx.fillStyle = '#8a93a8';
+      ctx.fillStyle = '#8da38b';
       ctx.font = '600 96px Inter, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(initials, fx + fs / 2, fy + fs / 2 + 32);
@@ -184,14 +184,14 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
 
     // name + mood
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#e8ebf3';
+    ctx.fillStyle = '#e7ecdd';
     ctx.font = '600 28px Inter, system-ui, sans-serif';
     ctx.fillText(input.persona.name, W / 2, fy + fs + 46);
     ctx.fillStyle = MOOD_COLOR[mood]!;
     ctx.font = '22px Inter, system-ui, sans-serif';
     ctx.fillText(moodLabel(mood, lang, input.persona.gender), W / 2, fy + fs + 80);
     for (let i = 1; i <= 5; i++) {
-      ctx.fillStyle = i <= mood ? MOOD_COLOR[mood]! : '#232838';
+      ctx.fillStyle = i <= mood ? MOOD_COLOR[mood]! : '#2b4132';
       roundRect(ctx, W / 2 - 130 + (i - 1) * 54, fy + fs + 96, 48, 8, 4);
       ctx.fill();
     }
@@ -200,7 +200,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
 
     if (t < plan.intro) {
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#e8ebf3';
+      ctx.fillStyle = '#e7ecdd';
       ctx.font = '600 38px Inter, system-ui, sans-serif';
       ctx.fillText(say('clipIntro1', input.userGender ?? 'm'), W / 2, bodyTop + 60);
       ctx.fillText(say('clipIntro2'), W / 2, bodyTop + 108);
@@ -210,17 +210,17 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     if (t >= plan.total - plan.outro) {
       const a = input.audit;
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#e8ebf3';
+      ctx.fillStyle = '#e7ecdd';
       ctx.font = '600 70px Inter, system-ui, sans-serif';
       ctx.fillText(a ? `${a.score}/100` : say('clipOver'), W / 2, bodyTop + 66);
       if (a) {
-        ctx.fillStyle = '#c3c9d8';
+        ctx.fillStyle = '#c5d1bd';
         ctx.font = '26px Inter, system-ui, sans-serif';
         wrap(ctx, a.verdict, W - 120)
           .slice(0, 3)
           .forEach((l, i) => ctx.fillText(l, W / 2, bodyTop + 116 + i * 36));
       }
-      ctx.fillStyle = '#6aa6ff';
+      ctx.fillStyle = '#a4d65e';
       ctx.font = '600 24px Inter, system-ui, sans-serif';
       ctx.fillText(say('clipPractice', input.siteLabel), W / 2, H - 50);
       return;
@@ -237,13 +237,13 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     const boxH = lines.length * 40 + 36;
     const boxW = W - 90;
     const bx = bot ? 36 : W - 36 - boxW;
-    ctx.fillStyle = bot ? '#171c29' : '#1e3a63';
+    ctx.fillStyle = bot ? '#15231a' : '#4a3622';
     roundRect(ctx, bx, bodyTop, boxW, boxH, 22);
     ctx.fill();
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#e8ebf3';
+    ctx.fillStyle = '#e7ecdd';
     lines.forEach((l, i) => ctx.fillText(l, bx + 24, bodyTop + 50 + i * 40));
-    ctx.fillStyle = '#8a93a8';
+    ctx.fillStyle = '#8da38b';
     ctx.font = '16px Inter, system-ui, sans-serif';
     ctx.fillText(bot ? first : say('you'), bx + 24, bodyTop + 22);
 

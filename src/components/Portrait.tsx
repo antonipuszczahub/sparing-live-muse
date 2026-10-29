@@ -8,7 +8,7 @@ interface Portraits {
   warm: string;
 }
 
-const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
+const MOOD_COLOR = ['', '#e0644a', '#e0a13c', '#a3ad95', '#8fcf5a', '#5fd08a'];
 
 /** Loads the three Muse Image portraits in the background so the call is never delayed. */
 function usePortraits(session: string, scenario: ScenarioId, persona: Persona, lang: Lang) {

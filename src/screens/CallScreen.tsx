@@ -9,7 +9,7 @@ import { moodLabel, t, useLang } from '../i18n/index.ts';
 import { CameraWatch } from '../lib/camera.ts';
 import { ScreenShare } from '../lib/screen.ts';
 
-const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
+const MOOD_COLOR = ['', '#e0644a', '#e0a13c', '#a3ad95', '#8fcf5a', '#5fd08a'];
 
 const fmt = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
 
@@ -148,7 +148,7 @@ export function CallScreen({
           </div>
           <div className="mt-1 flex gap-1">
             {[1, 2, 3, 4, 5].map((i) => (
-              <span key={i} className="h-1.5 flex-1 rounded-full" style={{ background: i <= snap.mood ? MOOD_COLOR[snap.mood] : '#232838', transition: 'background .6s' }} />
+              <span key={i} className="h-1.5 flex-1 rounded-full" style={{ background: i <= snap.mood ? MOOD_COLOR[snap.mood] : '#2b4132', transition: 'background .6s' }} />
             ))}
           </div>
         </div>
@@ -193,7 +193,7 @@ export function CallScreen({
       <footer className="rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
-            <span className={`h-2 w-2 rounded-full ${snap.state === 'listening' ? 'animate-pulse bg-green-400' : 'bg-[#3a4160]'}`} />
+            <span className={`h-2 w-2 rounded-full ${snap.state === 'listening' ? 'animate-pulse bg-[#8fcf5a]' : 'bg-[#3f5a47]'}`} />
             {statusText}
             {snap.lastLatencyMs != null && <span className="ml-2 text-xs">{t('firstWord', (snap.lastLatencyMs / 1000).toFixed(1))}</span>}
           </div>
@@ -201,7 +201,7 @@ export function CallScreen({
             <button
               onClick={toggleCamera}
               disabled={snap.state === 'ended'}
-              className={`ml-auto mr-2 rounded-lg border px-3 py-2 text-sm transition ${camOn ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`}
+              className={`ml-auto mr-2 rounded-lg border px-3 py-2 text-sm transition ${camOn ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3f5a47]'}`}
             >
               {camOn ? t('cameraOff') : t('cameraOn')}
             </button>
@@ -210,7 +210,7 @@ export function CallScreen({
             <button
               onClick={toggleShare}
               disabled={snap.state === 'ended'}
-              className={`mr-2 rounded-lg border px-3 py-2 text-sm transition ${sharing ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3a4160]'}`}
+              className={`mr-2 rounded-lg border px-3 py-2 text-sm transition ${sharing ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] hover:border-[#3f5a47]'}`}
             >
               {sharing ? t('stopSharing') : t('shareScreen')}
             </button>
@@ -218,7 +218,7 @@ export function CallScreen({
           <button
             onClick={() => engine.current?.hangUp()}
             disabled={snap.state === 'ended'}
-            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-40"
+            className="rounded-lg bg-[#c4452f] px-4 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-40"
           >
             {t('hangUp')}
           </button>
@@ -250,7 +250,7 @@ function Bubble({ turn, name, live }: { turn: Turn; name: string; live?: boolean
     <div className={`flex ${bot ? 'justify-start' : 'justify-end'}`}>
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-          bot ? 'bg-[var(--panel)] border border-[var(--line)]' : 'bg-[#1e3a63]'
+          bot ? 'bg-[var(--panel)] border border-[var(--line)]' : 'bg-[#4a3622]'
         } ${live ? 'opacity-70' : ''}`}
       >
         <div className="mb-0.5 text-xs text-[var(--muted)]">{bot ? name : t('you')}</div>

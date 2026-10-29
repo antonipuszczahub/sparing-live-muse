@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0b0d12;
-  --panel: #131722;
-  --line: #232838;
-  --text: #e8ebf3;
-  --muted: #8a93a8;
-  --accent: #6aa6ff;
+  --bg: #0d1610;
+  --panel: #15231a;
+  --line: #2b4132;
+  --text: #e7ecdd;
+  --muted: #8da38b;
+  --accent: #a4d65e;
 }
 
 html, body, #root { height: 100%; }

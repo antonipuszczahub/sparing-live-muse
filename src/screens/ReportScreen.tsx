@@ -8,9 +8,9 @@ import { ApiError, requestAudit } from '../lib/api.ts';
 import { ClipMaker } from '../components/ClipMaker.tsx';
 import { recordWeakSpots } from '../lib/memory.ts';
 
-const KIND_COLOR: Record<Moment['kind'], string> = { strength: '#22c55e', mistake: '#ef4444', 'turning-point': '#f59e0b' };
+const KIND_COLOR: Record<Moment['kind'], string> = { strength: '#8fcf5a', mistake: '#e0644a', 'turning-point': '#e0a13c' };
 const kindLabel = (k: Moment['kind']) => t(k === 'strength' ? 'kindStrength' : k === 'mistake' ? 'kindMistake' : 'kindTurning');
-const OUTCOME_COLOR: Record<AuditResult['outcome'], string> = { won: '#22c55e', partial: '#f59e0b', lost: '#ef4444' };
+const OUTCOME_COLOR: Record<AuditResult['outcome'], string> = { won: '#8fcf5a', partial: '#e0a13c', lost: '#e0644a' };
 const outcomeLabel = (o: AuditResult['outcome']) => t(o === 'won' ? 'outcomeWon' : o === 'partial' ? 'outcomePartial' : 'outcomeLost');
 const SKILLS = {
   clarity: 'skillClarity',
@@ -19,7 +19,7 @@ const SKILLS = {
   specificity: 'skillSpecificity',
   composure: 'skillComposure',
 } as const satisfies Record<keyof AuditResult['skills'], string>;
-const MOOD_COLOR = ['', '#ef4444', '#f59e0b', '#9ca3af', '#84cc16', '#22c55e'];
+const MOOD_COLOR = ['', '#e0644a', '#e0a13c', '#a3ad95', '#8fcf5a', '#5fd08a'];
 
 const fmt = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
 
@@ -119,7 +119,7 @@ export function ReportScreen({
                     <span>{t(SKILLS[k])}</span>
                     <span className="tabular-nums text-[var(--muted)]">{result.skills[k]}/10</span>
                   </div>
-                  <div className="mt-1 h-1.5 rounded-full bg-[#232838]">
+                  <div className="mt-1 h-1.5 rounded-full bg-[#2b4132]">
                     <div className="h-1.5 rounded-full bg-[var(--accent)]" style={{ width: `${result.skills[k] * 10}%` }} />
                   </div>
                 </div>
@@ -188,7 +188,7 @@ export function ReportScreen({
               <div key={i} ref={(el) => void (rows.current[i] = el)}>
                 <div className={`flex ${bot ? 'justify-start' : 'justify-end'}`}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${bot ? 'border border-[var(--line)] bg-[var(--panel)]' : 'bg-[#1e3a63]'}`}
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${bot ? 'border border-[var(--line)] bg-[var(--panel)]' : 'bg-[#4a3622]'}`}
                     style={m ? { outline: `2px solid ${KIND_COLOR[m.kind]}` } : undefined}
                   >
                     <div className="mb-0.5 flex gap-2 text-xs text-[var(--muted)]">
@@ -204,15 +204,15 @@ export function ReportScreen({
                   </div>
                 </div>
                 {m && (
-                  <div className="ml-4 mt-2 max-w-[90%] rounded-xl border-l-4 bg-[#10141d] p-3 text-sm" style={{ borderColor: KIND_COLOR[m.kind] }}>
+                  <div className="ml-4 mt-2 max-w-[90%] rounded-xl border-l-4 bg-[#101c14] p-3 text-sm" style={{ borderColor: KIND_COLOR[m.kind] }}>
                     <div className="text-xs font-medium uppercase tracking-wide" style={{ color: KIND_COLOR[m.kind] }}>
                       {kindLabel(m.kind)}
                     </div>
                     <p className="mt-1 leading-relaxed">{m.what}</p>
                     <p className="mt-1 leading-relaxed text-[var(--muted)]">{m.why}</p>
                     {m.betterLine && (
-                      <p className="mt-2 rounded-lg bg-[#16301f] px-3 py-2 leading-relaxed text-green-200">
-                        <span className="text-xs uppercase tracking-wide text-green-400">{t('sayInstead')}</span>
+                      <p className="mt-2 rounded-lg bg-[#1d3a22] px-3 py-2 leading-relaxed text-[#cfe9b4]">
+                        <span className="text-xs uppercase tracking-wide text-[#8fcf5a]">{t('sayInstead')}</span>
                         <br />“{m.betterLine}”
                       </p>
                     )}
@@ -237,7 +237,7 @@ function MoodLine({ turns, onPick }: { turns: Turn[]; onPick: (i: number) => voi
   const path = pts.map((p, k) => `${k ? 'L' : 'M'}${x(k)},${y(p.t.mood!)}`).join(' ');
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 w-full">
-      <path d={path} fill="none" stroke="#6aa6ff" strokeWidth="2" />
+      <path d={path} fill="none" stroke="#a4d65e" strokeWidth="2" />
       {pts.map((p, k) => (
         <circle key={k} cx={x(k)} cy={y(p.t.mood!)} r="4.5" fill={MOOD_COLOR[p.t.mood!]} className="cursor-pointer" onClick={() => onPick(p.i)} />
       ))}

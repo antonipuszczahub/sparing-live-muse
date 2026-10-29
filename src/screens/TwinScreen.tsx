@@ -87,7 +87,7 @@ export function TwinScreen({
       {error && (
         <div className="mt-6 rounded-xl border border-red-500/40 p-4">
           <p className="text-red-300">{error}</p>
-          <button onClick={onSkip} className="mt-3 rounded-lg border border-[var(--line)] px-4 py-2 text-sm hover:border-[#3a4160]">
+          <button onClick={onSkip} className="mt-3 rounded-lg border border-[var(--line)] px-4 py-2 text-sm hover:border-[#3f5a47]">
             {t('continueGeneric')}
           </button>
         </div>
