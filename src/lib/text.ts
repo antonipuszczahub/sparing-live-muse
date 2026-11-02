@@ -19,6 +19,15 @@ export function novelWords(heard: string, botText: string, lang: Lang = 'en'): s
   return words(heard).filter((w) => !bot.has(w) && !STOP[lang].has(w));
 }
 
+/**
+ * True when `heard` is almost entirely the bot's own last line (at least four words, at most a fifth of them new):
+ * its voice coming back through the speakers after it has stopped. Short answers such as "yes" are never echo.
+ */
+export function looksLikeEcho(heard: string, botText: string, lang: Lang = 'en'): boolean {
+  const count = words(heard).length;
+  return count >= 4 && novelWords(heard, botText, lang).length <= Math.floor(count * 0.2);
+}
+
 /** Split text into complete sentences and a remainder. */
 export function takeSentences(buf: string): { sentences: string[]; rest: string } {
   const sentences: string[] = [];

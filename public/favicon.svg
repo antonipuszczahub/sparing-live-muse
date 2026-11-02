@@ -1,7 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="#07100b" />
-  <g transform="translate(2.7 3.8) scale(1.15)">
-    <path d="M35 13 C 32 6, 24 4, 19 4.5 C 11 5.5, 8 13, 13 19 C 18 25, 34 24, 36 33 C 38 42, 26 45, 18 44 C 12 43.5, 8 40, 6 35" fill="none" stroke="#cdb67e" stroke-width="6.4" stroke-linecap="round" />
-    <path d="M35 13 C 37 8, 42 6, 45 6.5 C 45.5 11, 42 15, 37.5 15.5 C 36.3 15, 35.4 14.2, 35 13 Z" fill="#e6d6a8" />
+  <g transform="translate(14 3) scale(0.64)">
+    <path d="M12 87 C 26 77, 45 67, 46 55 C 47 44, 34 42, 25 36 C 15 30, 17 16, 31 12 C 39 10, 47 14, 47 23" fill="none" stroke="#cdb67e" stroke-width="7.5" stroke-linecap="round" />
+    <g transform="translate(13 85) rotate(-118) scale(1.6)"><path d="M0 0 C 3 -5.5, 11 -7.5, 17 -5 C 15.5 1, 8 4.5, 0 0 Z" fill="#8fa27c" /></g>
+    <g transform="translate(46 55) rotate(-30) scale(1.6)"><path d="M0 0 C 3 -5.5, 11 -7.5, 17 -5 C 15.5 1, 8 4.5, 0 0 Z" fill="#8fa27c" /></g>
+    <g transform="translate(22 22) rotate(-160) scale(1.7)"><path d="M0 0 C 2.5 -4.5, 8 -6, 12.5 -3.6 C 11.5 1.2, 5.5 3.4, 0 0 Z" fill="#9c3a4a" /></g>
+    <g transform="translate(22 22) rotate(-125) scale(1.7)"><path d="M0 0 C 2.5 -4.5, 8 -6, 12.5 -3.6 C 11.5 1.2, 5.5 3.4, 0 0 Z" fill="#b24a5a" /></g>
+    <g transform="translate(22 22) rotate(-195) scale(1.7)"><path d="M0 0 C 2.5 -4.5, 8 -6, 12.5 -3.6 C 11.5 1.2, 5.5 3.4, 0 0 Z" fill="#862f3f" /></g>
   </g>
 </svg>

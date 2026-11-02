@@ -6,7 +6,7 @@ import { translate } from '../i18n/index.ts';
 import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
-import { novelWords, takeSentences } from '../lib/text.ts';
+import { looksLikeEcho, novelWords, takeSentences } from '../lib/text.ts';
 import { createCloudSpeaker, resolveCloudVoice } from '../lib/cloudVoice.ts';
 import { pickVoice, pitchFor, Speaker, type SpeechOut, type VoicePick } from '../lib/tts.ts';
 
@@ -29,6 +29,8 @@ export interface CallSnapshot {
 
 const SILENCE_MS = 14_000;
 const MIN_BARGE_WORDS = 2;
+/** The recogniser reports a line a moment after it was spoken: its echo can still arrive this long after the character stops. */
+const ECHO_TAIL_MS = 4_000;
 
 export class CallEngine {
   private turns: Turn[] = [];
@@ -54,6 +56,8 @@ export class CallEngine {
   private pendingFinal: BotReply | null = null;
   private sentenceBuf = '';
   private userStoppedAt = 0;
+  /** When the character last stopped speaking, for the echo tail. */
+  private botQuietAt = 0;
   private turnId = 0;
   private lang: Lang;
   /** Name of the voice the character speaks with (empty when the browser has none). */
@@ -159,6 +163,7 @@ export class CallEngine {
 
   private set(state: CallState) {
     if (this.state === 'ended') return;
+    if (this.state === 'speaking' && state !== 'speaking') this.botQuietAt = Date.now();
     this.state = state;
     this.emit();
   }
@@ -198,6 +203,8 @@ export class CallEngine {
     if (this.state === 'ended') return;
     this.liveUser = '';
     if (this.state === 'speaking' && novelWords(text, this.botText(), this.lang).length < MIN_BARGE_WORDS) return; // echo
+    // the tail of its own line, reported after it stopped: not an answer
+    if (this.state === 'listening' && Date.now() - this.botQuietAt < ECHO_TAIL_MS && looksLikeEcho(text, this.botText(), this.lang)) return;
     if (this.state === 'speaking' || this.state === 'thinking') this.interruptBot();
     this.userStoppedAt = Date.now();
     this.turns.push({ role: 'user', text, at: this.now() });
