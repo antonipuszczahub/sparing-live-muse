@@ -1,0 +1,47 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* --mc is the mood colour (see useMoodTheme); on the start screen it is a pale sage. Kept quiet: one pool of light and a warm floor. */
+.glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(1100px 700px at 84% -14%, color-mix(in srgb, var(--mc) 13%, transparent), transparent 62%),
+    radial-gradient(900px 620px at 6% 110%, rgba(120, 82, 48, 0.2), transparent 64%),
+    #07100b;
+}
+
+/* the light shafts were too busy; the class names stay so the markup does not change */
+.shaft {
+  display: none;
+}
+
+.grain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+}
+
+@media (max-width: 700px) {
+  .glow {
+    background:
+      radial-gradient(640px 480px at 92% -6%, color-mix(in srgb, var(--mc) 13%, transparent), transparent 62%),
+      radial-gradient(560px 480px at 0% 106%, rgba(120, 82, 48, 0.2), transparent 62%),
+      #07100b;
+  }
+}

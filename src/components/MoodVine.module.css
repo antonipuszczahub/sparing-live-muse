@@ -1,0 +1,44 @@
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 14px;
+  overflow: visible;
+}
+
+.axis text,
+.time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: #97a48a;
+}
+
+.grow {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw 2.2s cubic-bezier(0.65, 0, 0.2, 1) both;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+.node,
+.flag {
+  cursor: pointer;
+  outline: none;
+}
+.node:focus-visible circle:first-child,
+.flag:focus-visible circle {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.letter {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  fill: #0b1710;
+}

@@ -1,0 +1,12 @@
+.canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  /* foliage is the frame, not the picture: slightly faded and less saturated than the moods */
+  opacity: 0.64;
+  filter: saturate(0.82);
+}

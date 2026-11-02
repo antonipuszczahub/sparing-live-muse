@@ -1,0 +1,21 @@
+/* The screen floats above the backdrop. It enters with a transform only: a fading ancestor would stop the glass panels from blurring the vines behind them. */
+.screen {
+  position: relative;
+  z-index: 2;
+  animation: enter 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.leaving {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.985);
+  pointer-events: none;
+  transition:
+    opacity 0.38s ease,
+    transform 0.38s ease;
+}
+
+@keyframes enter {
+  from {
+    transform: translateY(18px);
+  }
+}

@@ -1,6 +1,7 @@
 import type { AuditResult } from '../../shared/audit.ts';
 import type { Lang, Mood, Persona, Turn } from '../../shared/types.ts';
 import { moodLabel, translate } from '../i18n/index.ts';
+import { MOOD_COLOR } from './mood.ts';
 
 /**
  * Renders a short captioned clip of the most telling moment of a call: the counterpart's face
@@ -28,7 +29,6 @@ export interface ClipResult {
 
 const W = 720;
 const H = 900;
-const MOOD_COLOR = ['', '#e0644a', '#e0a13c', '#a3ad95', '#8fcf5a', '#5fd08a'];
 
 interface Step {
   turn: Turn;

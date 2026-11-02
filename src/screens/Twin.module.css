@@ -1,0 +1,225 @@
+.page {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px clamp(24px, 6.4vw, 124px) 60px;
+  gap: clamp(28px, 5vh, 56px);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(38px, 4.6vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -0.012em;
+}
+
+.intro {
+  margin: 14px 0 0;
+  max-width: 54ch;
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.55;
+  color: #b4bda2;
+}
+.intro strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* every step the research takes is a point on a growing vine */
+.steps {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  left: 13.5px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #3f7a3a, #cdb67e 50%, rgba(205, 182, 126, 0.1));
+  box-shadow: 0 0 18px rgba(205, 182, 126, 0.2);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 0 16px;
+  align-items: start;
+  animation: line 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.node {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  margin: 6px 0 0 6px;
+  border-radius: 50%;
+  background: var(--brass);
+  box-shadow:
+    0 0 0 6px #08120c,
+    0 0 20px -2px var(--brass);
+}
+.noteNode {
+  background: var(--lichen);
+  box-shadow:
+    0 0 0 6px #08120c,
+    0 0 20px -2px var(--lichen);
+}
+.waiting .node {
+  animation: breathe 1.4s ease-in-out infinite;
+}
+.text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lichen);
+}
+.thought {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--lichen);
+}
+.wait {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--lichen);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(22px, 3vw, 40px);
+  border-radius: 4px;
+  animation: line 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.ready {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.company {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(28px, 2.6vw, 44px);
+  line-height: 1.02;
+  letter-spacing: -0.012em;
+}
+.summary {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.65;
+  color: #b4bda2;
+}
+.who b {
+  font-weight: 600;
+}
+.who span {
+  color: var(--lichen);
+}
+.lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.lists h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.005em;
+}
+.lists ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #b4bda2;
+}
+.lists li::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  border-radius: 50% 0 50% 50%;
+  background: var(--brass);
+  transform: rotate(-20deg);
+}
+.sources {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--lichen);
+}
+.go {
+  align-self: flex-start;
+}
+
+@keyframes line {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px 20px 60px;
+  }
+  .lists {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .go {
+    align-self: stretch;
+  }
+}

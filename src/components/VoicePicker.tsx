@@ -15,6 +15,8 @@ import {
   type VoiceSource,
 } from '../lib/cloudVoice.ts';
 import { isNatural, pickVoice, pitchFor, previewVoice, saveVoice, savedVoice, sortVoices, voices, voicesFor } from '../lib/tts.ts';
+import ui from './ui.module.css';
+import styles from './VoicePicker.module.css';
 
 /** The voices of a language, kept current: browsers load them late, and Edge adds its Natural voices after a moment. */
 export function useVoiceList(lang: Lang) {
@@ -28,9 +30,6 @@ export function useVoiceList(lang: Lang) {
   }, [lang]);
   return state;
 }
-
-const SEGMENT = (on: boolean) =>
-  `rounded-lg border px-3 py-1.5 text-sm transition ${on ? 'border-[var(--accent)] bg-[var(--bg)]' : 'border-[var(--line)] hover:border-[#3f5a47]'}`;
 
 /**
  * Lets the user hear and choose the voice of the counterpart. With an ElevenLabs key on the server the cloud
@@ -60,15 +59,16 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
     const effective = saved && options.some((v) => v.id === saved) ? saved : catalog!.defaults[gender];
     const pool = (catalog!.pool?.[gender] ?? []).map((id) => options.find((v) => v.id === id)?.name.split(' ')[0]).filter(Boolean);
     return (
-      <div key={gender} className="flex flex-wrap items-center gap-2">
-        <span className="w-36 text-sm text-[var(--muted)]">{t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}</span>
+      <div key={gender} className={styles.row}>
+        <span className={styles.who}>{t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}</span>
         <select
           value={saved ?? ''}
           onChange={(e) => {
             saveCloudVoice(lang, gender, e.target.value || null);
             bump((n) => n + 1);
           }}
-          className="min-w-0 flex-1 rounded-lg border border-[var(--line)] bg-[var(--bg)] px-2 py-1.5 text-sm"
+          className={styles.select}
+          aria-label={t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}
         >
           <option value="">
             {t('voiceAuto')}
@@ -83,12 +83,13 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
           ))}
         </select>
         <button
+          type="button"
           disabled={!effective}
           onClick={() => {
             preview.current?.dispose();
             if (effective) preview.current = previewCloud(effective, t('voiceSample'), lang);
           }}
-          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3f5a47] disabled:opacity-40"
+          className={ui.btn}
         >
           {t('voicePreview')}
         </button>
@@ -99,15 +100,16 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
   const browserRow = (gender: 'm' | 'f') => {
     const pick = pickVoice(gender, lang);
     return (
-      <div key={gender} className="flex flex-wrap items-center gap-2">
-        <span className="w-36 text-sm text-[var(--muted)]">{t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}</span>
+      <div key={gender} className={styles.row}>
+        <span className={styles.who}>{t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}</span>
         <select
           value={savedVoice(lang, gender) ?? ''}
           onChange={(e) => {
             saveVoice(lang, gender, e.target.value || null);
             bump((n) => n + 1);
           }}
-          className="min-w-0 flex-1 rounded-lg border border-[var(--line)] bg-[var(--bg)] px-2 py-1.5 text-sm"
+          className={styles.select}
+          aria-label={t(gender === 'f' ? 'voiceWoman' : 'voiceMan')}
         >
           <option value="">
             {t('voiceAuto')}
@@ -120,10 +122,7 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
             </option>
           ))}
         </select>
-        <button
-          onClick={() => previewVoice(pick.voice, t('voiceSample'), lang, pitchFor(pick.matched, gender))}
-          className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[#3f5a47]"
-        >
+        <button type="button" onClick={() => previewVoice(pick.voice, t('voiceSample'), lang, pitchFor(pick.matched, gender))} className={ui.btn}>
           {t('voicePreview')}
         </button>
       </div>
@@ -131,16 +130,15 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
   };
 
   return (
-    <section className="mt-6 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm font-medium">{t('voiceTitle')}</div>
-        {cloud && catalog && (
-          <div role="group" className="flex gap-1">
+    <section className={styles.wrap}>
+      {cloud && catalog && (
+        <div className={styles.head}>
+          <div role="group" className={ui.seg}>
             {(['cloud', 'browser'] as const).map((s) => (
               <button
                 key={s}
+                type="button"
                 aria-pressed={source === s}
-                className={SEGMENT(source === s)}
                 onClick={() => {
                   setSource(s);
                   setSourceState(s);
@@ -150,11 +148,11 @@ export function VoicePicker({ lang, list }: { lang: Lang; list: SpeechSynthesisV
               </button>
             ))}
           </div>
-        )}
-      </div>
-      <div className="mt-3 space-y-2">{(['f', 'm'] as const).map((g) => (useCloud ? cloudRow(g) : browserRow(g)))}</div>
-      {useCloud && <p className="mt-3 text-xs text-[var(--muted)]">{t('voiceCloudNote')}</p>}
-      {!useCloud && !list.some(isNatural) && <p className="mt-3 text-xs text-amber-400">{t('voiceRobotic')}</p>}
+        </div>
+      )}
+      <div className={styles.rows}>{(['f', 'm'] as const).map((g) => (useCloud ? cloudRow(g) : browserRow(g)))}</div>
+      {useCloud && <p className={styles.small}>{t('voiceCloudNote')}</p>}
+      {!useCloud && !list.some(isNatural) && <p className={`${styles.small} ${styles.warn}`}>{t('voiceRobotic')}</p>}
     </section>
   );
 }

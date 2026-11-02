@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { Lang, Mood, Persona, ScenarioId } from '../../shared/types.ts';
 import { t } from '../i18n/index.ts';
+import { ArchPortrait } from './ArchPortrait.tsx';
+import styles from './Portrait.module.css';
 
 interface Portraits {
   neutral: string;
   cold: string;
   warm: string;
 }
-
-const MOOD_COLOR = ['', '#e0644a', '#e0a13c', '#a3ad95', '#8fcf5a', '#5fd08a'];
 
 /** Loads the three Muse Image portraits in the background so the call is never delayed. */
 function usePortraits(session: string, scenario: ScenarioId, persona: Persona, lang: Lang) {
@@ -31,25 +31,17 @@ function usePortraits(session: string, scenario: ScenarioId, persona: Persona, l
 }
 
 /**
- * The counterpart's face. Three expressions of the same person are cross-faded
- * according to their mood, with the initials shown until the images arrive.
+ * The counterpart's face, filling whatever frame it is placed in. Three expressions of the same person are
+ * cross-faded according to their mood; a drawn stand-in is shown until the images arrive.
  */
-export function Portrait({ session, scenario, persona, mood, lang = 'en', className = '' }: { session: string; scenario: ScenarioId; persona: Persona; mood: Mood; lang?: Lang; className?: string }) {
+export function Portrait({ session, scenario, persona, mood, lang = 'en' }: { session: string; scenario: ScenarioId; persona: Persona; mood: Mood; lang?: Lang }) {
   const portraits = usePortraits(session, scenario, persona, lang);
   const shown: keyof Portraits = mood <= 2 ? 'cold' : mood >= 4 ? 'warm' : 'neutral';
-  const initials = persona.name
-    .split(' ')
-    .map((w) => w[0])
-    .join('');
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border-2 bg-[var(--panel)] ${className}`} style={{ borderColor: MOOD_COLOR[mood], transition: 'border-color .6s' }}>
-      {!portraits && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[var(--muted)]">
-          <span className="text-3xl font-semibold">{initials}</span>
-          <span className="text-[10px]">{t('drawingPortrait')}</span>
-        </div>
-      )}
+    <div className={styles.portrait}>
+      <ArchPortrait scenario={scenario} gender={persona.gender} />
+      {!portraits && <span className={styles.wait}>{t('drawingPortrait')}</span>}
       {portraits &&
         (Object.keys(portraits) as (keyof Portraits)[]).map((k) => (
           <img
@@ -57,8 +49,8 @@ export function Portrait({ session, scenario, persona, mood, lang = 'en', classN
             src={portraits[k]}
             alt={k === shown ? `${persona.name}, ${k}` : ''}
             aria-hidden={k !== shown}
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ opacity: k === shown ? 1 : 0, transition: 'opacity .7s ease' }}
+            className={styles.image}
+            style={{ opacity: k === shown ? 1 : 0 }}
           />
         ))}
     </div>

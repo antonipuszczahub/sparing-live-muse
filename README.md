@@ -94,6 +94,8 @@ flowchart LR
 
 Requirements: Node 22+, a Meta Model API key from <https://dev.meta.ai>. Use Microsoft Edge or Chrome (speech synthesis and screen share).
 
+Platforms: developed and tested on Windows 11 with Edge. Nothing in the code is OS-specific (Node, Vite and the browser do the work), but macOS and Linux were not tested. The character's voice is the browser's own, so how it sounds depends on the voices installed: Edge on Windows has the best ones (Natural), Chrome has fewer.
+
 ```bash
 npm install
 cp .env.example .env      # then put your key in MODEL_API_KEY
@@ -155,6 +157,17 @@ An optional ElevenLabs path exists in the code from earlier experiments. ElevenL
 
 Rehearsals can contain sensitive material. Audio is relayed to Muse Voice Transcribe and never stored by this app. The character's lines are spoken by the browser's own voice and are not sent anywhere for that. The hackathon credits only cover the standard Contributor variants of Meta's models: content sent to them (your voice for transcription, the text of the call, and, if you turn them on, screenshots of the screen you share and frames from the camera) may be used to train future Meta models, the opt-out variants are not covered by these credits, and zero data retention cannot be enabled for them. The app says so before the first call, and screen sharing and the camera are both off until you start them. With the open-weights tick on, the text of the live turns goes to the open-weights host (Baseten in the default setup) instead of Meta's hosted Spark; that host's own terms apply and are not checked here. Weak-spot memory lives only in your browser (`localStorage`) and can be erased with one click. A researched company (public web findings only) is kept on the server for 24 hours so the same company and pitch is not researched twice; it contains no audio or transcripts.
 
+## Interface
+
+The look is called *Podszyt* (the understory). One fixed canvas behind every screen grows procedural vines from the screen edges (`src/lib/vines.ts`): near the pointer the leaves turn towards it and brighten, shoots sprout where it lingers, and a click or a change of screen sprouts a few more. The foliage is **the character's mood**: the call sets a `--mood` CSS variable from the hidden state, and the same vines turn ember with thorns when it goes badly and sunlit with blossoms when you win the character over; the glow, the portrait ring and the mood labels take their colour from it too. The review draws the same mood as a vine with one leaf per turn.
+
+- **Start:** four portrait arches (drawn stand-ins; the real face is generated when the call starts) and one briefing bar. Selection is plain CSS driven by custom properties (`--a`, `--d`).
+- **Call:** captions instead of chat bubbles, so the voice stays the loudest thing; the character's latest line is large, older lines fade upwards.
+- **Review:** score, mood vine, measured numbers, and a replay with what was said on the left and what the character privately thought on the right.
+- **Every screen fits a phone** (the start screen becomes a swipeable row with a pinned call button, the call fills the screen, the mood vine turns vertical) and wide monitors; motion respects `prefers-reduced-motion`.
+
+The type is Fraunces (light, with italic for emphasis) over Hanken Grotesk, with small tracked capitals for labels; the one accent is brass, and the wordmark's S is the vine itself. Both fonts load from Google Fonts with system fallbacks; they are the only third-party request the page makes. While developing, `/?fx=call`, `call-hostile`, `call-won`, `report`, `report-wait`, `twin` and `twin-ready` open the call, review and research screens with made-up data, so the interface can be looked at without spending model calls (dev server only, not in the production build).
+
 ## Layout
 
 ```
@@ -163,7 +176,9 @@ server/meta/     API clients, pricing table, budget ledger
 server/asr.ts    realtime transcription relay
 shared/          types, scenarios, variation, audit schema, speech cleaning, language helpers (*.pl.ts hold the Polish content)
 src/engine/      CallEngine: turn taking, barge-in, silence, hang-up
-src/screens/     setup, twin research, call, review
+src/screens/     setup, twin research, call, review (each a container that talks to the server and a view that only draws)
+src/components/  the vine background, portraits, mood vine, shared pieces; CSS modules next to them
+src/lib/vines.ts the vine engine    src/lib/captions.ts, moodVine.ts   pure layout code that is tested
 src/i18n/        interface text: English defines the keys, Polish is typed with them, so a missing string does not compile
 tests/           unit tests    scripts/  probes and evaluation
 ```
@@ -171,3 +186,7 @@ tests/           unit tests    scripts/  probes and evaluation
 ## Status
 
 Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); an optional ElevenLabs path is built but switched off in this submission because the hackathon allows only Meta models at runtime. Not yet deployed.
+
+## License
+
+MIT, see [`LICENSE`](LICENSE). Meta models and any open-weights host are used under their own terms.

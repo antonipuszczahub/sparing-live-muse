@@ -1,18 +1,68 @@
 @import "tailwindcss";
 
-:root {
-  --bg: #0d1610;
-  --panel: #15231a;
-  --line: #2b4132;
-  --text: #e7ecdd;
-  --muted: #8da38b;
-  --accent: #a4d65e;
+/* The mood colour. Registered, so changing it fades everything that is built from it. */
+@property --mc {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #aeb99e;
 }
 
-html, body, #root { height: 100%; }
+/* One accent: brass, used sparingly. The greens belong to the foliage and the moods. */
+:root {
+  --mc: #aeb99e;
+  --ink: #eee8d3;
+  --lichen: #a3ae96;
+  --brass: #cdb67e;
+  --brass-hi: #e6d6a8;
+  --canopy: #07100b;
+  --mud: #4a3622;
+  --clay: #d9a070;
+  --ochre: #e0a73e;
+  --ember: #f0603f;
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  /* Labels are small tracked capitals in the body face, not a monospace. */
+  --font-mono: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  transition: --mc 0.9s ease;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--canopy);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(205, 182, 126, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

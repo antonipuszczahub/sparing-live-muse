@@ -1,6 +1,7 @@
 {
   "name": "sparing-live-muse",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "description": "Real-time voice sparring on Meta Muse models",
