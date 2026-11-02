@@ -34,7 +34,7 @@ export function CallScreen({
   const [face, setFace] = useState<FaceBox | null>(null);
   const selfView = useRef<HTMLVideoElement>(null);
 
-  // The vines and the glow follow how the character feels.
+  // The light and the portrait ring follow how the character feels.
   useMoodTheme(snap?.mood ?? 3);
 
   useEffect(() => {

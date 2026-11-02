@@ -36,16 +36,19 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   addressed to a character carries `{m|f}` gender markers resolved with `gendered()` (`shared/lang.ts`). The start
   screen asks the user's gender and Pan/Pani vs ty because Polish verbs carry gender. UI text is in `src/i18n/`:
   `en.ts` defines the keys and `pl.ts` is typed with them, so a missing string does not compile.
-- **Interface ("Podszyt").** Deliberately quiet and "prestige": Fraunces light + Hanken Grotesk, tracked-caps labels (`--font-mono` is
-  the body face, not a monospace), square-cornered controls and hairline panels, ONE accent (`--brass`), sparse vines. The greens are
-  only foliage and mood colours. Do not bring back the lime accent, pills, glow or heavy grotesque headings (the user called that
-  version generic and chaotic). `App.tsx` renders one `Backdrop` (glow, vine canvas from `src/lib/vines.ts`, grain)
-  under whichever screen is up, and fades screens in and out with a burst of shoots. The call sets `--mood`/`--mc` on `:root`
-  (`useMoodTheme`), the engine reads `--mood` and `--mc` is a registered `@property`, so colour changes fade. Each screen is a container
-  (server, state) plus a `*View` that only draws; styles are CSS modules next to them and `ui.module.css` holds the shared pieces.
-  Pure layout code (`captions.ts`, `moodVine.ts`) is tested. A glass panel inside an element with `opacity < 1` or `filter` stops
-  blurring the canvas behind it, so `.screen` enters with a transform only. `/?fx=…` (dev server only, `src/dev/fixtures.tsx`) shows the
-  call, review and research screens with fake data. Fonts come from Google Fonts in `index.html`.
+- **Interface.** Modelled on how Meta, Stripe, Linear and ElevenLabs look: ONE tight grotesque (Figtree, semibold, negative tracking;
+  never a serif or a quirky display face), a calm warm-grey page (`--canopy`) that turns to orange at the bottom with drifting pools of
+  light that lean towards the pointer (`Backdrop.tsx`), black pill buttons and segmented controls, white glass cards with 24px radius,
+  ONE accent (`--brass` deep orange for small text, `--brass-hi` bright orange for light and the logo; the names are historical), ink
+  for text. Real photographs, not drawings: the start screen shows four archetype portraits (`public/archetypes`, made by
+  `npm run make:archetypes`) and the call shows the generated face. The logo is an S built from two arcs on an orange tile
+  (`Brand.tsx`, `public/favicon.svg`). Do not bring back the dark jungle look, serif headings, vines, square corners or cartoon faces:
+  the user rejected three earlier looks. The call sets `--mood`/`--mc` on `:root` (`useMoodTheme`); `--mc` is a registered
+  `@property`, so colour changes fade. Each screen is a container (server, state) plus a `*View` that only draws; styles are CSS modules
+  next to them and `ui.module.css` holds the shared pieces. Pure layout code (`captions.ts`, `moodVine.ts`) is tested. A glass panel
+  inside an element with `opacity < 1` or `filter` stops blurring what is behind it, so `.screen` enters with a transform only. `/?fx=…`
+  (dev server only, `src/dev/fixtures.tsx`) shows the call, review and research screens with fake data (the call screens still draw a
+  real face once per server start, about 3 cents). The font comes from Google Fonts in `index.html`.
 - **Voice of the character.** Meta has no speech synthesis, and the hackathon allows only Meta models at runtime, so the
   submitted voice is the browser's own (`src/lib/tts.ts`, picker in `VoicePicker.tsx`, lists filtered by gender; Edge
   Natural voices rank first). The ElevenLabs path (`server/tts/`, `src/lib/cloudSpeaker.ts`) stays in the code but is OFF

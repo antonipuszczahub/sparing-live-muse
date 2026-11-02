@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Lang, Mood, Persona, ScenarioId } from '../../shared/types.ts';
 import { t } from '../i18n/index.ts';
-import { ArchPortrait } from './ArchPortrait.tsx';
+import { Archetype } from './Archetype.tsx';
 import styles from './Portrait.module.css';
 
 interface Portraits {
@@ -32,7 +32,7 @@ function usePortraits(session: string, scenario: ScenarioId, persona: Persona, l
 
 /**
  * The counterpart's face, filling whatever frame it is placed in. Three expressions of the same person are
- * cross-faded according to their mood; a drawn stand-in is shown until the images arrive.
+ * cross-faded according to their mood; a blurred photograph of the same kind of person stands in until the images arrive.
  */
 export function Portrait({ session, scenario, persona, mood, lang = 'en' }: { session: string; scenario: ScenarioId; persona: Persona; mood: Mood; lang?: Lang }) {
   const portraits = usePortraits(session, scenario, persona, lang);
@@ -40,7 +40,7 @@ export function Portrait({ session, scenario, persona, mood, lang = 'en' }: { se
 
   return (
     <div className={styles.portrait}>
-      <ArchPortrait scenario={scenario} gender={persona.gender} />
+      <Archetype scenario={scenario} blur />
       {!portraits && <span className={styles.wait}>{t('drawingPortrait')}</span>}
       {portraits &&
         (Object.keys(portraits) as (keyof Portraits)[]).map((k) => (

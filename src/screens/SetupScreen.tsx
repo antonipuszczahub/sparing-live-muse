@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LANG_META, LANGS } from '../../shared/lang.ts';
 import { levelDef, scenarioDef, SCENARIO_IDS } from '../../shared/scenarios.ts';
 import type { Level, ScenarioId, SessionConfig } from '../../shared/types.ts';
-import { ArchPortrait } from '../components/ArchPortrait.tsx';
+import { Archetype } from '../components/Archetype.tsx';
 import { Brand } from '../components/Brand.tsx';
 import { Icon } from '../components/Icons.tsx';
 import { Sheet } from '../components/Sheet.tsx';
@@ -127,7 +127,7 @@ export function SetupScreen({
   const notices = [!sttSupported() && t('needsEdge'), missingVoice && t('noVoice'), health && !health.keyConfigured && t('keyMissing')].filter(Boolean) as string[];
 
   return (
-    <main className={s.page} style={vars({ '--a': SCENARIO_IDS.indexOf(scenario) + 1, '--d': level - 1 })}>
+    <main className={s.page} style={vars({ '--a': SCENARIO_IDS.indexOf(scenario) + 1 })}>
       <header className={`${s.top} ${ui.rise1}`}>
         <Brand />
         <div className={s.tools}>
@@ -160,138 +160,141 @@ export function SetupScreen({
         </div>
       </header>
 
-      <section className={`${s.hero} ${ui.rise2}`}>
-        <h1 className={s.h1}>
-          {t('heroTop')} <em>{t('heroEm')}</em>
-        </h1>
-        <p className={s.lead}>{t('heroLead')}</p>
-      </section>
+      <div className={s.stage}>
+        <div className={s.intro}>
+          <section className={`${s.hero} ${ui.rise2}`}>
+            <h1 className={s.h1}>
+              {t('heroTop')} <em>{t('heroEm')}</em>
+            </h1>
+            <p className={s.lead}>{t('heroLead')}</p>
+          </section>
 
-      <section ref={rails} role="radiogroup" aria-label={t('tagline')} className={`${s.arches} ${ui.rise3}`}>
-        {SCENARIO_IDS.map((id, i) => {
-          const def = scenarioDef(id, lang);
-          return (
-            <label key={id} className={s.card} data-on={scenario === id} style={vars({ '--i': i + 1 })}>
-              <input className={ui.sr} type="radio" name="scenario" checked={scenario === id} onChange={() => setScenario(id)} />
-              <span className={s.arch}>
-                <ArchPortrait scenario={id} />
-                <span className={s.tag}>0{i + 1}</span>
+          {(notices.length > 0 || error) && (
+            <div className={s.notices} role="status">
+              {notices.map((n) => (
+                <p key={n} className={ui.note}>
+                  {n}
+                </p>
+              ))}
+              {error && <p className={`${ui.note} ${ui.noteBad}`}>{error}</p>}
+            </div>
+          )}
+
+          <section className={`${s.bar} ${ui.glass} ${ui.rise3}`}>
+            <label className={s.fld}>
+              <span className={`${ui.lbl} ${s.lbl}`}>
+                <span key={scenario} className={s.swap}>
+                  {sc.topicLabel}
+                </span>
               </span>
-              <span className={s.ct}>{def.title}</span>
-              <span className={s.cp}>{t(WHO[id])}</span>
-              <span className={s.tg}>{def.tagline}</span>
+              <input className={s.in} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={sc.topicExample} />
             </label>
-          );
-        })}
-      </section>
-
-      {(notices.length > 0 || error) && (
-        <div className={s.notices} role="status">
-          {notices.map((n) => (
-            <p key={n} className={ui.note}>
-              {n}
-            </p>
-          ))}
-          {error && <p className={`${ui.note} ${ui.noteBad}`}>{error}</p>}
-        </div>
-      )}
-
-      <section className={`${s.bar} ${ui.glass} ${showCompany ? '' : s.noCompany} ${ui.rise4}`}>
-        <label className={s.fld}>
-          <span className={`${ui.lbl} ${s.lbl}`}>
-            <span key={scenario} className={s.swap}>
-              {sc.topicLabel}
-            </span>
-          </span>
-          <input className={s.in} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={sc.topicExample} />
-        </label>
-        {showCompany && (
-          <label className={s.fld}>
-            <span className={`${ui.lbl} ${s.lbl}`}>
-              {t('twinLabel')} · {t('optional')}
-            </span>
-            <input className={s.in} value={company} onChange={(e) => setCompany(e.target.value)} placeholder={sc.twinExample} title={t('twinOptional')} />
-          </label>
-        )}
-        <div className={s.fld} role="radiogroup" aria-label={t('difficulty')}>
-          <span className={`${ui.lbl} ${s.lbl}`}>{t('difficulty')}</span>
-          <div className={s.track}>
-            {([1, 2, 3, 4] as Level[]).map((l) => (
-              <label key={l} className={s.stop} style={vars({ '--j': l - 1 })}>
-                <input className={ui.sr} type="radio" name="level" checked={level === l} onChange={() => setLevel(l)} />
-                <span className={s.dot} />
-                <span className={s.dn}>{levelDef(l, lang).name}</span>
+            {showCompany && (
+              <label className={s.fld}>
+                <span className={`${ui.lbl} ${s.lbl}`}>
+                  {t('twinLabel')} · {t('optional')}
+                </span>
+                <input className={s.in} value={company} onChange={(e) => setCompany(e.target.value)} placeholder={sc.twinExample} title={t('twinOptional')} />
               </label>
-            ))}
-          </div>
-        </div>
-        <div className={s.ctaInline}>{cta}</div>
-      </section>
-
-      {lang === 'pl' && (
-        <section className={s.you} aria-label={t('userTitle')}>
-          <div className={s.youGroup}>
-            <span>{t('userGender')}</span>
-            <div role="group" className={ui.seg}>
-              <button type="button" aria-pressed={user.gender === 'm'} onClick={() => changeUser({ ...user, gender: 'm' })}>
-                {t('userMan')}
-              </button>
-              <button type="button" aria-pressed={user.gender === 'f'} onClick={() => changeUser({ ...user, gender: 'f' })}>
-                {t('userWoman')}
-              </button>
+            )}
+            <div className={s.fld} role="radiogroup" aria-label={t('difficulty')}>
+              <span className={`${ui.lbl} ${s.lbl}`}>{t('difficulty')}</span>
+              <div className={s.levels}>
+                {([1, 2, 3, 4] as Level[]).map((l) => (
+                  <label key={l} className={s.lvl}>
+                    <input className={ui.sr} type="radio" name="level" checked={level === l} onChange={() => setLevel(l)} />
+                    <span>{levelDef(l, lang).name}</span>
+                  </label>
+                ))}
+              </div>
+              <p className={s.blurb}>
+                <span key={level}>{lv.blurb}</span>
+              </p>
             </div>
-          </div>
-          <div className={s.youGroup}>
-            <span>{t('userForm')}</span>
-            <div role="group" className={ui.seg}>
-              <button type="button" aria-pressed={user.formal} onClick={() => changeUser({ ...user, formal: true })}>
-                {t('userFormal')}
-              </button>
-              <button type="button" aria-pressed={!user.formal} onClick={() => changeUser({ ...user, formal: false })}>
-                {t('userInformal')}
-              </button>
-            </div>
-          </div>
-          <p className={s.youWhy}>{t('userWhy')}</p>
-        </section>
-      )}
+            <div className={s.ctaInline}>{cta}</div>
+          </section>
 
-      <footer className={s.foot}>
-        <span className={s.blurb}>
-          <span key={level}>
-            <b>{lv.name}</b>
-            {lv.blurb}
-          </span>
-        </span>
-        {weak.length > 0 && (
-          <span className={s.weak}>
-            <span className={ui.lbl}>{t('practising')}</span>
-            {weak.map((w) => (
-              <span key={w} className={s.chip}>
-                {w}
+          {lang === 'pl' && (
+            <section className={s.you} aria-label={t('userTitle')}>
+              <div className={s.youGroup}>
+                <span>{t('userGender')}</span>
+                <div role="group" className={ui.seg}>
+                  <button type="button" aria-pressed={user.gender === 'm'} onClick={() => changeUser({ ...user, gender: 'm' })}>
+                    {t('userMan')}
+                  </button>
+                  <button type="button" aria-pressed={user.gender === 'f'} onClick={() => changeUser({ ...user, gender: 'f' })}>
+                    {t('userWoman')}
+                  </button>
+                </div>
+              </div>
+              <div className={s.youGroup}>
+                <span>{t('userForm')}</span>
+                <div role="group" className={ui.seg}>
+                  <button type="button" aria-pressed={user.formal} onClick={() => changeUser({ ...user, formal: true })}>
+                    {t('userFormal')}
+                  </button>
+                  <button type="button" aria-pressed={!user.formal} onClick={() => changeUser({ ...user, formal: false })}>
+                    {t('userInformal')}
+                  </button>
+                </div>
+              </div>
+              <p className={s.youWhy}>{t('userWhy')}</p>
+            </section>
+          )}
+
+          <footer className={s.foot}>
+            {weak.length > 0 && (
+              <span className={s.weak}>
+                <span className={ui.lbl}>{t('practising')}</span>
+                {weak.map((w) => (
+                  <span key={w} className={s.chip}>
+                    {w}
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  className={s.forget}
+                  onClick={() => {
+                    clearWeakSpots(lang);
+                    setWeak([]);
+                  }}
+                >
+                  {t('weakForget')}
+                </button>
+                <Switch checked={useMemory} onChange={setUseMemory}>
+                  {t('weakUse')}
+                </Switch>
               </span>
-            ))}
-            <button
-              type="button"
-              className={s.forget}
-              onClick={() => {
-                clearWeakSpots(lang);
-                setWeak([]);
-              }}
-            >
-              {t('weakForget')}
-            </button>
-            <Switch checked={useMemory} onChange={setUseMemory}>
-              {t('weakUse')}
-            </Switch>
-          </span>
-        )}
-        <span className={s.hint}>
-          <Icon name="headphones" size={16} />
-          {t('headphones')}
-          {health && ` · ${t('budgetToday', health.budget.spentToday.toFixed(2), health.budget.dailyLimit.toFixed(2))}`}
-        </span>
-      </footer>
+            )}
+            <span className={s.hint}>
+              <Icon name="headphones" size={16} />
+              {t('headphones')}
+              {health && ` · ${t('budgetToday', health.budget.spentToday.toFixed(2), health.budget.dailyLimit.toFixed(2))}`}
+            </span>
+          </footer>
+        </div>
+
+        <section ref={rails} role="radiogroup" aria-label={t('tagline')} className={`${s.cast} ${ui.rise3}`}>
+          {SCENARIO_IDS.map((id, i) => {
+            const def = scenarioDef(id, lang);
+            return (
+              <label key={id} className={s.card} data-on={scenario === id}>
+                <input className={ui.sr} type="radio" name="scenario" checked={scenario === id} onChange={() => setScenario(id)} />
+                <span className={s.shot}>
+                  <Archetype scenario={id} />
+                  <span className={s.veil} />
+                  <span className={s.tag}>0{i + 1}</span>
+                  <span className={s.cap}>
+                    <span className={s.ct}>{def.title}</span>
+                    <span className={s.cp}>{t(WHO[id])}</span>
+                    <span className={s.tg}>{def.tagline}</span>
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </section>
+      </div>
 
       <p className={s.privacy}>{t('privacy')}</p>
 

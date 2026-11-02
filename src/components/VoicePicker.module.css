@@ -36,9 +36,9 @@
   min-width: 0;
   min-height: 44px;
   padding: 0 12px;
-  border: 1px solid rgba(238, 232, 211, 0.16);
+  border: 1px solid rgba(27, 19, 13, 0.16);
   border-radius: 4px;
-  background: rgba(7, 16, 11, 0.7);
+  background: rgba(255, 252, 247, 0.7);
   color: var(--ink);
   font: inherit;
   font-size: 14px;
@@ -52,5 +52,5 @@
 }
 
 .warn {
-  color: #f0c46c;
+  color: var(--ochre);
 }

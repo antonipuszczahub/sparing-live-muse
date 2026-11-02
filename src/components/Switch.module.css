@@ -12,9 +12,9 @@
   flex: none;
   width: 52px;
   height: 30px;
-  border: 1px solid rgba(238, 232, 211, 0.3);
+  border: 1px solid rgba(27, 19, 13, 0.3);
   border-radius: 999px;
-  background: rgba(238, 232, 211, 0.08);
+  background: rgba(27, 19, 13, 0.08);
   transition:
     background 0.4s,
     border-color 0.4s;
@@ -27,23 +27,23 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #a8b399;
+  background: var(--lichen);
   transition:
     left 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
     background 0.4s;
 }
 
 input:checked + .track {
-  background: #2d5a30;
-  border-color: rgba(205, 182, 126, 0.6);
+  background: var(--brass);
+  border-color: rgba(194, 65, 12, 0.6);
 }
 
 input:checked + .track .knob {
   left: 25px;
-  background: #cdb67e;
+  background: var(--brass);
 }
 
 input:focus-visible + .track {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--ink);
   outline-offset: 3px;
 }

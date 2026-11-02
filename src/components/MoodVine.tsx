@@ -31,7 +31,7 @@ export function MoodVine({
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className={styles.chart} role="group" aria-label={label}>
-      <g stroke="rgba(238,232,211,.09)" strokeWidth="1">
+      <g stroke="rgba(27,19,13,.08)" strokeWidth="1">
         {layout.guides.map((g) => (vertical ? <path key={g.mood} d={`M${g.pos} 28 V${height - 28}`} /> : <path key={g.mood} d={`M96 ${g.pos} H${width}`} />))}
       </g>
       <g className={styles.axis}>
@@ -47,8 +47,8 @@ export function MoodVine({
           ),
         )}
       </g>
-      <path d={layout.path} fill="none" stroke="#13281a" strokeWidth="9" strokeLinecap="round" />
-      <path d={layout.path} fill="none" stroke="#cdb67e" strokeWidth="3.2" strokeLinecap="round" className={styles.grow} pathLength={1} />
+      <path d={layout.path} fill="none" stroke="#fff3e4" strokeWidth="9" strokeLinecap="round" />
+      <path d={layout.path} fill="none" stroke="#c2410c" strokeWidth="3.2" strokeLinecap="round" className={styles.grow} pathLength={1} />
       {layout.flags.map((f) => (
         <g key={f.turn} className={styles.flag} role="button" tabIndex={0} aria-label={f.letter} onClick={() => onPick(f.turn)} onKeyDown={pick(f.turn)}>
           <path d={vertical ? `M${f.from} ${f.y} H${f.to}` : `M${f.x} ${f.to} V${f.from}`} stroke={KIND_COLOR[f.kind]} strokeWidth="1.5" strokeDasharray="3 5" />
@@ -61,7 +61,7 @@ export function MoodVine({
       {layout.nodes.map((n) => (
         <g key={n.turn} className={styles.node} role="button" tabIndex={0} aria-label={`${time(n.at)}, ${moodName(n.mood)}`} onClick={() => onPick(n.turn)} onKeyDown={pick(n.turn)}>
           <circle cx={n.x} cy={n.y} r="14" fill="transparent" />
-          <circle cx={n.x} cy={n.y} r="6" fill="#07100b" stroke={MOOD_COLOR[n.mood]} strokeWidth="3" />
+          <circle cx={n.x} cy={n.y} r="6" fill="#fffaf3" stroke={MOOD_COLOR[n.mood]} strokeWidth="3" />
           <path transform={`translate(${n.leafX} ${n.leafY}) rotate(${n.rot})`} d={LEAF} fill={MOOD_COLOR[n.mood]} />
           {n.showTime && (
             <text className={styles.time} x={vertical ? 6 : n.x} y={vertical ? n.y + 4 : height - 8} textAnchor={vertical ? 'start' : 'middle'}>

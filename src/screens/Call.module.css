@@ -29,13 +29,14 @@
   gap: 12px;
   min-height: 46px;
   padding: 0 20px;
-  border: 1px solid rgba(238, 232, 211, 0.12);
+  border: 1px solid rgba(27, 19, 13, 0.12);
   border-radius: 999px;
-  background: rgba(12, 24, 17, 0.5);
+  background: rgba(255, 252, 247, 0.68);
   backdrop-filter: blur(14px);
   font-family: var(--font-mono);
   font-size: 13px;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .live b {
@@ -48,10 +49,12 @@
 }
 .live span {
   font-size: 17px;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
 }
 .liveEnded b {
-  background: #6d7a62;
+  background: var(--lichen);
   box-shadow: none;
   animation: none;
 }
@@ -88,17 +91,18 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 50% 50% 22px 22px / 42% 42% 22px 22px;
+  border-radius: 28px;
 }
 
 /* --mc is the mood colour: the ring and its glow change with it */
 .face {
   overflow: hidden;
-  background: #0d1a12;
+  background: var(--mud);
   box-shadow:
-    0 0 0 3px var(--mc),
-    0 0 56px -22px var(--mc),
-    0 50px 80px -40px #000;
+    0 0 0 4px rgba(255, 255, 255, 0.92),
+    0 0 0 7px var(--mc),
+    0 0 70px -10px var(--mc),
+    0 50px 80px -40px rgba(110, 50, 15, 0.4);
 }
 
 .wave {
@@ -120,21 +124,20 @@
 .nm {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 300;
-  font-size: clamp(28px, 2.7vw, 46px);
+  font-weight: 600;
+  font-size: clamp(30px, 2.9vw, 50px);
   line-height: 1;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.04em;
 }
 .role {
   font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.02em;
+  font-size: 14.5px;
   color: var(--lichen);
 }
 .voice {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: #8d9a80;
+  color: var(--lichen);
 }
 .mood {
   display: flex;
@@ -153,8 +156,8 @@
   width: min(220px, 100%);
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border: 1px solid rgba(238, 232, 211, 0.16);
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
   background: #000;
 }
 .self video {
@@ -165,7 +168,7 @@
 }
 .faceBox {
   position: absolute;
-  border: 2px solid #cdb67e;
+  border: 2px solid var(--brass);
   border-radius: 6px;
   transition: all 0.4s;
 }
@@ -201,7 +204,7 @@
 .tag {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--lichen);
 }
@@ -215,12 +218,12 @@
 }
 .tDana {
   font-family: var(--font-display);
-  font-weight: 380;
-  letter-spacing: -0.012em;
-  line-height: 1.16;
+  font-weight: 560;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
 }
 .tMe {
-  color: #e0ad7f;
+  color: var(--brass);
   line-height: 1.4;
 }
 
@@ -273,13 +276,13 @@
   gap: 9px;
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid rgba(205, 182, 126, 0.35);
+  border: 1px solid rgba(194, 65, 12, 0.35);
   border-radius: 999px;
-  background: rgba(205, 182, 126, 0.08);
+  background: rgba(194, 65, 12, 0.08);
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.04em;
-  color: #d3e8a8;
+  color: var(--ink-soft);
   cursor: pointer;
   list-style: none;
 }
@@ -295,13 +298,13 @@
   margin: 0;
   padding: 16px 18px;
   transform: translateX(-50%);
-  border-radius: 4px;
-  background: rgba(11, 22, 15, 0.94);
-  border: 1px solid rgba(238, 232, 211, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(27, 19, 13, 0.14);
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
-  color: #c3cdb3;
+  color: var(--ink-soft);
 }
 
 .dock {
@@ -313,7 +316,7 @@
   align-items: center;
   gap: 14px;
   padding: 12px 14px 12px 24px;
-  border-radius: 999px;
+  --glass-r: 999px;
 }
 
 .stat {
@@ -334,7 +337,7 @@
   width: 3px;
   height: 22px;
   border-radius: 2px;
-  background: #cdb67e;
+  background: var(--brass);
   transform: scaleY(0.25);
 }
 .eqOn i {
@@ -359,8 +362,9 @@
 .stat b {
   display: block;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
+  letter-spacing: -0.01em;
 }
 .stat small {
   display: block;
@@ -380,9 +384,9 @@
   min-width: 120px;
   height: 52px;
   padding: 0 22px;
-  border: 1px solid rgba(238, 232, 211, 0.12);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
   font: inherit;
   font-size: 15px;
@@ -392,11 +396,12 @@
     background 0.3s;
 }
 .typ::placeholder {
-  color: #8a977d;
+  color: var(--lichen);
 }
 .typ:focus {
-  border-color: #cdb67e;
-  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--ink);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.22);
 }
 
 .ib {
@@ -406,9 +411,9 @@
   justify-content: center;
   width: 52px;
   height: 52px;
-  border: 1px solid rgba(238, 232, 211, 0.14);
+  border: 1px solid var(--line);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
   cursor: pointer;
   transition:
@@ -417,7 +422,7 @@
     transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .ib:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: #fff;
   transform: translateY(-2px);
 }
 .ib:disabled,
@@ -432,9 +437,9 @@
   grid-area: share;
 }
 .on {
-  border-color: #cdb67e;
-  color: #cdb67e;
-  background: rgba(205, 182, 126, 0.1);
+  border-color: var(--brass);
+  color: var(--brass);
+  background: rgba(194, 65, 12, 0.1);
 }
 
 .hang {
@@ -611,7 +616,7 @@
   }
   .face,
   .wave {
-    border-radius: 50% 50% 20px 20px / 42% 42% 20px 20px;
+    border-radius: 22px;
   }
   .voice {
     display: none;

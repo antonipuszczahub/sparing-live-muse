@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FramingEvent } from '../shared/framing.ts';
 import type { SessionConfig, Turn } from '../shared/types.ts';
 import styles from './App.module.css';
-import { Backdrop } from './components/Backdrop.tsx';
-import { burstVines } from './lib/vines.ts';
+import { Backdrop, pulseBackdrop } from './components/Backdrop.tsx';
+
 import { CallScreen } from './screens/CallScreen.tsx';
 import { ReportScreen } from './screens/ReportScreen.tsx';
 import { SetupScreen } from './screens/SetupScreen.tsx';
@@ -22,10 +22,10 @@ export function App() {
   const [leaving, setLeaving] = useState(false);
   const timer = useRef(0);
 
-  /** Leaving a screen: it recedes while the vines sprout around the pointer, then the next screen rises. */
+  /** Leaving a screen: it recedes while the light flares behind it, then the next screen rises. */
   const go = useCallback((next: View) => {
     window.clearTimeout(timer.current);
-    burstVines();
+    pulseBackdrop();
     setLeaving(true);
     timer.current = window.setTimeout(() => {
       setView(next);

@@ -33,7 +33,7 @@
   font-family: var(--font-display);
   font-size: clamp(150px, 17vw, 310px);
   line-height: 0.78;
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: -0.035em;
 }
 
@@ -64,17 +64,17 @@
   margin: 18px 0 0;
   max-width: 17em;
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(27px, 2.6vw, 44px);
   line-height: 1.08;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.035em;
 }
 .sum {
   margin: 18px 0 0;
   max-width: 48ch;
   font-size: clamp(16px, 1.2vw, 19px);
   line-height: 1.6;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 
 .reviewing {
@@ -94,15 +94,15 @@
 .reviewing b {
   font-family: var(--font-display);
   font-size: clamp(22px, 2vw, 32px);
-  font-weight: 400;
-  letter-spacing: -0.008em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
 }
 .reviewing p {
   margin: 0;
   max-width: 46ch;
   font-size: 16px;
   line-height: 1.6;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 
 @keyframes grow {
@@ -129,9 +129,9 @@
 .h2 {
   margin: 0 0 26px;
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 600;
   font-size: clamp(26px, 2.3vw, 38px);
-  letter-spacing: -0.008em;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 
@@ -141,7 +141,7 @@
 }
 .stat {
   padding: 22px 0;
-  border-top: 1px solid rgba(238, 232, 211, 0.14);
+  border-top: 1px solid rgba(27, 19, 13, 0.14);
 }
 .stat:nth-child(odd) {
   padding-right: 20px;
@@ -149,10 +149,10 @@
 .stat b {
   display: block;
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(44px, 4.4vw, 76px);
   line-height: 1;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.035em;
 }
 .stat b small {
   font-size: 0.38em;
@@ -184,14 +184,14 @@
   height: 8px;
   margin-top: 10px;
   border-radius: 4px;
-  background: rgba(238, 232, 211, 0.1);
+  background: rgba(27, 19, 13, 0.1);
 }
 .bar i {
   display: block;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(90deg, #3f7a3a, #cdb67e);
-  box-shadow: 0 0 16px -2px rgba(205, 182, 126, 0.5);
+  background: linear-gradient(90deg, #3f7a3a, var(--brass));
+  box-shadow: 0 0 16px -2px rgba(194, 65, 12, 0.5);
   transform-origin: left;
   animation: fill 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -234,16 +234,16 @@
   gap: 20px;
   align-items: baseline;
   padding: 20px 0;
-  border-top: 1px solid rgba(238, 232, 211, 0.14);
+  border-top: 1px solid rgba(27, 19, 13, 0.14);
   list-style: none;
 }
 .next li b {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(34px, 3vw, 52px);
   line-height: 1;
-  letter-spacing: -0.012em;
-  color: #cdb67e;
+  letter-spacing: -0.035em;
+  color: var(--brass);
 }
 .next li span {
   font-size: clamp(18px, 1.4vw, 23px);
@@ -262,9 +262,9 @@
 .rtitle {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(32px, 3.2vw, 56px);
-  letter-spacing: -0.012em;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 
@@ -284,8 +284,8 @@
   width: 3px;
   margin-left: -1.5px;
   border-radius: 2px;
-  background: linear-gradient(180deg, rgba(205, 182, 126, 0.05), #3f7a3a 6%, #cdb67e 50%, #3f7a3a 94%, rgba(205, 182, 126, 0.05));
-  box-shadow: 0 0 18px rgba(205, 182, 126, 0.25);
+  background: linear-gradient(180deg, rgba(194, 65, 12, 0.05), #3f7a3a 6%, var(--brass) 50%, #3f7a3a 94%, rgba(194, 65, 12, 0.05));
+  box-shadow: 0 0 18px rgba(194, 65, 12, 0.25);
 }
 
 .rw {
@@ -307,9 +307,10 @@
 }
 .tg span {
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--lichen);
+  font-weight: 600;
 }
 .me .tg span:first-child {
   color: var(--clay);
@@ -317,16 +318,16 @@
 .tD {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 600;
   font-size: clamp(19px, 1.6vw, 26px);
   line-height: 1.18;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.035em;
 }
 .tM {
   margin: 0;
   font-size: clamp(16px, 1.25vw, 20px);
   line-height: 1.45;
-  color: #e0ad7f;
+  color: var(--brass);
 }
 
 /* --c is the colour of the point on the vine */
@@ -340,7 +341,7 @@
   border-radius: 50%;
   background: var(--c);
   box-shadow:
-    0 0 0 6px #08120c,
+    0 0 0 6px #fff9f2,
     0 0 24px -2px var(--c);
 }
 .ndBig {
@@ -348,7 +349,7 @@
   height: 28px;
   margin-top: 4px;
   box-shadow:
-    0 0 0 6px #08120c,
+    0 0 0 6px #fff9f2,
     0 0 0 8px var(--c),
     0 0 30px 0 var(--c);
 }
@@ -357,7 +358,7 @@
   margin: 0;
   font-family: var(--font-serif);
   font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
   font-size: clamp(23px, 2vw, 32px);
   line-height: 1.15;
   color: var(--c);
@@ -379,9 +380,9 @@
 .an {
   margin-top: 14px;
   padding: 20px 22px;
-  border: 1px solid rgba(238, 232, 211, 0.1);
+  border: 1px solid rgba(27, 19, 13, 0.1);
   border-radius: 4px;
-  background: linear-gradient(180deg, rgba(22, 40, 29, 0.72), rgba(11, 22, 15, 0.64));
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.72), rgba(255, 252, 247, 0.82));
   backdrop-filter: blur(14px);
 }
 .th + .an {
@@ -394,11 +395,11 @@
   padding: 0 12px;
   border-radius: 999px;
   background: var(--c);
-  color: #0b1710;
+  color: #fffaf3;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .an p {
@@ -409,14 +410,14 @@
 .an p.why {
   margin-top: 6px;
   font-size: 15px;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 .say {
   margin-top: 14px;
   padding: 14px 16px;
   border-radius: 4px;
-  background: #1d3a22;
-  color: #d6ecba;
+  background: rgba(27, 19, 13, 0.06);
+  color: var(--ink-soft);
   font-size: 16px;
   line-height: 1.5;
 }
@@ -425,9 +426,10 @@
   margin-bottom: 4px;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #92d450;
+  font-weight: 600;
 }
 
 @media (max-width: 980px) {

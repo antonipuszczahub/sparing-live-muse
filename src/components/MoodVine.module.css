@@ -10,7 +10,7 @@
 .time {
   font-family: var(--font-mono);
   font-size: 11px;
-  fill: #97a48a;
+  fill: var(--lichen);
 }
 
 .grow {
@@ -32,7 +32,7 @@
 }
 .node:focus-visible circle:first-child,
 .flag:focus-visible circle {
-  stroke: #fff;
+  stroke: var(--ink);
   stroke-width: 2;
 }
 
@@ -40,5 +40,5 @@
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
-  fill: #0b1710;
+  fill: #fffaf3;
 }

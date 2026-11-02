@@ -95,7 +95,7 @@ export function layoutMoodVine(nodes: MoodNode[], moments: { turn: number; kind:
     }
   }
   const last = laid[n - 1]!;
-  // a curl at the tip, like the vines in the background
+  // a curl at the tip, like a tendril
   path += vertical
     ? ` C${last.x},${last.y + 12} ${last.x + 10},${last.y + 22} ${last.x + 20},${last.y + 16} C${last.x + 28},${last.y + 10} ${last.x + 22},${last.y + 2} ${last.x + 16},${last.y + 6}`
     : ` C${last.x + 16},${last.y} ${last.x + 28},${last.y - 8} ${last.x + 24},${last.y - 22} C${last.x + 20},${last.y - 34} ${last.x + 6},${last.y - 32} ${last.x + 8},${last.y - 20}`;

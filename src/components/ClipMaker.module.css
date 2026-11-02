@@ -4,19 +4,19 @@
   gap: clamp(24px, 3vw, 56px);
   align-items: center;
   padding: clamp(24px, 3vw, 44px);
-  border: 1px solid rgba(238, 232, 211, 0.1);
+  border: 1px solid rgba(27, 19, 13, 0.1);
   border-radius: 4px;
   background:
-    radial-gradient(600px 300px at 100% 0, rgba(205, 182, 126, 0.14), transparent 70%),
-    linear-gradient(180deg, rgba(22, 40, 29, 0.7), rgba(11, 22, 15, 0.62));
+    radial-gradient(600px 300px at 100% 0, rgba(194, 65, 12, 0.14), transparent 70%),
+    linear-gradient(180deg, rgba(255, 252, 247, 0.7), rgba(255, 252, 247, 0.8));
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 600;
   font-size: clamp(26px, 2.3vw, 38px);
-  letter-spacing: -0.008em;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 
@@ -25,13 +25,13 @@
   max-width: 40ch;
   font-size: 17px;
   line-height: 1.55;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 
 .error {
   margin: 14px 0 0;
   font-size: 14px;
-  color: #ff9b84;
+  color: var(--ember);
 }
 
 .result {
@@ -42,16 +42,16 @@
 }
 .result video {
   width: 100%;
-  border: 1px solid rgba(238, 232, 211, 0.14);
+  border: 1px solid rgba(27, 19, 13, 0.14);
   border-radius: 3px;
 }
 .post {
   width: 100%;
   margin-top: 12px;
   padding: 12px 14px;
-  border: 1px solid rgba(238, 232, 211, 0.16);
+  border: 1px solid rgba(27, 19, 13, 0.16);
   border-radius: 3px;
-  background: rgba(7, 16, 11, 0.6);
+  background: rgba(255, 252, 247, 0.78);
   color: var(--ink);
   font: inherit;
   font-size: 14px;
@@ -59,12 +59,12 @@
   outline: none;
 }
 .post:focus {
-  border-color: #cdb67e;
+  border-color: var(--brass);
 }
 .note {
   margin: 10px 0 0;
   font-size: 12px;
-  color: #f0c46c;
+  color: var(--ochre);
 }
 .actions {
   display: flex;
@@ -79,7 +79,7 @@
   width: 208px;
   height: 370px;
   overflow: hidden;
-  border: 1px solid rgba(238, 232, 211, 0.16);
+  border: 1px solid rgba(27, 19, 13, 0.16);
   border-radius: 4px;
   background: linear-gradient(180deg, #14301c, #07100b);
   box-shadow: 0 40px 70px -34px #000;
@@ -112,8 +112,8 @@
   margin-bottom: 2px;
   font-family: var(--font-display);
   font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.005em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 .thought {
@@ -136,8 +136,8 @@
   bottom: 16px;
   font-family: var(--font-display);
   font-size: 44px;
-  font-weight: 300;
-  letter-spacing: -0.012em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 .built {

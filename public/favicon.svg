@@ -1,11 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#07100b" />
-  <g transform="translate(14 3) scale(0.64)">
-    <path d="M12 87 C 26 77, 45 67, 46 55 C 47 44, 34 42, 25 36 C 15 30, 17 16, 31 12 C 39 10, 47 14, 47 23" fill="none" stroke="#cdb67e" stroke-width="7.5" stroke-linecap="round" />
-    <g transform="translate(13 85) rotate(-118) scale(1.6)"><path d="M0 0 C 3 -5.5, 11 -7.5, 17 -5 C 15.5 1, 8 4.5, 0 0 Z" fill="#8fa27c" /></g>
-    <g transform="translate(46 55) rotate(-30) scale(1.6)"><path d="M0 0 C 3 -5.5, 11 -7.5, 17 -5 C 15.5 1, 8 4.5, 0 0 Z" fill="#8fa27c" /></g>
-    <g transform="translate(22 22) rotate(-160) scale(1.7)"><path d="M0 0 C 2.5 -4.5, 8 -6, 12.5 -3.6 C 11.5 1.2, 5.5 3.4, 0 0 Z" fill="#9c3a4a" /></g>
-    <g transform="translate(22 22) rotate(-125) scale(1.7)"><path d="M0 0 C 2.5 -4.5, 8 -6, 12.5 -3.6 C 11.5 1.2, 5.5 3.4, 0 0 Z" fill="#b24a5a" /></g>
-    <g transform="translate(22 22) rotate(-195) scale(1.7)"><path d="M0 0 C 2.5 -4.5, 8 -6, 12.5 -3.6 C 11.5 1.2, 5.5 3.4, 0 0 Z" fill="#862f3f" /></g>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff8f45" />
+      <stop offset="0.55" stop-color="#ff5a1f" />
+      <stop offset="1" stop-color="#f23d0a" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)" />
+  <g transform="translate(9.5 9.5) scale(0.9)">
+    <path d="M33 15 A9 9 0 1 0 24 24 A9 9 0 1 1 15 33" fill="none" stroke="#fff" stroke-width="7.5" stroke-linecap="round" />
   </g>
 </svg>

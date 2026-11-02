@@ -4,26 +4,31 @@
 @property --mc {
   syntax: '<color>';
   inherits: true;
-  initial-value: #aeb99e;
+  initial-value: #7d705f;
 }
 
-/* One accent: brass, used sparingly. The greens belong to the foliage and the moods. */
+/* A calm warm-grey page, black controls, and orange only where something lights up (the glow, the accent, the
+   character's presence). The mood colours tint the glow and the portrait ring. */
 :root {
-  --mc: #aeb99e;
-  --ink: #eee8d3;
-  --lichen: #a3ae96;
-  --brass: #cdb67e;
-  --brass-hi: #e6d6a8;
-  --canopy: #07100b;
-  --mud: #4a3622;
-  --clay: #d9a070;
-  --ochre: #e0a73e;
-  --ember: #f0603f;
-  --font-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --font-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  /* Labels are small tracked capitals in the body face, not a monospace. */
-  --font-mono: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mc: #7d705f;
+  --ink: #14110e;
+  --ink-soft: #3d3731;
+  --lichen: #6b645b;
+  --brass: #c4410a;
+  --brass-hi: #ff5a1f;
+  --canopy: #f7f4ef;
+  --paper: #ffffff;
+  --line: rgba(20, 17, 14, 0.1);
+  --mud: #ece6dd;
+  --clay: #b4540f;
+  --ochre: #a65d00;
+  --ember: #d9381e;
+  --r-card: 24px;
+  --r-field: 14px;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   transition: --mc 0.9s ease;
 }
 
@@ -49,12 +54,12 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--ink);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: rgba(205, 182, 126, 0.35);
+  background: rgba(255, 90, 31, 0.28);
 }
 
 @media (prefers-reduced-motion: reduce) {

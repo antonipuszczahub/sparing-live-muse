@@ -6,7 +6,7 @@ import { moodLabel, t, translate, useLang } from '../i18n/index.ts';
 import { clipSupported, renderClip, type ClipResult } from '../lib/clip.ts';
 import { vars } from '../lib/css.ts';
 import { MOOD_COLOR } from '../lib/mood.ts';
-import { ArchPortrait } from './ArchPortrait.tsx';
+import { Archetype } from './Archetype.tsx';
 import ui from './ui.module.css';
 import styles from './ClipMaker.module.css';
 
@@ -117,7 +117,7 @@ export function ClipMaker({
       </div>
       <div className={styles.phone} style={vars({ '--c': MOOD_COLOR[mood] })} aria-hidden="true">
         <div className={styles.face}>
-          <ArchPortrait scenario={scenario} />
+          <Archetype scenario={scenario} />
         </div>
         <div className={styles.who}>
           <b>{first}</b>

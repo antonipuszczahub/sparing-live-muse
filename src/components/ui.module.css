@@ -49,88 +49,91 @@
 }
 .disp {
   font-family: var(--font-display);
-  font-optical-sizing: auto;
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 .ser {
   font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
 }
 
-/* Labels: small tracked capitals */
+/* Labels: small, tracked, upper case */
 .lbl {
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
   color: var(--lichen);
 }
 
-/* The wordmark scales with the font size set on .brand */
+/* The logo scales with the font size set on .brand: a tile for the mark, then the name */
 .brand {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  gap: 0.5em;
   line-height: 1;
 }
 
-.wm {
-  display: inline-flex;
-  align-items: baseline;
-  font-family: var(--font-display);
-  font-size: 1em;
-  font-weight: 460;
-  letter-spacing: -0.01em;
-  color: var(--ink);
+.tile {
+  display: grid;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 0.5em;
+  background: linear-gradient(145deg, #ff8f45 0%, #ff5a1f 55%, #f23d0a 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 -1px 0 rgba(160, 30, 0, 0.25) inset,
+    0 0.45em 0.9em -0.4em rgba(255, 90, 31, 0.75);
 }
-.wm i {
-  margin-left: 0.28em;
-  font-style: italic;
-  font-weight: 400;
-  color: var(--brass);
-}
-/* the S is the face's own letter in brass; a leaf sprouts from its upper terminal */
-.glyph {
-  width: 0.6em;
-  height: 0.86em;
-  margin-right: 0.04em;
+.tile svg {
+  width: 74%;
+  height: 74%;
   overflow: visible;
 }
-/* the stem draws itself once, then leaves and the flower open from their base */
-.tendril {
+.arcs {
   stroke-dasharray: 1;
   stroke-dashoffset: 0;
-  animation: grow 1.6s cubic-bezier(0.3, 0.6, 0.2, 1) 0.3s backwards;
-}
-.sprout {
-  animation: open 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  animation: grow 1.1s cubic-bezier(0.3, 0.6, 0.2, 1) 0.2s backwards;
 }
 @keyframes grow {
   from {
     stroke-dashoffset: 1;
   }
 }
-@keyframes open {
-  from {
-    transform: scale(0);
-  }
+
+.wm {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  font-family: var(--font-display);
+  font-size: 1em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.wm i {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--brass-hi);
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  min-height: 46px;
-  padding: 0 16px;
-  border-radius: 3px;
-  border: 1px solid rgba(238, 232, 211, 0.12);
-  background: rgba(12, 24, 17, 0.5);
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(14px);
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: #c3cdb3;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
   transition:
     border-color 0.3s,
     background 0.3s;
@@ -139,40 +142,43 @@ button.pill {
   cursor: pointer;
 }
 button.pill:hover {
-  border-color: rgba(238, 232, 211, 0.3);
+  border-color: rgba(20, 17, 14, 0.3);
+  background: #fff;
 }
 .pill b {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--brass);
+  background: var(--brass-hi);
+  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.18);
   animation: breathe 3.2s ease-in-out infinite;
 }
 .pillOff b {
-  background: #6d7a62;
+  background: var(--lichen);
   box-shadow: none;
   animation: none;
 }
 
+/* a segmented switch: the chosen option is a black pill */
 .seg {
   display: flex;
-  padding: 3px;
-  border-radius: 3px;
-  background: rgba(12, 24, 17, 0.55);
-  border: 1px solid rgba(238, 232, 211, 0.1);
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
   backdrop-filter: blur(14px);
 }
 .seg button {
   min-width: 52px;
-  min-height: 40px;
-  padding: 0 14px;
+  min-height: 36px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 3px;
+  border-radius: 999px;
   background: transparent;
   font: inherit;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  color: #b4bda2;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--lichen);
   cursor: pointer;
   transition:
     background 0.3s,
@@ -183,7 +189,7 @@ button.pill:hover {
 }
 .seg button[aria-pressed='true'] {
   background: var(--ink);
-  color: #0b1710;
+  color: #fff;
   font-weight: 600;
 }
 
@@ -193,14 +199,14 @@ button.pill:hover {
   justify-content: center;
   gap: 10px;
   min-height: 48px;
-  padding: 0 22px;
-  border: 1px solid rgba(238, 232, 211, 0.2);
-  border-radius: 3px;
-  background: rgba(12, 24, 17, 0.5);
+  padding: 0 24px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(14px);
   font: inherit;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink);
   cursor: pointer;
   transition:
@@ -209,43 +215,47 @@ button.pill:hover {
     transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .btn:hover:not(:disabled) {
-  background: rgba(238, 232, 211, 0.1);
-  border-color: rgba(238, 232, 211, 0.4);
-  transform: translateY(-2px);
+  background: #fff;
+  border-color: rgba(20, 17, 14, 0.3);
+  transform: translateY(-1px);
 }
 .btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
 .btnPrimary {
-  background: var(--brass);
-  border-color: var(--brass);
-  color: #0b1710;
-  font-weight: 600;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
 }
 .btnPrimary:hover:not(:disabled) {
-  background: #e2cf9a;
-  border-color: #e2cf9a;
+  background: #2c241d;
+  border-color: #2c241d;
 }
 
 .glass {
-  border: 1px solid rgba(238, 232, 211, 0.13);
-  background: rgba(8, 17, 12, 0.6);
-  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--glass-r, var(--r-card));
+  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(22px) saturate(1.1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 24px 60px -30px rgba(120, 60, 20, 0.28),
+    0 2px 6px rgba(20, 17, 14, 0.04);
 }
 
 .note {
   margin: 0;
   padding: 12px 18px;
-  border: 1px solid rgba(224, 167, 62, 0.45);
-  border-radius: 4px;
-  background: rgba(224, 167, 62, 0.1);
+  border: 1px solid rgba(166, 93, 0, 0.3);
+  border-radius: var(--r-field);
+  background: rgba(255, 244, 222, 0.8);
   font-size: 14px;
   line-height: 1.5;
-  color: #f0c46c;
+  color: var(--ochre);
 }
 .noteBad {
-  border-color: rgba(240, 96, 63, 0.5);
-  background: rgba(240, 96, 63, 0.1);
-  color: #ff9b84;
+  border-color: rgba(217, 56, 30, 0.35);
+  background: rgba(255, 233, 228, 0.85);
+  color: var(--ember);
 }

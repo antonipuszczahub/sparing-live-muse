@@ -1,4 +1,4 @@
-/* The screen floats above the backdrop. It enters with a transform only: a fading ancestor would stop the glass panels from blurring the vines behind them. */
+/* The screen floats above the backdrop. It enters with a transform only: a fading ancestor would stop the glass panels from blurring the light behind them. */
 .screen {
   position: relative;
   z-index: 2;

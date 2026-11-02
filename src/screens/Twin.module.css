@@ -20,10 +20,10 @@
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(38px, 4.6vw, 76px);
   line-height: 0.98;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.035em;
 }
 
 .intro {
@@ -31,7 +31,7 @@
   max-width: 54ch;
   font-size: clamp(16px, 1.3vw, 20px);
   line-height: 1.55;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 .intro strong {
   font-weight: 600;
@@ -56,8 +56,8 @@
   bottom: 10px;
   width: 3px;
   border-radius: 2px;
-  background: linear-gradient(180deg, #3f7a3a, #cdb67e 50%, rgba(205, 182, 126, 0.1));
-  box-shadow: 0 0 18px rgba(205, 182, 126, 0.2);
+  background: linear-gradient(180deg, #3f7a3a, var(--brass) 50%, rgba(194, 65, 12, 0.1));
+  box-shadow: 0 0 18px rgba(194, 65, 12, 0.2);
 }
 
 .step {
@@ -76,13 +76,13 @@
   border-radius: 50%;
   background: var(--brass);
   box-shadow:
-    0 0 0 6px #08120c,
+    0 0 0 6px #fff9f2,
     0 0 20px -2px var(--brass);
 }
 .noteNode {
   background: var(--lichen);
   box-shadow:
-    0 0 0 6px #08120c,
+    0 0 0 6px #fff9f2,
     0 0 20px -2px var(--lichen);
 }
 .waiting .node {
@@ -103,9 +103,10 @@
   gap: 8px;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--lichen);
+  font-weight: 600;
 }
 .thought {
   font-family: var(--font-serif);
@@ -130,23 +131,24 @@
 .ready {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--brass);
+  font-weight: 600;
 }
 .company {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(28px, 2.6vw, 44px);
   line-height: 1.02;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.035em;
 }
 .summary {
   margin: 0;
   font-size: 16px;
   line-height: 1.65;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 .who b {
   font-weight: 600;
@@ -162,9 +164,9 @@
 .lists h3 {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 18px;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.035em;
 }
 .lists ul {
   display: flex;
@@ -175,7 +177,7 @@
   list-style: none;
   font-size: 15px;
   line-height: 1.5;
-  color: #b4bda2;
+  color: var(--lichen);
 }
 .lists li::before {
   content: '';

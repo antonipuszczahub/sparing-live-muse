@@ -44,6 +44,26 @@ const SETTING: Record<ScenarioId, string> = {
 };
 
 /**
+ * One neutral portrait of the kind of person each scenario calls, for the start screen
+ * (generated once by `npm run make:archetypes` and shipped as static files, so the start screen costs nothing).
+ */
+export async function drawArchetype(scenario: ScenarioId, gender: 'm' | 'f', session: string): Promise<string> {
+  const who = gender === 'f' ? 'woman' : 'man';
+  return post(
+    '/images/generations',
+    {
+      model: MODELS.image,
+      n: 1,
+      size: '1024x1024',
+      output_format: 'webp',
+      prompt: `Editorial portrait photograph of a fictional ${who}, around 50 years old, who is a ${ROLE_EN[scenario]}, ${SETTING[scenario]}. Warm soft daylight from a window, shallow depth of field, calm and attentive expression, looking at the camera. Natural skin texture, true-to-life colour, photographic, no text, no logos.`,
+    },
+    session,
+    'archetype',
+  );
+}
+
+/**
  * Muse Image draws the counterpart once, then edits the same face into three expressions
  * so the portrait follows the character's mood during the call. 3 images, about 3 cents.
  */

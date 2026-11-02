@@ -102,7 +102,7 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
           ) : (
             <div className={s.reviewing}>
               <svg viewBox="0 0 180 48" aria-hidden="true">
-                <path pathLength={1} d="M4 38 C 30 6, 52 44, 80 22 S 130 6, 172 16" fill="none" stroke="#cdb67e" strokeWidth="3.4" strokeLinecap="round" />
+                <path pathLength={1} d="M4 38 C 30 6, 52 44, 80 22 S 130 6, 172 16" fill="none" stroke="#c2410c" strokeWidth="3.4" strokeLinecap="round" />
               </svg>
               <b>{t('reviewing', secs)}</b>
               <p>{t('reviewingNote', first)}</p>
@@ -163,7 +163,7 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                   <div className={s.bar}>
                     <i style={{ width: `${result.skills[k] * 10}%` }} />
                     <svg style={{ left: `calc(${result.skills[k] * 10}% - 10px)` }} viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M4 20 C 3 11 9 4 20 3 C 21 13 15 20 4 20 Z" fill="#e6d6a8" />
+                      <path d="M4 20 C 3 11 9 4 20 3 C 21 13 15 20 4 20 Z" fill="#ee6a1f" />
                     </svg>
                   </div>
                 </div>
