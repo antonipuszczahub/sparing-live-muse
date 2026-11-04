@@ -6,6 +6,7 @@ import type { TraceRow } from '../../shared/trace.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { t, useLang } from '../i18n/index.ts';
 import { ApiError, requestAudit, requestTrace } from '../lib/api.ts';
+import { recordRun } from '../lib/history.ts';
 import { recordWeakSpots } from '../lib/memory.ts';
 import { ReportView } from './ReportView.tsx';
 
@@ -40,6 +41,7 @@ export function ReportScreen({
       .then((r) => {
         if (!live) return;
         recordWeakSpots(r.weaknessTags, lang);
+        recordRun({ t: Date.now(), score: r.score, scenario: config.scenario, level: config.level }, lang);
         setResult(r);
         // the review is the last call of the session, so the ledger is complete now
         void requestTrace(session).then((rows) => live && setTrace(rows));

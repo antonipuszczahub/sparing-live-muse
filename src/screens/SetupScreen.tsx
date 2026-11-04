@@ -10,6 +10,7 @@ import { Switch } from '../components/Switch.tsx';
 import { AboutSheet } from '../components/AboutSheet.tsx';
 import { AudioCheck } from '../components/AudioCheck.tsx';
 import { MicPicker } from '../components/MicPicker.tsx';
+import { Progress } from '../components/Progress.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
 import ui from '../components/ui.module.css';
 import { setLang, t, useLang } from '../i18n/index.ts';
@@ -254,6 +255,7 @@ export function SetupScreen({
           )}
 
           <footer className={s.foot}>
+            <Progress lang={lang} />
             {weak.length > 0 && (
               <section className={s.memory}>
                 <div className={s.memoryHead}>

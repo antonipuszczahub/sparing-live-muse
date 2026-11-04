@@ -57,6 +57,9 @@ export const pl: Dict = {
   whoPitch: 'Inwestor',
   optional: 'opcjonalnie',
   practising: 'Ćwiczysz',
+  progressTitle: 'Twoje ostatnie rozmowy',
+  progressBest: (n) => `najlepszy ${n}`,
+  progressClear: 'Wyczyść',
   close: 'Zamknij',
 
   // ---- call

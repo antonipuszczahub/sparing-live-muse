@@ -56,6 +56,9 @@ export const en = {
   whoPitch: 'Investor',
   optional: 'optional',
   practising: 'Practising',
+  progressTitle: 'Your last calls',
+  progressBest: (n: number) => `best ${n}`,
+  progressClear: 'Clear',
   close: 'Close',
 
   // ---- call
