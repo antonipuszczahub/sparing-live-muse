@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo slide: the weak claim</title>
+  <style>
+    /* One slide with one deliberately weak claim, to share on screen in the demo (docs/DEMO.md).
+       Open this file in a browser window, press F11, and share that window. */
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      background: #f6f2ec;
+      font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      color: #1b130d;
+    }
+    .slide {
+      width: min(94vw, 168vh);
+      aspect-ratio: 16 / 9;
+      padding: 5.5% 6%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #fffdf9;
+      border-radius: 1.6vw;
+      box-shadow: 0 2.4vw 5vw -2vw rgba(120, 55, 15, 0.35);
+    }
+    .kicker { font-size: clamp(12px, 1.5vw, 26px); letter-spacing: 0.14em; text-transform: uppercase; color: #8a7d70; }
+    h1 { margin: 0.4em 0 0; font-size: clamp(28px, 4.6vw, 84px); line-height: 1.04; letter-spacing: -0.03em; font-weight: 650; }
+    .big { display: flex; align-items: baseline; gap: 2.4vw; }
+    .big b { font-size: clamp(80px, 17vw, 330px); line-height: 0.9; letter-spacing: -0.05em; color: #ff5a1f; font-weight: 700; }
+    .big span { font-size: clamp(20px, 3vw, 56px); line-height: 1.15; max-width: 14em; }
+    .row { display: flex; gap: 4vw; font-size: clamp(14px, 1.9vw, 34px); color: #5c5148; }
+    .row b { color: #1b130d; }
+    .name { font-size: clamp(11px, 1.2vw, 20px); color: #a79f94; }
+  </style>
+</head>
+<body>
+  <main class="slide">
+    <div>
+      <div class="kicker">Why now</div>
+      <h1>Empty chairs are the biggest leak in a dental clinic</h1>
+    </div>
+    <div class="big">
+      <b>94%</b>
+      <span>of clinics lose visits to empty appointment slots</span>
+    </div>
+    <div class="row">
+      <div>Market: <b>$40B</b></div>
+      <div>Growing <b>fast</b></div>
+      <div>No direct competitor</div>
+    </div>
+    <div class="name">Slotfill, seed round</div>
+  </main>
+</body>
+</html>

@@ -24,6 +24,19 @@ The submission form takes a link to a video of at most 3:00 (judges stop at 3:00
 | 2:20 | Open the README table or `docs/MANIFEST.md` | "The live character runs on Muse Spark Open, served by Baseten. Same speed as hosted Spark: median first word 1.2 s, no failures in 24 scripted calls. Transcription is Voice Transcribe, research and the audit are Wonder, the face is Muse Image, and every call is in the budget ledger." |
 | 2:45 | Flip to Polish, one line of a call, then the clip button | "One switch and it is Polish, with gender and formal address handled. And it renders a clip of the moment you lost them." |
 
+## A script for your side of the call
+
+After "Demo setup" the pitch is an app that fills the empty appointment slots of dental clinics. These lines give the call a clear arc (cold, a moment she warms up, a mistake, a recovery) without sounding rehearsed. Say them in your own words; the character reacts to what you actually say.
+
+1. **Open.** "Hi, I'm [name]. We fill the empty appointment slots of dental clinics, and two clinics already pay us eight hundred a month."
+2. **Let her cut in** with her first question, then answer it in one sentence. This is the "full duplex" moment: stop talking the instant she speaks, and once, on purpose, talk over her mid-sentence.
+3. **Share the screen** and open `docs/demo-slide.html` in its own window (press F11 first). It is one slide with a bold claim and no source: "94% of clinics lose visits", "Market: $40B". Say: "Here is the slide." She should go for the missing source within a turn or two.
+4. **The mistake.** Answer her with the market size instead of a customer: "The market is about forty billion, and we are just getting started." Her mood should drop; this is the sentence the review will point to.
+5. **The recovery.** "Fair. Two clinics pay eight hundred a month each, both renewed once, and a third signs next month." Her mood should rise.
+6. **Close** with a clear ask: "Can we take twenty minutes on Thursday so I can show you the renewal numbers?" Then hang up yourself, or keep going until she does.
+
+Record a dry run first: the model answers differently each time, so the exact words will not repeat. If a take goes flat, start again; one call costs a few cents.
+
 ## Cut if it runs long
 
 The camera and SAM are not in the shot list. Drop the Polish switch before dropping the review or the open-weights line: those two carry the score.
