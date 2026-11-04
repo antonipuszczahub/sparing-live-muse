@@ -51,10 +51,12 @@ export interface ReportViewProps {
   secs: number;
   onAgain: () => void;
   onRedial: () => void;
+  /** The review failed: ask for it again (the call itself is kept). */
+  onRetry: () => void;
 }
 
 /** The review: score, the mood vine, the numbers, and the replay with what the character was thinking. */
-export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain, onRedial }: ReportViewProps) {
+export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain, onRedial, onRetry }: ReportViewProps) {
   const lang = langOf(config);
   const persona = config.persona;
   const first = persona.name.split(' ')[0]!;
@@ -145,9 +147,14 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
               )}
             </>
           ) : error ? (
-            <p className={`${ui.note} ${ui.noteBad}`} style={{ marginTop: 18 }}>
-              {error}
-            </p>
+            <>
+              <p className={`${ui.note} ${ui.noteBad}`} style={{ marginTop: 18 }}>
+                {error}
+              </p>
+              <button type="button" className={`${ui.btn} ${ui.btnPrimary}`} style={{ marginTop: 14 }} onClick={onRetry}>
+                {t('retryReview')}
+              </button>
+            </>
           ) : (
             <div className={s.reviewing}>
               <svg viewBox="0 0 180 48" aria-hidden="true">

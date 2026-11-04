@@ -36,6 +36,7 @@ export function ReportScreen({
   const [error, setError] = useState('');
   const [trace, setTrace] = useState<TraceRow[]>([]);
   const [secs, setSecs] = useState(0);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let live = true;
@@ -52,7 +53,7 @@ export function ReportScreen({
     return () => {
       live = false;
     };
-  }, [session, config, turns, durationMs, hungUp, camera, lang]);
+  }, [session, config, turns, durationMs, hungUp, camera, lang, attempt]);
 
   useEffect(() => {
     if (result || error) return;
@@ -60,5 +61,9 @@ export function ReportScreen({
     return () => clearInterval(id);
   }, [result, error]);
 
-  return <ReportView session={session} config={config} turns={turns} durationMs={durationMs} hungUp={hungUp} camera={camera} result={result} trace={trace} error={error} secs={secs} onAgain={onAgain} onRedial={onRedial} />;
+  return <ReportView session={session} config={config} turns={turns} durationMs={durationMs} hungUp={hungUp} camera={camera} result={result} trace={trace} error={error} secs={secs} onAgain={onAgain} onRedial={onRedial} onRetry={() => {
+    setError('');
+    setSecs(0);
+    setAttempt((n) => n + 1);
+  }} />;
 }

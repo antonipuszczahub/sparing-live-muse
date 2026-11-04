@@ -180,6 +180,7 @@ export const en = {
   copyPost: 'Copy post text',
   copied: 'Copied',
   copyReview: 'Copy as text',
+  retryReview: 'Try the review again',
   summaryMore: 'Read the whole summary',
   summaryLess: 'Show less',
   reviewMoments: 'Key moments',

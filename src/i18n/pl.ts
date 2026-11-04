@@ -181,6 +181,7 @@ export const pl: Dict = {
   copyPost: 'Skopiuj tekst posta',
   copied: 'Skopiowano',
   copyReview: 'Kopiuj jako tekst',
+  retryReview: 'Spróbuj ponownie przygotować recenzję',
   summaryMore: 'Czytaj całe podsumowanie',
   summaryLess: 'Zwiń',
   reviewMoments: 'Kluczowe momenty',
