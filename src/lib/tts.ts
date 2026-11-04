@@ -207,7 +207,7 @@ export class Speaker {
 /** Pitch correction for a voice that does not fit the character's gender (Windows ships one Polish voice per gender at best). */
 export const pitchFor = (matched: boolean, gender: 'm' | 'f'): number => (matched ? 1 : gender === 'm' ? 0.8 : 1.1);
 
-/** What the call engine needs from whatever speaks for the character: the browser's voice or a cloud voice. */
+/** What the call engine needs from whatever speaks for the character (the browser's voice, in this build). */
 export interface SpeechOut {
   onIdle: () => void;
   onStart: () => void;
@@ -217,27 +217,4 @@ export interface SpeechOut {
   finish(): void;
   reset(): void;
   cancel(): void;
-  dispose?(): void;
 }
-
-/** Says one sentence with the browser's voice and resolves when it has been spoken (or the browser gave up). */
-export function speakBrowser(text: string, voice: SpeechSynthesisVoice | null, lang: Lang, pitch = 1, rate = 1.04): Promise<void> {
-  return new Promise((resolve) => {
-    const u = new SpeechSynthesisUtterance(text);
-    if (voice) u.voice = voice;
-    u.lang = voice?.lang ?? LANG_META[lang].speech;
-    u.pitch = pitch;
-    u.rate = rate;
-    // Some browsers never report the end of an utterance; do not hang the call on that.
-    const watchdog = window.setTimeout(done, Math.max(3000, text.length * 110));
-    function done() {
-      window.clearTimeout(watchdog);
-      resolve();
-    }
-    u.onend = done;
-    u.onerror = done;
-    speechSynthesis.speak(u);
-  });
-}
-
-export const cancelBrowserSpeech = () => speechSynthesis.cancel();

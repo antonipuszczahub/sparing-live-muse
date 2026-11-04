@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Request, Response } from 'express';
-import { Allowance, rateLimit } from '../server/limits.ts';
+import { rateLimit } from '../server/limits.ts';
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -48,14 +48,4 @@ test('the allowance comes back once the window has passed', async () => {
   assert.equal(call(limit, '4.4.4.4').passed, false);
   await wait(60);
   assert.ok(call(limit, '4.4.4.4').passed);
-});
-
-test('the character allowance counts units, refuses what does not fit, and expires old use', () => {
-  const a = new Allowance(1000);
-  assert.ok(a.take('v', 60, 100, 0));
-  assert.ok(a.take('v', 40, 100, 10), 'exactly the maximum still fits');
-  assert.equal(a.take('v', 1, 100, 20), false, 'one more does not');
-  assert.ok(a.take('other', 100, 100, 20), 'visitors do not share an allowance');
-  assert.ok(a.take('v', 100, 100, 1500), 'after the window the use has expired');
-  assert.equal(a.take('v', 101, 100, 1500), false, 'a single request over the maximum is never allowed');
 });

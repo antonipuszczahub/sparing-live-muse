@@ -16,10 +16,6 @@ export interface LedgerEntry {
   promptTokens?: number;
   cachedTokens?: number;
   completionTokens?: number;
-  /** Characters sent to a text-to-speech service. */
-  chars?: number;
-  /** Estimated cost billed by a service outside the Meta budget (ElevenLabs). Not counted against the daily limit. */
-  externalUsd?: number;
   costUsd: number;
   firstTokenMs?: number;
   totalMs?: number;
@@ -72,16 +68,6 @@ class Ledger {
   /** Every call recorded for one session (never prompts or transcripts: the ledger holds none). */
   forSession(session: string): LedgerEntry[] {
     return this.entries.filter((e) => e.session === session);
-  }
-
-  /** Characters spoken today by a text-to-speech provider, for its own daily cap. */
-  charsToday(provider: string): number {
-    const today = day(Date.now());
-    return this.entries.filter((e) => e.provider === provider && day(e.t) === today).reduce((s, e) => s + (e.chars ?? 0), 0);
-  }
-
-  charsBySession(session: string, provider: string): number {
-    return this.entries.filter((e) => e.provider === provider && e.session === session).reduce((s, e) => s + (e.chars ?? 0), 0);
   }
 
   /** Can a new call start? Calls already in flight are never cut. */

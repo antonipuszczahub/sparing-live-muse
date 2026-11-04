@@ -23,7 +23,6 @@
     "eval:inject": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/eval-inject.ts",
     "check:open": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/check-open.ts",
     "manifest": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/manifest.ts",
-    "check:voice": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/check-voice.ts",
     "start": "tsx server/index.ts"
   },
   "dependencies": {

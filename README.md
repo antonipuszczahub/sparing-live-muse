@@ -133,13 +133,12 @@ Wear headphones, so the character does not hear itself.
 
 | Command | What it does |
 |---|---|
-| `npm run preflight` | Checks, in one go, that the app is ready to be recorded or submitted (server, key, no third-party voice, budget, files, git); calls no model |
+| `npm run preflight` | Checks, in one go, that the app is ready to be recorded or submitted (server, key, budget, files, git); calls no model |
 | `npm run check:meta` | Probes the API: chat, streaming, JSON schema, Wonder |
 | `npm run try:turn` | Plays a short scripted call and prints latency per turn (`-- --lang pl` for Polish) |
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
 | `npm run try:audit` | Audits a scripted call (`-- --lang pl` for Polish) |
 | `npm run try:portrait` | Draws the three portraits |
-| `npm run check:voice` | Experimental, needs an ElevenLabs key: lists its voices and saves a sample line per voice to `data/voice-samples/` (not part of the submission) |
 | `npm run check:open` | Probes the open-weights host (see `.env.example` for Baseten, Fireworks, Modal, Ollama) |
 | `npm run manifest` | Rebuilds [`docs/MANIFEST.md`](docs/MANIFEST.md) from the budget ledger: models, tokens, cost, latency, open-weights share |
 | `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics, both languages |
@@ -176,7 +175,7 @@ The hackathon allows only Meta models at runtime, and Meta has no speech-synthes
 | Camera framing | SAM 3.1 | yes |
 | **Speaking the character's lines** | **the browser's own voice (OS feature)** | **no, and not an AI model call** |
 
-An optional ElevenLabs path exists in the code from earlier experiments. ElevenLabs is not a Meta model, so it is **off in this submission**: even with `ELEVENLABS_API_KEY` set, the server ignores it unless `THIRD_PARTY_VOICE=on` is also set, and that switch is not set on the demo or on the hosted link. Nothing the character says is sent to any non-Meta service.
+The code contains no third-party speech service: the hackathon allows only Meta models at runtime, and Meta has no speech synthesis, so the voice is the operating system's. (An optional ElevenLabs path from early experiments was removed before submission; it is in the git history only.) Nothing the character says is sent to any non-Meta service.
 
 ## Evaluation
 
@@ -214,7 +213,7 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); an optional ElevenLabs path is built but switched off in this submission because the hackathon allows only Meta models at runtime. There is no hosted link: the project runs from this repository (see [Run it](#run-it)), and a hosted copy is optional. Before recording or submitting, `npm run preflight` checks the running app, the key, the voice switch, the budget and the files in one go.
+Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); there is no third-party speech service in the code, because the hackathon allows only Meta models at runtime. There is no hosted link: the project runs from this repository (see [Run it](#run-it)), and a hosted copy is optional. Before recording or submitting, `npm run preflight` checks the running app, the key, the voice switch, the budget and the files in one go.
 
 ## License
 

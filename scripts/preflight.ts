@@ -21,7 +21,6 @@ const web = 'http://localhost:5173/';
 const major = Number(process.versions.node.split('.')[0]);
 add(major >= 22 ? 'ok' : 'fail', `Node ${process.versions.node}${major >= 22 ? '' : ' (the README asks for 22+)'}`);
 add(process.env.MODEL_API_KEY ? 'ok' : 'fail', process.env.MODEL_API_KEY ? 'Meta key present in the environment' : 'MODEL_API_KEY is missing (.env)');
-add(process.env.THIRD_PARTY_VOICE === 'on' ? 'fail' : 'ok', process.env.THIRD_PARTY_VOICE === 'on' ? 'THIRD_PARTY_VOICE=on: a third-party voice would play. Unset it before recording' : 'Third-party voice is off (the browser voice is used)');
 
 // --- the running app ---
 try {
@@ -31,13 +30,11 @@ try {
     openWeights?: boolean;
     openHost?: string;
     openDefault?: boolean;
-    voice?: unknown;
     budget?: { spentToday: number; dailyLimit: number };
   };
   add('ok', `Server answers on :${port}`);
   add(h.keyConfigured ? 'ok' : 'fail', h.keyConfigured ? 'Server sees the Meta key' : 'Server does not see the Meta key');
   add(h.openWeights && h.openDefault ? 'ok' : 'warn', h.openWeights ? `Open weights ${h.openDefault ? 'on by default' : 'available but NOT the default'} (${h.openHost ?? '?'})` : 'No open-weights host: the demo will not show Muse Spark Open');
-  add(h.voice ? 'fail' : 'ok', h.voice ? 'The server reports a cloud voice as active. It must be off for the recording' : 'No cloud voice active');
   if (h.budget) {
     const left = h.budget.dailyLimit - h.budget.spentToday;
     add(left >= 1 ? 'ok' : 'warn', `Budget today: $${h.budget.spentToday.toFixed(2)} of $${h.budget.dailyLimit.toFixed(2)} used (a call costs a few cents)`);

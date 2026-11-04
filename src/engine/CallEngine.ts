@@ -8,8 +8,7 @@ import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
 import { EchoWatch, isBotEcho, MIN_BARGE_WORDS } from './echo.ts';
-import { createCloudSpeaker, resolveCloudVoice } from '../lib/cloudVoice.ts';
-import { pickVoice, pitchFor, Speaker, type SpeechOut, type VoicePick } from '../lib/tts.ts';
+import { pickVoice, pitchFor, Speaker, type SpeechOut } from '../lib/tts.ts';
 
 export type CallState = 'connecting' | 'listening' | 'thinking' | 'speaking' | 'ended';
 
@@ -40,8 +39,6 @@ export class CallEngine {
   private startedAt = 0;
   private endReason?: CallSnapshot['endReason'];
   private error?: string;
-  /** Said once when the cloud voice gives way to the browser voice. Kept apart so another error does not hide it. */
-  private voiceNotice = '';
   /** Said once when a turn of an open-weights call had to be served by Meta's hosted model. */
   private openNotice = '';
   /** Said once when the character seems to hear itself through the speakers. */
@@ -65,7 +62,6 @@ export class CallEngine {
   private lang: Lang;
   /** Name of the voice the character speaks with (empty when the browser has none). */
   voiceName = '';
-  private browserPick: VoicePick;
 
   constructor(
     private config: SessionConfig,
@@ -76,7 +72,6 @@ export class CallEngine {
     this.lang = langOf(config);
     // A browser may have no voice of the right gender (Windows ships a single Polish voice): shift the pitch instead.
     const pick = pickVoice(config.persona.gender, this.lang, config.variant);
-    this.browserPick = pick;
     this.voiceName = pick.voice?.name ?? '';
     this.speaker = this.useSpeaker(new Speaker(pick.voice, this.lang, pitchFor(pick.matched, config.persona.gender)));
     this.ears = this.wireEars(new MetaEars(session, this.lang), true);
@@ -90,26 +85,6 @@ export class CallEngine {
       this.set('speaking');
     };
     return speaker;
-  }
-
-  /**
-   * The cloud voice (ElevenLabs) when the server has one and the user has not turned it off; otherwise the
-   * browser voice that is already in place. If the cloud voice fails mid-call the browser voice takes over.
-   */
-  private async chooseVoice() {
-    const gender = this.config.persona.gender;
-    const cloud = await resolveCloudVoice(this.lang, gender, this.config.variant).catch(() => null);
-    if (!cloud || this.state === 'ended') return;
-    const pick = this.browserPick;
-    const speaker = createCloudSpeaker(this.session, this.lang, cloud.id, { voice: pick.voice, pitch: pitchFor(pick.matched, gender) });
-    speaker.onFallback = (code) => {
-      this.voiceName = pick.voice?.name ?? '';
-      this.voiceNotice = translate(this.lang, 'voiceFallback', code);
-      this.emit();
-    };
-    this.speaker.dispose?.();
-    this.speaker = this.useSpeaker(speaker);
-    this.voiceName = `ElevenLabs · ${cloud.name}`;
   }
 
   /** Muse Voice Transcribe is the ears; if it cannot start, fall back to the browser's recognizer. */
@@ -142,10 +117,7 @@ export class CallEngine {
     this.startedAt = Date.now();
     this.ears.start();
     this.tick = window.setInterval(() => this.emit(), 500);
-    // The first line waits for the choice of voice, which is instant once the start screen has loaded the catalog.
-    void this.chooseVoice().then(() => {
-      if (this.state !== 'ended') void this.botTurn();
-    });
+    void this.botTurn();
   }
 
   hangUp() {
@@ -181,7 +153,7 @@ export class CallEngine {
       mood: this.mood,
       elapsedMs: this.state === 'ended' ? this.now() : Date.now() - this.startedAt,
       endReason: this.endReason,
-      error: [this.error, this.voiceNotice, this.openNotice, this.echoNotice].filter(Boolean).join(' ') || undefined,
+      error: [this.error, this.openNotice, this.echoNotice].filter(Boolean).join(' ') || undefined,
       lastLatencyMs: this.lastLatencyMs,
     });
   }
@@ -357,7 +329,6 @@ export class CallEngine {
     this.turnId++;
     this.abort?.abort();
     this.speaker.cancel();
-    this.speaker.dispose?.();
     this.ears.stop();
     window.clearTimeout(this.silenceTimer);
     window.clearInterval(this.tick);

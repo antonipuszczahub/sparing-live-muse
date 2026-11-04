@@ -16,12 +16,11 @@ import { openByDefault, wantsOpenWeights } from './meta/open.ts';
 import { rateLimit } from './limits.ts';
 import { ledger } from './meta/ledger.ts';
 import { traceRows } from './meta/trace.ts';
-import { registerTts, thirdPartyVoiceEnv, voiceHealth } from './tts/route.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
 import { newSeed, rollVariant } from '../shared/variation.ts';
 import type { SessionConfig } from '../shared/types.ts';
 
-// Keys written by the ElevenLabs CLI live in .env.local; load them too when the file exists (they do not override .env).
+// Local overrides live in .env.local; load them too when the file exists (they do not override .env).
 try {
   process.loadEnvFile('.env.local');
 } catch {
@@ -79,7 +78,6 @@ app.get('/api/health', (_req, res) => {
     openHost: open?.label,
     openModel: open?.model,
     openDefault: openByDefault(),
-    voice: voiceHealth(ledger, thirdPartyVoiceEnv()),
     budget: ledger.summary(),
   });
 });
@@ -315,10 +313,6 @@ app.post('/api/audit', async (req, res) => {
     else res.status(502).json({ error: e instanceof Error ? e.message : 'Audit failed' });
   }
 });
-
-// The character's voice is the browser's own (an OS feature, not a model call). ElevenLabs is available only with
-// THIRD_PARTY_VOICE=on, because the hackathon allows only Meta models at runtime.
-registerTts(app, { ledger, env: thirdPartyVoiceEnv() });
 
 // Production: the same server serves the built front end.
 const dist = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');

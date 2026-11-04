@@ -33,9 +33,9 @@ test('open-weights calls are their own row and say where they ran', () => {
   assert.equal(open.costUsd, 0);
 });
 
-test('speech recognition has no latency, a third-party service is flagged, an empty session gives no rows', () => {
-  const rows = traceRows([e({ kind: 'asr', model: 'muse-voice-transcribe-1.0', totalMs: 60000 }), e({ kind: 'tts', model: 'elevenlabs/x', provider: 'elevenlabs', costUsd: 0 })]);
+test('speech recognition has no latency and an empty session gives no rows', () => {
+  const rows = traceRows([e({ kind: 'asr', model: 'muse-voice-transcribe-1.0', totalMs: 60000 })]);
   assert.equal(rows.find((r) => r.kind === 'asr')!.medianMs, null);
-  assert.equal(rows.find((r) => r.kind === 'tts')!.served, 'Third-party service');
+  assert.equal(rows.find((r) => r.kind === 'asr')!.served, 'Meta Model API');
   assert.deepEqual(traceRows([]), []);
 });

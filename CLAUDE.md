@@ -19,7 +19,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 |---|---|
 | `npm run dev` | server on 8787 and Vite on 5173 (`.env` and `.env.local` are both read) |
 | `npm run typecheck` / `npm test` / `npm run build` | must be green before anything is called done |
-| `npm run check:meta` / `check:open` / `check:voice` | probe Meta, the open-weights host, ElevenLabs (saves WAV samples) |
+| `npm run check:meta` / `check:open` | probe the Meta Model API and the open-weights host |
 | `npm run try:turn -- [--lang pl] [--open]` | scripted call against the live character |
 | `npm run eval -- [--lang pl] [--open]` | 24 scripted calls, writes `docs/EVAL*.md` (open weights run two at a time: Baseten allows 100 requests a minute) |
 | `npm run eval:inject` | prompt-injection probe (planted instructions in web research and screen text, EN and PL, Spark and open weights), writes `docs/EVAL.inject.md` |
@@ -37,7 +37,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   addressed to a character carries `{m|f}` gender markers resolved with `gendered()` (`shared/lang.ts`). The start
   screen asks the user's gender and Pan/Pani vs ty because Polish verbs carry gender. UI text is in `src/i18n/`:
   `en.ts` defines the keys and `pl.ts` is typed with them, so a missing string does not compile.
-- **Interface.** Modelled on how Meta, Stripe, Linear and ElevenLabs look: ONE tight grotesque (Figtree, semibold, negative tracking;
+- **Interface.** Modelled on how Meta, Stripe and Linear look: ONE tight grotesque (Figtree, semibold, negative tracking;
   never a serif or a quirky display face), a calm warm-grey page (`--canopy`) that turns to orange at the bottom with drifting pools of
   light that lean towards the pointer (`Backdrop.tsx`), black pill buttons and segmented controls, white glass cards with 24px radius,
   ONE accent (`--brass` deep orange for small text, `--brass-hi` bright orange for light and the logo; the names are historical), ink
@@ -52,9 +52,8 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   real face once per server start, about 3 cents). The font comes from Google Fonts in `index.html`.
 - **Voice of the character.** Meta has no speech synthesis, and the hackathon allows only Meta models at runtime, so the
   submitted voice is the browser's own (`src/lib/tts.ts`, picker in `VoicePicker.tsx`, lists filtered by gender; Edge
-  Natural voices rank first). The ElevenLabs path (`server/tts/`, `src/lib/cloudSpeaker.ts`) stays in the code but is OFF
-  unless `THIRD_PARTY_VOICE=on` (`thirdPartyVoiceEnv` in `server/tts/route.ts`); never set it on the hosted link or while
-  recording the demo. README says which parts are OS/browser features and which are Meta model calls.
+  Natural voices rank first). There is no third-party speech service in the code at all (an earlier optional ElevenLabs path
+  was removed; git history has it). README says which parts are OS/browser features and which are Meta model calls.
 - **Open weights.** `server/meta/open.ts` picks the host (Baseten, Fireworks, Modal, Ollama). Muse Spark Open always
   reasons; the Baseten preset sends `reasoning_effort: low` (xhigh is 3x slower and sometimes returns nothing). A failing
   host falls back to Spark before the character has spoken, and the call says so.
@@ -81,7 +80,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 - Muse Spark in Polish uses more tokens than English (open weights: 1.5 s vs 1.2 s); the private thought is
   capped at 12 words in Polish for that reason.
 - Wonder sometimes puts the outcome word ("lost") in the audit `verdict`; `ensureVerdict` repairs it.
-- Model ids and prices are in `server/meta/models.ts`; ElevenLabs price used for estimates is `ELEVENLABS_USD_PER_1K_CHARS`.
+- Model ids and prices are in `server/meta/models.ts`.
 
 ## How to work here
 

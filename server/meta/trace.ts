@@ -23,11 +23,10 @@ export function traceRows(entries: LedgerEntry[], openHost = 'open-weights host'
   const rows = [...groups.values()].map(({ entries: es }): TraceRow => {
     const first = es[0]!;
     const open = first.provider === 'open';
-    const external = first.provider === 'elevenlabs';
     return {
       kind: first.kind,
       model: first.model,
-      served: open ? `Open weights · ${openHost}` : external ? 'Third-party service' : 'Meta Model API',
+      served: open ? `Open weights · ${openHost}` : 'Meta Model API',
       open,
       calls: es.length,
       medianMs: first.kind === 'asr' ? null : median(es.map((e) => e.totalMs).filter((n): n is number => typeof n === 'number')),
