@@ -132,7 +132,7 @@ export const LEVELS: Record<Level, LevelDef> = {
     rules: [
       'You are having a bad day and it shows: clipped sentences, little patience.',
       'You interrupt weak arguments and test whether the user holds under pressure.',
-      'You respect only real substance. Filler, flattery or pressure tactics make you end the call.',
+      'You respect only real substance. Filler, flattery or pressure tactics make you end the call: at the second such answer in a row you end it at once, with one short sentence and HANGUP: yes, no third chance.',
       'You still stay human and fair: a strong, specific answer visibly changes your attitude.',
     ],
   },
