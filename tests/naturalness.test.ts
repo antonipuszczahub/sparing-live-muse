@@ -41,6 +41,20 @@ test('the character prompt teaches how people really sound on a call, in both la
   assert.doesNotMatch(pl, /wypowiedziałaby\b|byś wypowiedzia/, 'the earlier broken "byś wypowiedziałaby" is gone');
 });
 
+test('the character is told to stay logical: no re-asking, a serious admission is answered and ends the meeting, formality is mirrored', () => {
+  const en = buildSystemPrompt(config('en'));
+  assert.match(en, /# Staying logical/);
+  assert.match(en, /Never ask for something they have just told you/);
+  assert.match(en, /passing off someone else's work or an AI's as their own, being drunk/);
+  assert.match(en, /At Realistic and harder levels such an admission ends the meeting/);
+  const pl = buildSystemPrompt(config('pl'));
+  assert.match(pl, /# Trzymaj się logiki/);
+  assert.match(pl, /Nie pytaj o to, co dopiero co usłysza(?:łeś|łaś)/);
+  assert.match(pl, /bycie pod wpływem alkoholu/);
+  assert.match(pl, /per Pan\/Pani/);
+  assert.doesNotMatch(pl, MARKER);
+});
+
 test('every scenario has its own spoken-sounding example lines in both languages, and the prompt carries that scenario\'s', () => {
   for (const id of SCENARIO_IDS) {
     assert.ok(SCENARIOS[id].sounds.length >= 4 && SCENARIOS_PL[id].sounds.length >= 4, id);

@@ -7,7 +7,7 @@ import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
-import { afterCutIn, CUT_IN, CUT_IN_GRACE_MS, CUT_IN_PAUSE_MS, CutInGate } from './cutin.ts';
+import { afterCutIn, CUT_IN, CUT_IN_HOLD_MS, CUT_IN_PAUSE_MS, CutInGate } from './cutin.ts';
 import { EchoWatch, isBotEcho, micClosedForTurnTaking, MIN_BARGE_WORDS, TURN_TAKING_TAIL_MS } from './echo.ts';
 import { pickVoice, pitchFor, Speaker, type SpeechOut } from '../lib/tts.ts';
 
@@ -71,8 +71,11 @@ export class CallEngine {
   private cutInTimer: number | undefined;
   /** What was used by a cut-in is forgotten after a while even if the recogniser never ends that stretch of speech. */
   private usedExpiry: number | undefined;
-  /** The character cut in and has not finished its line: the user's continued talking cannot cancel it at once. */
+  /** The character cut in and has not finished its line: the user's continued talking waits for it (see cutInHolds). */
   private cutInPending = false;
+  private cutInAt = 0;
+  /** What the user said while the character's cut-in line was on: their next turn, once the line has ended. */
+  private heldUser = '';
 
   private ears: EarsLike;
   private speaker: SpeechOut;
@@ -253,7 +256,7 @@ export class CallEngine {
       this.cutInTimer = window.setTimeout(() => this.cutInOnUser(), CUT_IN_PAUSE_MS);
     }
     // Barge-in: the user talks over the character. Echo of the character's own voice is filtered out.
-    if ((this.state === 'speaking' || this.state === 'thinking') && !this.inCutInGrace() && novelWords(text, this.botText(), this.lang).length >= MIN_BARGE_WORDS) {
+    if ((this.state === 'speaking' || this.state === 'thinking') && !this.cutInHolds() && novelWords(text, this.botText(), this.lang).length >= MIN_BARGE_WORDS) {
       this.noteBargeIn();
       this.interruptBot();
     }
@@ -289,17 +292,19 @@ export class CallEngine {
     this.rambleGate.reset();
     this.liveUser = '';
     this.cutInPending = true;
+    this.cutInAt = Date.now();
     this.userStoppedAt = Date.now();
     this.turns.push({ role: 'user', text: `${said} —`, at: this.now() });
     this.emit();
     void this.botTurn(simNote('rambling', this.lang));
   }
 
-  /** Just after a cut-in the character's line (still being written, or just begun) is not cancelled by the user talking on. */
-  private inCutInGrace(): boolean {
-    if (!this.cutInPending) return false;
-    if (this.state === 'thinking') return true;
-    return this.state === 'speaking' && Date.now() - this.speechStartedAt < CUT_IN_GRACE_MS;
+  /**
+   * A cut-in is an interruption the user yields to: while the character's short line is being written and spoken, the
+   * user's talking neither cancels it nor becomes a second turn in a row; it waits and is answered after the line.
+   */
+  private cutInHolds(): boolean {
+    return this.cutInPending && Date.now() - this.cutInAt < CUT_IN_HOLD_MS && (this.state === 'thinking' || this.state === 'speaking');
   }
 
   private onFinal(text: string, typed = false) {
@@ -319,6 +324,12 @@ export class CallEngine {
       }
     }
     this.liveUser = '';
+    if (!typed && this.cutInHolds()) {
+      // the user talked on while the character's cut-in line was on: that is their next turn, after the line
+      this.heldUser = `${this.heldUser} ${text}`.trim();
+      this.emit();
+      return;
+    }
     // the character's own voice coming back (while it speaks, or the tail of its line right after): not an answer
     if (isBotEcho(this.state, Date.now() - this.botQuietAt, text, this.botText(), this.lang)) {
       this.echo.filtered();
@@ -347,6 +358,7 @@ export class CallEngine {
     this.rawBot = '';
     this.sentenceBuf = '';
     this.pendingFinal = null;
+    this.heldUser = ''; // typing or a late barge-in supersedes what was waiting
     this.set('listening');
   }
 
@@ -426,6 +438,16 @@ export class CallEngine {
       return;
     }
     this.set('listening');
+    const held = this.heldUser;
+    this.heldUser = '';
+    if (held) {
+      // what the user said while the character's cut-in line was on is answered now, as the next turn
+      this.userStoppedAt = Date.now();
+      this.turns.push({ role: 'user', text: held, at: this.now() });
+      this.emit();
+      void this.botTurn();
+      return;
+    }
     this.armSilence();
   }
 

@@ -20,8 +20,11 @@ export const CUT_IN: Record<Level, CutInPolicy | null> = {
 
 /** No new words from the recogniser for this long: the speaker is drawing breath, and that is when a person cuts in. */
 export const CUT_IN_PAUSE_MS = 650;
-/** After a cut-in the user's continued talking cannot cancel the character's line until it has been heard this long. */
-export const CUT_IN_GRACE_MS = 1_200;
+/**
+ * After the character cuts in, its line is heard to the end: what the user says meanwhile waits and becomes their next
+ * turn. This is the longest the wait can last, in case the voice never reports that it has finished.
+ */
+export const CUT_IN_HOLD_MS = 8_000;
 
 const tokens = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean);
 export const countWords = (s: string) => tokens(s).length;

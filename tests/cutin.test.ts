@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, mock, test } from 'node:test';
-import { afterCutIn, CUT_IN, CUT_IN_PAUSE_MS, CutInGate, countWords } from '../src/engine/cutin.ts';
+import { afterCutIn, CUT_IN, CUT_IN_HOLD_MS, CUT_IN_PAUSE_MS, CutInGate, countWords } from '../src/engine/cutin.ts';
 import { CallEngine, type CallSnapshot } from '../src/engine/CallEngine.ts';
 import type { EarsLike } from '../src/lib/metaEars.ts';
 import type { SpeechOut } from '../src/lib/tts.ts';
@@ -207,7 +207,7 @@ test('words said after the cut-in, in the same stretch of speech, are what the n
   r.engine.dispose();
 });
 
-test('talking on right after the cut-in does not cancel the character before it has been heard', async () => {
+test('the cut-in line is heard to the end, and what the user says meanwhile is their next turn after it', async () => {
   const r = await rig(3);
   let release!: (s: string) => void;
   r.answers.push(new Promise<string>((res) => (release = res)));
@@ -215,19 +215,50 @@ test('talking on right after the cut-in does not cancel the character before it 
   mock.timers.tick(CUT_IN_PAUSE_MS + 50);
   await flush();
   assert.equal(r.requests.length, 2, 'the character is thinking about its interruption');
-  // the user keeps going while it thinks: new words, more than two
-  r.ears.onInterim(`${text} i jeszcze więcej nowych słów ciągle mówię dalej`);
+  // the user keeps going while it thinks and while it speaks: new words, more than two
+  const more = 'i jeszcze więcej nowych słów ciągle mówię dalej';
+  r.ears.onInterim(`${text} ${more}`);
   await flush();
-  release('Moment, przerwę.');
+  release('Moment, przerwę. Co dokładnie Pan chce mi sprzedać?');
   await flush();
   assert.equal(r.requests.length, 2, 'the thinking turn was not thrown away and asked again');
-  assert.deepEqual(r.voice.said.at(-1), 'Moment, przerwę.', 'the interruption was spoken');
+  assert.ok(r.voice.said.join(' ').includes('Moment, przerwę.'), 'the interruption was spoken');
+  r.ears.onInterim(`${text} ${more} oraz kolejne zupełnie nowe wyrazy`);
+  await flush();
+  assert.equal(r.voice.cancelled, 0, 'talking over the interruption does not cut it short: it is heard to the end');
+  // the recogniser ends the stretch with everything said: the part after the cut-in waits
+  r.ears.onFinal(`${text} ${more} oraz kolejne zupełnie nowe wyrazy`, 0);
+  await flush();
+  assert.equal(r.requests.length, 2, 'not answered yet: the character is still talking');
+  assert.equal(r.last().turns.filter((t) => t.role === 'user').length, 1, 'and not a second user turn in a row');
+  r.answers.push('Słucham.');
+  r.voice.end();
+  await flush();
+  assert.deepEqual(
+    r.last().turns.map((t) => t.role),
+    ['bot', 'user', 'bot', 'user'],
+    'the turns alternate: the user (cut), the interruption, then what the user said meanwhile',
+  );
+  assert.equal(r.last().turns.at(-1)!.text, `${more} oraz kolejne zupełnie nowe wyrazy`);
+  assert.equal(r.requests.length, 3, 'and the character answers it');
+  assert.equal(r.requests[2]!.history.at(-1)!.text, `${more} oraz kolejne zupełnie nowe wyrazy`);
+  r.engine.dispose();
+});
+
+test('if the voice never reports the end of the cut-in line, talking over it works again after a while', async () => {
+  const r = await rig(3);
+  const text = talk(r, 20);
+  r.answers.push('Moment, przerwę.');
+  mock.timers.tick(CUT_IN_PAUSE_MS + 50);
+  await flush();
+  assert.equal(r.requests.length, 2);
+  r.ears.onInterim(`${text} i jeszcze więcej nowych słów ciągle mówię dalej`);
+  await flush();
   assert.equal(r.voice.cancelled, 0);
-  // once it has been talking for a moment, talking over it works as before
-  mock.timers.tick(1_500);
+  mock.timers.tick(CUT_IN_HOLD_MS + 500);
   r.ears.onInterim(`${text} i jeszcze więcej nowych słów ciągle mówię dalej oraz kolejne zupełnie nowe wyrazy`);
   await flush();
-  assert.equal(r.voice.cancelled > 0, true, 'a barge-in after the grace period stops it, as always');
+  assert.equal(r.voice.cancelled > 0, true, 'the hold has a limit, so a silent voice cannot lock the call');
   r.engine.dispose();
 });
 

@@ -10,12 +10,12 @@ const NOTES: Record<Lang, Record<SimNote, string>> = {
   en: {
     silent: '[the user has been silent for a while]',
     'screen-shared': '[the user just shared their screen with you]',
-    rambling: '[the user has been talking for a long time without letting you speak: you cut in now, with one short line, the way a person interrupts]',
+    rambling: '[the user has been talking for a long time without letting you speak: you cut in now, in one or two short sentences, reacting to the most striking thing they said, the way a person interrupts]',
   },
   pl: {
     silent: '[rozmówca milczy od dłuższej chwili]',
     'screen-shared': '[rozmówca właśnie udostępnił Ci swój ekran]',
-    rambling: '[rozmówca mówi bez przerwy od dłuższego czasu: wchodzisz mu w słowo jednym krótkim zdaniem, tak jak robi to człowiek]',
+    rambling: '[rozmówca mówi bez przerwy od dłuższego czasu: wchodzisz mu w słowo jednym lub dwoma krótkimi zdaniami, reagując na to, co w jego słowach najbardziej rzuca się w oczy, tak jak robi to człowiek]',
   },
 };
 
