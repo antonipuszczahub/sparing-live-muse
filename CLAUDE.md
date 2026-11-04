@@ -76,7 +76,9 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 - `json_schema` does not stream and returns keys alphabetically. Web search exists only on the Responses API.
 - Voice Transcribe: key in the first JSON frame, PCM 24 kHz in 80 ms frames, `ENDPOINTING` mode; it detects language by
   itself, `languageBias` only sharpens it (Polish came back word for word).
-- Muse Spark in Polish: median first word 1.6 s (English 1.1 s) because Polish uses more tokens; the private thought is
+- Hosted Muse Spark first-word latency varies by day: 1.1 s EN / 1.6 s PL on 28 Oct, 2.4-2.6 s in both languages on 4 Nov
+  (same prompts took about 1 s on open weights that day, so default to open weights and quote dated numbers).
+- Muse Spark in Polish uses more tokens than English (open weights: 1.5 s vs 1.2 s); the private thought is
   capped at 12 words in Polish for that reason.
 - Wonder sometimes puts the outcome word ("lost") in the audit `verdict`; `ensureVerdict` repairs it.
 - Model ids and prices are in `server/meta/models.ts`; ElevenLabs price used for estimates is `ELEVENLABS_USD_PER_1K_CHARS`.

@@ -49,7 +49,7 @@ The conversations that decide something (a salary, a defence, a pitch, a sales c
 
 | Model | Role | Measured |
 |---|---|---|
-| `muse-spark-1.3` | Live counterpart (streamed, tagged format); the **eye** agent (vision) | first spoken word median 1.1 s; screen read in 2.7 s |
+| `muse-spark-1.3` | Live counterpart (streamed, tagged format); the **eye** agent (vision) | first spoken word median 1.1 s on 28 Oct, 2.4-2.5 s in two re-runs on 4 Nov (hosted latency varies, see [Open weights](#open-weights-where-and-why)); screen read in 2.7 s |
 | `muse-wonder-1.0` | **Twin research** with live web search (Responses API); **post-call audit** (JSON schema) | twin about 30 s; audit about 13 s |
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode, language bias per call (English or Polish) | final text 0.36 s after speech ends; a Polish test sentence came back word for word |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | first portrait in about 9 s, all three images in about 25 s, 3 cents |
@@ -57,7 +57,7 @@ The conversations that decide something (a salary, a defence, a pitch, a sales c
 | Browser speech synthesis (not a model) | The character's **voice**: the OS/browser feature, chosen per character gender; see [Voice](#voice-what-is-a-meta-model-and-what-is-not) | no model call |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
-With a host configured the character runs on open weights **by default** (the start screen ticks the box; `OPEN_BY_DEFAULT=0` turns it off): the speed is the same and the Meta budget is spared.
+With a host configured the character runs on open weights **by default** (the start screen ticks the box; `OPEN_BY_DEFAULT=0` turns it off): the Meta budget is spared, and on 4 Nov the open host was the faster one (median first word 1.2 s against 2.4-2.5 s on hosted Spark, same prompts, same 24 scripted calls).
 
 Muse Spark Open always reasons, and Baseten's default depth (`xhigh`) is too slow to speak: measured over the same 24 calls, `xhigh` gave a median 3.4 s to the first word (p95 7.1 s), about 930 output tokens per turn and 3 empty replies when the reasoning used the whole budget, while `reasoning_effort: low` gives 1.2 s (p95 2.2 s), about 170 tokens and no failures. The Baseten preset therefore sends `low`. The host allows 100 requests a minute, which one call uses a small part of; if the host fails or limits a turn before the character has spoken, that turn is asked again from Meta's hosted Spark with the same prompt and the call says so.
 
@@ -159,7 +159,7 @@ Polish is written for Polish rather than translated line by line: złoty instead
 | Piece | Measured in Polish |
 |---|---|
 | Speech recognition | A synthesised Polish sentence with *Dzień, Dzwonię, państwa, ładuje* came back word for word through our relay with `languageBias: Polish` (with the English bias only *Pan* lost its capital) |
-| Character | `npm run eval -- --lang pl`: 0 repeated turns in 306 pairs, 0 leaked stage directions, 0 failed turns; median first word 1.6 s (English 1.1 s: Polish takes more tokens, so the private thought is capped at 12 words), p95 2.8 s. See [`docs/EVAL.pl.md`](docs/EVAL.pl.md) |
+| Character | `npm run eval -- --lang pl` (4 Nov): 0 repeated turns in 304 pairs, 0 leaked stage directions, 0 failed turns; median first word 2.6 s on hosted Spark (1.6 s on 28 Oct, see the note under [Evaluation](#evaluation)) and 1.5 s on open weights, against 2.5 s and 1.2 s in English (Polish takes more tokens, so the private thought is capped at 12 words), p95 4.6 s hosted. See [`docs/EVAL.pl.md`](docs/EVAL.pl.md) |
 | Review | The Polish audit quotes what was said, ties it to the character's thoughts and writes in the user's gender; the delivery numbers (filler words, interruptions) are measured, not guessed |
 
 Difficulty still changes behaviour in Polish, but with three seeds per cell the middle levels are noisy: *Realistyczny* hung up on the weak caller 2 times in 3 in one run and 0 in the next, *Twardy* and *Brutalny* 3 in 3 both times. The English evaluation has the same sample size.
@@ -180,7 +180,7 @@ An optional ElevenLabs path exists in the code from earlier experiments. ElevenL
 
 ## Evaluation
 
-`npm run eval` plays 24 scripted calls (weak and strong caller, four difficulty levels, three seeds) and writes [`docs/EVAL.md`](docs/EVAL.md). Latest run: 0 repeated turns in 287 pairs, 0 stage directions leaked into speech, 0 failed turns, median time to first spoken word 1.1 s. Difficulty changes behaviour: the friendly character never hangs up on a weak caller, the others do, and no strong caller is ever hung up on. The same evaluation in Polish is in [`docs/EVAL.pl.md`](docs/EVAL.pl.md), and on open weights in [`docs/EVAL.open.md`](docs/EVAL.open.md) and [`docs/EVAL.open.pl.md`](docs/EVAL.open.pl.md).
+`npm run eval` plays 24 scripted calls (weak and strong caller, four difficulty levels, three seeds) and writes [`docs/EVAL.md`](docs/EVAL.md). Latest run (4 Nov): 0 repeated turns in 281 pairs, 0 stage directions leaked into speech, 0 failed turns, median time to first spoken word 2.5 s on hosted Spark. That is slower than the 1.1 s measured on 28 Oct: a second run on 4 Nov gave 2.4 s, and single scripted turns took 2.3 to 3.2 s, while the same prompts took about 1 s on open weights the same day, so the difference is the hosted service's latency, not the prompt. Difficulty changes behaviour: the friendly character never hangs up on a weak caller, the harder ones do, and a strong caller is hung up on only rarely (at the Tough and Brutal levels, 1 in 3 in the latest run). The same evaluation in Polish is in [`docs/EVAL.pl.md`](docs/EVAL.pl.md), and on open weights in [`docs/EVAL.open.md`](docs/EVAL.open.md) and [`docs/EVAL.open.pl.md`](docs/EVAL.open.pl.md).
 
 ## Privacy
 
