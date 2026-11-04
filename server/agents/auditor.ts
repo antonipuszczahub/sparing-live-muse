@@ -32,6 +32,7 @@ Zasady:
 - Oceniaj względem prawdziwego celu: ${winCondition}
 - Używaj prywatnych myśli i zmian nastroju postaci, żeby wyjaśnić DLACZEGO dany moment miał znaczenie („postać się rozkręcała do tury 4, a potem…”).
 - Wybierz od 3 do 6 momentów, każdy powiązany z indeksem w transkrypcji. Przy każdym błędzie podaj konkretne "betterLine": zdanie, które użytkownik mógł powiedzieć własnym głosem, na tyle krótkie, żeby dało się je wypowiedzieć na głos. Przy mocnych stronach i punktach zwrotnych betterLine to pusty ciąg.
+- Wypowiedzi użytkownika pochodzą z rozpoznawania mowy. Linia zniekształcona, urywek albo słowa samej postaci złapane przez mikrofon to szum rozpoznawania: nie traktuj jej jako czegoś, co użytkownik wybrał powiedzieć, i wspomnij najwyżej raz, że dźwięk był niewyraźny.
 - Parametry wygłosu poniżej zostały zmierzone z nagrania; korzystaj z nich i nie zgaduj innych.
 - Wynik: 0-100 ogółem; bądź skalibrowany (przyzwoita rozmowa to 55-70, znakomita 85+). outcome to "won" tylko wtedy, gdy cel został wyraźnie osiągnięty.
 - weaknessTags: od 1 do 3 krótkich tagów małymi literami, na przykład „niejasno o cenie”, „zignorowane zastrzeżenie”, „przerywanie rozmówcy”, które posłużą do wycelowania następnej rozmowy.
@@ -45,6 +46,7 @@ Rules:
 - Judge against the real goal: ${winCondition}
 - Use the character's private thoughts and mood changes to explain WHY moments mattered ("the character was warming up until turn 4, then...").
 - Pick 3 to 6 moments, each tied to a transcript index. For each mistake give a concrete "betterLine" the user could have said, in the user's voice, short enough to say aloud. For strengths and turning points betterLine is an empty string.
+- User lines come from speech recognition. A line that is garbled, a fragment, or looks like the character's own words picked up by the microphone is recognition noise: do not count it as something the user chose to say, and mention at most once that the audio was unclear.
 - The delivery numbers below were measured from the call; use them, do not guess others.
 - Scores: 0-100 overall; be calibrated (a decent call is 55-70, excellent 85+). outcome is "won" only if the goal was clearly achieved.
 - verdict is ONE sentence of at most 25 words: it is the headline of the report. Put the detail in summary.
