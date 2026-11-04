@@ -144,6 +144,20 @@ export function SetupScreen({
               {openWeights && health.openHost ? ` · ${health.openHost}` : ''}
             </button>
           )}
+          <button
+            type="button"
+            className={ui.pill}
+            title={t('demoPresetBody')}
+            onClick={() => {
+              // the recording: the investor, a realistic level and a pitch with real numbers in it
+              setScenario('pitch');
+              setLevel(2);
+              setTopic(t('demoTopic'));
+            }}
+          >
+            <Icon name="phone" size={16} />
+            {t('demoPreset')}
+          </button>
           {voiceList.length > 0 && (
             <button type="button" className={ui.pill} onClick={() => setVoices(true)}>
               <Icon name="voice" size={16} />
