@@ -21,7 +21,7 @@ The submission form takes a link to a video of at most 3:00 (judges stop at 3:00
 | 1:00 | Share the screen, show the weak slide | "She can see my screen. Muse Spark reads the slide and she goes straight for the claim with no source." |
 | 1:25 | Keep talking until the mood turns, or hang up yourself | "Her mood moves with what I say. Hard levels hang up on a weak pitch." |
 | 1:45 | Review: score, mood vine, the replay with private thoughts | "Afterwards the reviewer shows what she was privately thinking at each turn, and the exact sentence where I lost her." |
-| 2:20 | Open the README table or `docs/MANIFEST.md` | "The live character runs on Muse Spark Open, served by Baseten. On the same scripted calls it was faster than hosted Spark on the day I measured: median first word 1.2 s against 2.5 s, no failures in 24 calls. Transcription is Voice Transcribe, research and the audit are Wonder, the face is Muse Image, and every call is in the budget ledger." |
+| 2:20 | Open the README table or `docs/MANIFEST.md` | "The live character runs on Muse Spark Open, served by Baseten. On the same scripted calls it was faster than hosted Spark on the day I measured: median first word 1.0 s against 2.5 s, no failures in 24 calls. Transcription is Voice Transcribe, research and the audit are Wonder, the face is Muse Image, and every call is in the budget ledger." |
 | 2:45 | Flip to Polish, one line of a call, then the clip button | "One switch and it is Polish, with gender and formal address handled. And it renders a clip of the moment you lost them." |
 
 ## A script for your side of the call
