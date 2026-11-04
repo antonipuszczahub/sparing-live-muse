@@ -32,6 +32,7 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | **A face that reacts** | Muse Image draws the counterpart once and edits the same person into three expressions. The face follows the character's mood during the call. |
 | **Real interruptions** | Full-duplex voice. Talk over the character and it stops mid-sentence; the transcript shows where it was cut off. |
 | **An opponent that learns** | The auditor tags what you keep getting wrong ("dodged price", "vague intro"); the next character aims at it. |
+| **Again, with the same person** | After the review, one click calls the same character again, with the same hidden agenda and aimed at your current weak spots, and the start screen keeps the scores of your last calls: the quickest way to see whether you improved. |
 | **A clip you can post** | One click renders a captioned MP4 of the key moment (their face, their private thoughts, your score) in the browser, with post text ready to copy. |
 | **English and Polish** | One switch changes everything: the interface, the character and its private thoughts, the company research, the review, speech recognition and the voice. Polish is written for Polish, with gender and "Pan/Pani" handled (see [Two languages](#two-languages)). |
 | **Measured, not claimed** | Latency, repetition, stage-direction leaks and difficulty behaviour are measured against the live API by `npm run eval`. A budget guard with a persistent ledger caps spend. |

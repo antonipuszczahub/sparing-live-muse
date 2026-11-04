@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FramingEvent } from '../shared/framing.ts';
+import { langOf } from '../shared/lang.ts';
 import type { SessionConfig, Turn } from '../shared/types.ts';
 import styles from './App.module.css';
 import { Backdrop, pulseBackdrop } from './components/Backdrop.tsx';
+import { topWeakSpots } from './lib/memory.ts';
+import { redial } from './lib/redial.ts';
 
 import { CallScreen } from './screens/CallScreen.tsx';
 import { ReportScreen } from './screens/ReportScreen.tsx';
@@ -73,6 +76,10 @@ export function App() {
         hungUp={view.hungUp}
         camera={view.camera}
         onAgain={() => go({ name: 'setup' })}
+        onRedial={() => {
+          const again = redial(view.config, topWeakSpots(3, langOf(view.config)));
+          go({ name: 'call', session: again.session, config: again.config });
+        }}
       />
     );
   }

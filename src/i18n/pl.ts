@@ -111,6 +111,7 @@ export const pl: Dict = {
   reviewMeta: (name, duration, turns, hungUp, gender) =>
     `${name} · ${duration} · ${turns} ${pluralPl(turns, 'tura', 'tury', 'tur')}${hungUp ? (gender === 'f' ? ' · rozłączyła się' : ' · rozłączył się') : ''}`,
   newCall: 'Nowa rozmowa',
+  redial: () => 'Jeszcze raz z tą osobą',
   reviewing: (seconds) => `Muse Wonder analizuje Twoją rozmowę… ${seconds} s`,
   reviewingNote: (name) => `Czyta transkrypcję razem z ukrytymi myślami postaci (${name}). Zwykle trwa to od 10 do 25 sekund.`,
   kindStrength: 'Mocna strona',

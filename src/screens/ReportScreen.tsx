@@ -19,6 +19,7 @@ export function ReportScreen({
   hungUp,
   camera,
   onAgain,
+  onRedial,
 }: {
   session: string;
   config: SessionConfig;
@@ -27,6 +28,7 @@ export function ReportScreen({
   hungUp: boolean;
   camera: FramingEvent[];
   onAgain: () => void;
+  onRedial: () => void;
 }) {
   useLang();
   const lang = langOf(config);
@@ -58,5 +60,5 @@ export function ReportScreen({
     return () => clearInterval(id);
   }, [result, error]);
 
-  return <ReportView session={session} config={config} turns={turns} durationMs={durationMs} hungUp={hungUp} camera={camera} result={result} trace={trace} error={error} secs={secs} onAgain={onAgain} />;
+  return <ReportView session={session} config={config} turns={turns} durationMs={durationMs} hungUp={hungUp} camera={camera} result={result} trace={trace} error={error} secs={secs} onAgain={onAgain} onRedial={onRedial} />;
 }

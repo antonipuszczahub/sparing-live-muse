@@ -137,6 +137,7 @@ export function FixtureApp({ name }: { name: string }) {
         error=""
         secs={7}
         onAgain={() => undefined}
+        onRedial={() => undefined}
       />
     );
   } else {

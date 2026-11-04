@@ -50,10 +50,11 @@ export interface ReportViewProps {
   /** Seconds the review has been running, for the wait message. */
   secs: number;
   onAgain: () => void;
+  onRedial: () => void;
 }
 
 /** The review: score, the mood vine, the numbers, and the replay with what the character was thinking. */
-export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain }: ReportViewProps) {
+export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain, onRedial }: ReportViewProps) {
   const lang = langOf(config);
   const persona = config.persona;
   const first = persona.name.split(' ')[0]!;
@@ -109,6 +110,9 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
               {copied ? t('copied') : t('copyReview')}
             </button>
           )}
+          <button type="button" className={ui.btn} onClick={onRedial}>
+            {t('redial', persona.name.split(' ')[0]!)}
+          </button>
           <button type="button" className={`${ui.btn} ${ui.btnPrimary}`} onClick={onAgain}>
             {t('newCall')}
             <Icon name="arrow" size={18} stroke={2} />

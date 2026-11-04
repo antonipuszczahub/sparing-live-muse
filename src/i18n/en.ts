@@ -110,6 +110,7 @@ export const en = {
   reviewMeta: (name: string, duration: string, turns: number, hungUp: boolean, _gender: Gender) =>
     `${name} · ${duration} · ${turns} turns${hungUp ? ' · they hung up' : ''}`,
   newCall: 'New call',
+  redial: (name: string) => `Again with ${name}`,
   reviewing: (seconds: number) => `Muse Wonder is reviewing your call… ${seconds}s`,
   reviewingNote: (name: string) => `It reads the transcript together with what ${name} was privately thinking. Usually 10 to 25 seconds.`,
   kindStrength: 'Strength',
