@@ -26,7 +26,7 @@ A real-time voice sparring system on Meta's Muse models, in English and Polish. 
 - **Auditor** (Muse Wonder, JSON schema): the post-call review, using the character's private thoughts and measured delivery numbers.
 - **Camera** (SAM 3.1, optional): framing facts for the review.
 
-**What is different.** Real interruptions in both directions (talk over it and it stops mid-sentence, the transcript marks the cut); hidden state that is revealed afterwards; a mood curve of the whole call; weak-spot memory that the next character aims at; a one-click captioned MP4 of the moment you lost them; English and Polish end to end (gender and "Pan/Pani" handled); an echo filter for the character's own voice; and a budget ledger that records every model call.
+**What is different.** Real interruptions in both directions (talk over it and it stops mid-sentence, the transcript marks the cut); hidden state that is revealed afterwards; a mood curve of the whole call; weak-spot memory that the next character aims at; a one-click captioned MP4 of the moment you lost them; English and Polish end to end (gender and "Pan/Pani" handled); an echo filter for the character's own voice and an audio check that tests, with your real microphone, whether the character would hear itself; one click to call the same character again and a small history of your scores; a Demo panel that says what the project is and what is not built yet; and a budget ledger that records every model call.
 
 **Measured, not claimed.** `npm run eval` plays 24 scripted calls (3 seeds x 4 difficulty levels x weak and strong caller) against the live API:
 

@@ -37,6 +37,12 @@ After "Fill in the demo call" the pitch is an app that fills the empty appointme
 
 Record a dry run first: the model answers differently each time, so the exact words will not repeat. If a take goes flat, start again; one call costs a few cents.
 
+## Bonus shots (if there is time)
+
+- **Audio check** (start screen, "Voice and microphone"): speak, stay silent while the character speaks a line, and the check says whether the microphone hears the character. Good proof that the echo problem was taken seriously; skip it if the take is short.
+- **Mute** (the microphone button, or the M key): the character stops waiting for an answer; typing still works.
+- **After the review:** "Again with <name>" calls the same character again; the start screen then shows your last scores as a small line.
+
 ## Cut if it runs long
 
 The camera and SAM are not in the shot list. Drop the Polish switch before dropping the review or the open-weights line: those two carry the score.
