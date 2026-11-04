@@ -107,9 +107,11 @@ Platforms: developed and tested on Windows 11 with Edge. Nothing in the code is 
 
 ```bash
 npm install
-cp .env.example .env      # then put your key in MODEL_API_KEY
+cp .env.example .env      # Windows (cmd): copy .env.example .env   then put your key in MODEL_API_KEY
 npm run dev               # http://localhost:5173
 ```
+
+That is all a judge needs: the one Meta key (`MODEL_API_KEY`). The open-weights tick on the start screen appears only when an open-weights host key is set (`BASETEN_API_KEY`, optional); without it the character runs on Meta's hosted Muse Spark. In Windows PowerShell, if scripts are blocked (`npm.ps1 cannot be loaded`), use `npm.cmd run dev` instead. `npm run preflight`, in a second terminal, checks that the app is ready (server, key, budget, files) without calling a model.
 
 Wear headphones, so the character does not hear itself.
 
