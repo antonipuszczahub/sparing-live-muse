@@ -75,3 +75,38 @@
 .warn {
   color: var(--ochre);
 }
+
+/* on the start screen the check is a card like the others */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: rgba(27, 19, 13, 0.25);
+}
+.dotGood {
+  background: #2f8a1f;
+  box-shadow: 0 0 0 4px rgba(47, 138, 31, 0.18);
+}
+.dotWarn {
+  background: var(--brass-hi);
+  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.18);
+}

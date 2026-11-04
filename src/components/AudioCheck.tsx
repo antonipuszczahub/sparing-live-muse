@@ -15,7 +15,7 @@ const PHASE_KEY = { room: 'audioPhaseRoom', speak: 'audioPhaseSpeak', sample: 'a
  * runs a short test with the real microphone: does it hear the user, and does it hear the character's own voice
  * (speakers leaking into the microphone), which would make the call talk to itself.
  */
-export function AudioCheck({ lang }: { lang: Lang }) {
+export function AudioCheck({ lang, card = false }: { lang: Lang; card?: boolean }) {
   const [mic, setMic] = useState('');
   const [out, setOut] = useState<OutputInfo | null>(null);
   const [phase, setPhase] = useState<Phase | null>(null);
@@ -39,6 +39,17 @@ export function AudioCheck({ lang }: { lang: Lang }) {
     return () => md?.removeEventListener?.('devicechange', refresh);
   }, [refresh]);
 
+  /** Device names stay hidden until the microphone has been allowed once, so detection starts with this. */
+  async function allow() {
+    try {
+      const st = await navigator.mediaDevices.getUserMedia({ audio: true });
+      st.getTracks().forEach((tr) => tr.stop());
+    } catch {
+      setFailed(true);
+    }
+    void refresh();
+  }
+
   async function run() {
     setVerdict(null);
     setFailed(false);
@@ -61,9 +72,14 @@ export function AudioCheck({ lang }: { lang: Lang }) {
   }
 
   const speakers = out?.kind === 'speakers';
+  // green: a named microphone and headphones; amber: speakers or a virtual output; grey: not known yet
+  const status = !mic ? 'idle' : out?.kind === 'headphones' ? 'good' : out?.kind === 'speakers' || out?.kind === 'virtual' ? 'warn' : 'idle';
   return (
-    <section className={styles.wrap}>
-      <h3 className={styles.title}>{t('audioTitle')}</h3>
+    <section className={card ? styles.card : styles.wrap}>
+      <h3 className={styles.title}>
+        <span className={`${styles.dot} ${status === 'good' ? styles.dotGood : status === 'warn' ? styles.dotWarn : ''}`} aria-hidden="true" />
+        {t('audioTitle')}
+      </h3>
       <p className={styles.line}>
         {t('audioMic')}: <b>{mic || t('audioUnnamed')}</b>
       </p>
@@ -77,7 +93,12 @@ export function AudioCheck({ lang }: { lang: Lang }) {
         )}
       </p>
       {speakers && <p className={`${styles.line} ${styles.warn}`}>{t('audioSpeakersHint')}</p>}
-      <div>
+      <div className={styles.actions}>
+        {!mic && (
+          <button type="button" className={ui.btn} onClick={allow}>
+            {t('audioAllow')}
+          </button>
+        )}
         <button type="button" className={ui.btn} onClick={run} disabled={running}>
           {t('audioRun')}
         </button>

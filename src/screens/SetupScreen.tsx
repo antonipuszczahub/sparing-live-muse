@@ -301,6 +301,7 @@ export function SetupScreen({
                 </Switch>
               </section>
             )}
+            <AudioCheck lang={lang} card />
             <span className={s.hint}>
               <Icon name="headphones" size={16} />
               {t('headphones')}
