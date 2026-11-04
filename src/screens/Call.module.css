@@ -29,9 +29,9 @@
   gap: 12px;
   min-height: 46px;
   padding: 0 20px;
-  border: 1px solid rgba(27, 19, 13, 0.12);
+  border: 1px solid var(--glass-edge, rgba(27, 19, 13, 0.12));
   border-radius: var(--r-pill);
-  background: rgba(255, 252, 247, 0.68);
+  background: var(--glass, rgba(255, 252, 247, 0.68));
   backdrop-filter: blur(14px);
   font-family: var(--font-mono);
   font-size: 13px;
@@ -99,7 +99,7 @@
   overflow: hidden;
   background: var(--mud);
   box-shadow:
-    0 0 0 4px rgba(255, 255, 255, 0.92),
+    0 0 0 4px var(--face-gap, rgba(255, 255, 255, 0.92)),
     0 0 0 7px var(--mc),
     0 0 70px -10px var(--mc),
     0 50px 80px -40px rgba(110, 50, 15, 0.4);
@@ -299,8 +299,8 @@
   padding: 16px 18px;
   transform: translateX(-50%);
   border-radius: calc(16px * var(--round));
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(27, 19, 13, 0.14);
+  background: var(--glass-solid, rgba(255, 255, 255, 0.96));
+  border: 1px solid var(--glass-edge, rgba(27, 19, 13, 0.14));
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -386,7 +386,7 @@
   padding: 0 22px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--glass-solid, rgba(255, 255, 255, 0.92));
   color: var(--ink);
   font: inherit;
   font-size: 16px; /* under 16px iOS zooms the page when the field is focused */
@@ -400,7 +400,7 @@
 }
 .typ:focus {
   border-color: var(--ink);
-  background: #fff;
+  background: var(--glass-hover, #fff);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass-hi) 22%, transparent);
 }
 
@@ -413,7 +413,7 @@
   height: 52px;
   border: 1px solid var(--line);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--glass-solid, rgba(255, 255, 255, 0.92));
   color: var(--ink);
   cursor: pointer;
   transition:
@@ -422,7 +422,7 @@
     transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .ib:hover:not(:disabled) {
-  background: #fff;
+  background: var(--glass-hover, #fff);
   transform: translateY(-2px);
 }
 .ib:disabled,

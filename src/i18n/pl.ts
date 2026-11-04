@@ -229,6 +229,7 @@ Zbudowane na modelach Muse od @AIatMeta dla @cerebral_valley. Wypróbuj: ${origi
     `„${name}” wygląda na wejście wirtualne (Voicemeeter, kabel wirtualny albo Stereo Mix). Jeśli niesie to, co grają głośniki, postać słyszy tylko samą siebie: wybierz mikrofon ze słuchawek.`,
   themeTitle: 'Wygląd',
   themeClassic: 'Klasyczny',
+  themeSwiatlo: 'Światło',
   themeMaison: 'Maison',
   themeAtelier: 'Atelier',
   themeGalerie: 'Galerie',

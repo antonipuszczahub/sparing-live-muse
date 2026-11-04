@@ -163,7 +163,7 @@
 }
 .stat {
   padding: 22px 0;
-  border-top: 1px solid rgba(27, 19, 13, 0.14);
+  border-top: 1px solid var(--hairline, rgba(27, 19, 13, 0.14));
 }
 .stat:nth-child(odd) {
   padding-right: 20px;
@@ -206,7 +206,7 @@
   height: 8px;
   margin-top: 10px;
   border-radius: var(--r-pill);
-  background: rgba(27, 19, 13, 0.1);
+  background: var(--hover-fill, rgba(27, 19, 13, 0.1));
 }
 .bar i {
   display: block;
@@ -256,7 +256,7 @@
   gap: 20px;
   align-items: baseline;
   padding: 20px 0;
-  border-top: 1px solid rgba(27, 19, 13, 0.14);
+  border-top: 1px solid var(--hairline, rgba(27, 19, 13, 0.14));
   list-style: none;
 }
 .next li b {
@@ -363,7 +363,7 @@
   border-radius: 50%;
   background: var(--c);
   box-shadow:
-    0 0 0 6px #fff9f2,
+    0 0 0 6px var(--face-gap, #fff9f2),
     0 0 24px -2px var(--c);
 }
 .ndBig {
@@ -371,7 +371,7 @@
   height: 28px;
   margin-top: 4px;
   box-shadow:
-    0 0 0 6px #fff9f2,
+    0 0 0 6px var(--face-gap, #fff9f2),
     0 0 0 8px var(--c),
     0 0 30px 0 var(--c);
 }
@@ -402,9 +402,9 @@
 .an {
   margin-top: 14px;
   padding: 20px 22px;
-  border: 1px solid rgba(27, 19, 13, 0.1);
+  border: 1px solid var(--hairline, rgba(27, 19, 13, 0.1));
   border-radius: calc(18px * var(--round));
-  background: linear-gradient(180deg, rgba(255, 252, 247, 0.72), rgba(255, 252, 247, 0.82));
+  background: var(--glass-grad, linear-gradient(180deg, rgba(255, 252, 247, 0.72), rgba(255, 252, 247, 0.82)));
   backdrop-filter: blur(14px);
 }
 .th + .an {
@@ -438,7 +438,7 @@
   margin-top: 14px;
   padding: 14px 16px;
   border-radius: calc(14px * var(--round));
-  background: rgba(27, 19, 13, 0.06);
+  background: var(--hover-fill, rgba(27, 19, 13, 0.06));
   color: var(--ink-soft);
   font-size: 16px;
   line-height: 1.5;
@@ -465,9 +465,9 @@
 .traceWrap {
   overflow-x: auto;
   padding: 6px 22px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--glass-edge, rgba(255, 255, 255, 0.9));
   border-radius: var(--r-card);
-  background: rgba(255, 255, 255, 0.74);
+  background: var(--glass, rgba(255, 255, 255, 0.74));
   backdrop-filter: blur(22px);
   box-shadow: 0 24px 60px -34px rgba(120, 60, 20, 0.3);
 }
@@ -495,7 +495,7 @@
 .traceTable code {
   padding: 2px 8px;
   border-radius: calc(7px * var(--round));
-  background: rgba(20, 17, 14, 0.06);
+  background: var(--hover-fill, rgba(20, 17, 14, 0.06));
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
   font-size: 12.5px;
 }

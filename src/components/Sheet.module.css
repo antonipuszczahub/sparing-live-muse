@@ -29,7 +29,7 @@
 
 /* a long read over a busy photograph: more opaque than the plain glass */
 div.panel {
-  background: rgba(255, 252, 247, 0.9);
+  background: var(--glass-solid, rgba(255, 252, 247, 0.9));
 }
 
 .head {
@@ -53,7 +53,7 @@ div.panel {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(27, 19, 13, 0.16);
+  border: 1px solid var(--hairline, rgba(27, 19, 13, 0.16));
   border-radius: 50%;
   background: transparent;
   color: var(--ink);

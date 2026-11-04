@@ -4,11 +4,11 @@
   gap: clamp(24px, 3vw, 56px);
   align-items: center;
   padding: clamp(24px, 3vw, 44px);
-  border: 1px solid rgba(27, 19, 13, 0.1);
+  border: 1px solid var(--hairline, rgba(27, 19, 13, 0.1));
   border-radius: calc(28px * var(--round));
   background:
     radial-gradient(600px 300px at 100% 0, rgba(194, 65, 12, 0.14), transparent 70%),
-    linear-gradient(180deg, rgba(255, 252, 247, 0.7), rgba(255, 252, 247, 0.8));
+    var(--glass-grad, linear-gradient(180deg, rgba(255, 252, 247, 0.7), rgba(255, 252, 247, 0.8)));
 }
 
 .title {
@@ -42,16 +42,16 @@
 }
 .result video {
   width: 100%;
-  border: 1px solid rgba(27, 19, 13, 0.14);
+  border: 1px solid var(--hairline, rgba(27, 19, 13, 0.14));
   border-radius: 3px;
 }
 .post {
   width: 100%;
   margin-top: 12px;
   padding: 12px 14px;
-  border: 1px solid rgba(27, 19, 13, 0.16);
+  border: 1px solid var(--hairline, rgba(27, 19, 13, 0.16));
   border-radius: 3px;
-  background: rgba(255, 252, 247, 0.78);
+  background: var(--glass-strong, rgba(255, 252, 247, 0.78));
   color: var(--ink);
   font: inherit;
   font-size: 14px;

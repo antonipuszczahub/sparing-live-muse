@@ -76,13 +76,13 @@
   border-radius: 50%;
   background: var(--brass);
   box-shadow:
-    0 0 0 6px #fff9f2,
+    0 0 0 6px var(--face-gap, #fff9f2),
     0 0 20px -2px var(--brass);
 }
 .noteNode {
   background: var(--lichen);
   box-shadow:
-    0 0 0 6px #fff9f2,
+    0 0 0 6px var(--face-gap, #fff9f2),
     0 0 20px -2px var(--lichen);
 }
 .waiting .node {

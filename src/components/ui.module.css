@@ -120,7 +120,7 @@
   padding: 0 18px;
   border-radius: var(--r-pill);
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--glass, rgba(255, 255, 255, 0.72));
   backdrop-filter: blur(14px);
   font-family: var(--font-mono);
   font-size: 13.5px;
@@ -134,8 +134,8 @@ button.pill {
   cursor: pointer;
 }
 button.pill:hover {
-  border-color: rgba(20, 17, 14, 0.3);
-  background: #fff;
+  border-color: var(--hover-edge, rgba(20, 17, 14, 0.3));
+  background: var(--glass-hover, #fff);
 }
 .pill b {
   width: 8px;
@@ -156,7 +156,7 @@ button.pill:hover {
   display: flex;
   padding: 4px;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--glass, rgba(255, 255, 255, 0.72));
   border: 1px solid var(--line);
   backdrop-filter: blur(14px);
 }
@@ -180,8 +180,8 @@ button.pill:hover {
   color: var(--ink);
 }
 .seg button[aria-pressed='true'] {
-  background: var(--ink);
-  color: #fff;
+  background: var(--seg-on, var(--ink));
+  color: var(--seg-on-fg, #fff);
   font-weight: 600;
 }
 
@@ -194,7 +194,7 @@ button.pill:hover {
   padding: 0 24px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--glass-strong, rgba(255, 255, 255, 0.8));
   backdrop-filter: blur(14px);
   font: inherit;
   font-size: 15px;
@@ -207,8 +207,8 @@ button.pill:hover {
     transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .btn:hover:not(:disabled) {
-  background: #fff;
-  border-color: rgba(20, 17, 14, 0.3);
+  background: var(--glass-hover, #fff);
+  border-color: var(--hover-edge, rgba(20, 17, 14, 0.3));
   transform: translateY(-1px);
 }
 .btn:disabled {
@@ -216,22 +216,22 @@ button.pill:hover {
   cursor: default;
 }
 .btnPrimary {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
+  background: var(--pill-bg, var(--ink));
+  border-color: var(--pill-edge, var(--ink));
+  color: var(--pill-fg, #fff);
 }
 .btnPrimary:hover:not(:disabled) {
-  background: #2c241d;
-  border-color: #2c241d;
+  background: var(--pill-hover, #2c241d);
+  border-color: var(--pill-hover-edge, #2c241d);
 }
 
 .glass {
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--glass-edge, rgba(255, 255, 255, 0.9));
   border-radius: var(--glass-r, var(--r-card));
-  background: rgba(255, 255, 255, 0.74);
+  background: var(--glass, rgba(255, 255, 255, 0.74));
   backdrop-filter: blur(22px) saturate(1.1);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 1px 0 var(--glass-hi, rgba(255, 255, 255, 0.8)) inset,
     0 24px 60px -30px rgba(120, 60, 20, 0.28),
     0 2px 6px rgba(20, 17, 14, 0.04);
 }
@@ -241,13 +241,13 @@ button.pill:hover {
   padding: 12px 18px;
   border: 1px solid rgba(166, 93, 0, 0.3);
   border-radius: var(--r-field);
-  background: rgba(255, 244, 222, 0.8);
+  background: var(--note-bg, rgba(255, 244, 222, 0.8));
   font-size: 14px;
   line-height: 1.5;
   color: var(--ochre);
 }
 .noteBad {
   border-color: rgba(217, 56, 30, 0.35);
-  background: rgba(255, 233, 228, 0.85);
+  background: var(--note-bad-bg, rgba(255, 233, 228, 0.85));
   color: var(--ember);
 }

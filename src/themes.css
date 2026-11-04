@@ -7,6 +7,119 @@
  * words, sharp or barely rounded edges, quiet motion), not the look of any one house.
  */
 
+/*
+ * Światło: a near-black page lit by diagonal bars of orange, amber and crimson light with film grain, glass cards with a
+ * hairline edge, one orange accent. The palette of the user's favourite mock-up; the layout is the app's own.
+ */
+:root[data-theme='swiatlo'] {
+  color-scheme: dark;
+  --canopy: #060709;
+  --paper: #101115;
+  --ink: #f3f3f5;
+  --ink-soft: #d4d4da;
+  --lichen: #aeb0b8;
+  --brass: #ff8a5c;
+  --brass-hi: #f65f31;
+  --line: rgba(255, 255, 255, 0.13);
+  --mud: #1b1c22;
+  --clay: #ff9a5c;
+  --ochre: #f5bb47;
+  --ember: #ff5a4a;
+  --bg-grad: #060709;
+  --glow-a: #f65f31;
+  --glow-b: #d1162a;
+  --glow-c: #f5bb47;
+  /* the surfaces that are white glass on the light looks (the other looks leave these unset and keep their own values) */
+  --glass-faint: rgba(255, 255, 255, 0.04);
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.085);
+  --glass-solid: rgba(16, 17, 21, 0.92);
+  --glass-hover: rgba(255, 255, 255, 0.12);
+  --glass-grad: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04));
+  --glass-edge: rgba(255, 255, 255, 0.12);
+  --glass-hi: rgba(255, 255, 255, 0.07);
+  --hairline: rgba(255, 255, 255, 0.12);
+  --hairline-strong: rgba(255, 255, 255, 0.3);
+  --hover-edge: rgba(255, 255, 255, 0.34);
+  --hover-fill: rgba(255, 255, 255, 0.06);
+  --seg-track: rgba(0, 0, 0, 0.35);
+  --seg-on: rgba(255, 255, 255, 0.15);
+  --seg-on-fg: #ffffff;
+  /* the black pills become dark glass with a light edge and a glow */
+  --pill-bg: rgba(0, 0, 0, 0.4);
+  --pill-fg: #ffffff;
+  --pill-edge: rgba(255, 255, 255, 0.28);
+  --pill-hover: rgba(255, 255, 255, 0.12);
+  --pill-hover-edge: rgba(255, 255, 255, 0.4);
+  --cta-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28), 0 0 44px -8px rgba(246, 95, 49, 0.75);
+  --face-gap: #0a0b0e;
+  --sticky-fade: linear-gradient(180deg, rgba(6, 7, 9, 0), rgba(6, 7, 9, 0.94) 46%);
+  --note-bg: rgba(245, 187, 71, 0.1);
+  --note-bad-bg: rgba(255, 90, 74, 0.12);
+}
+
+/* The light: slanted bars of orange, amber and crimson, blurred, with a vignette and grain. They still drift and lean
+   towards the pointer, and the call tints the brightest one with the character's mood. */
+:root[data-theme='swiatlo'] [class*='_orb_'] {
+  top: -30vmax;
+  right: auto;
+  bottom: auto;
+  width: 34vmax;
+  height: 150vmax;
+  border-radius: 99px;
+  filter: blur(34px);
+  mix-blend-mode: screen;
+  opacity: 0.58 !important;
+}
+:root[data-theme='swiatlo'] [class*='_o1_'] {
+  left: -6vmax;
+  background: linear-gradient(
+    180deg,
+    transparent 4%,
+    color-mix(in srgb, var(--mc) 22%, var(--glow-a)) 40%,
+    var(--glow-b) 70%,
+    transparent 96%
+  );
+  transform: rotate(-36deg) translate(calc(var(--px) * 46px), calc(var(--py) * 30px));
+}
+:root[data-theme='swiatlo'] [class*='_o2_'] {
+  left: 20vmax;
+  width: 22vmax;
+  background: linear-gradient(180deg, transparent 8%, var(--glow-c) 44%, transparent 90%);
+  transform: rotate(-36deg) translate(calc(var(--px) * -64px), calc(var(--py) * -34px));
+  opacity: 0.38 !important;
+}
+:root[data-theme='swiatlo'] [class*='_o3_'] {
+  left: 44vmax;
+  width: 30vmax;
+  background: linear-gradient(180deg, transparent 6%, var(--glow-b) 46%, var(--glow-a) 66%, transparent 94%);
+  transform: rotate(-36deg) translate(calc(var(--px) * 30px), calc(var(--py) * 20px));
+}
+:root[data-theme='swiatlo'] [class*='_backdrop_']::before {
+  content: '';
+  position: absolute;
+  left: 74vmax;
+  top: -34vmax;
+  width: 16vmax;
+  height: 150vmax;
+  border-radius: 99px;
+  background: linear-gradient(180deg, transparent 8%, var(--glow-c) 50%, transparent 90%);
+  filter: blur(34px);
+  mix-blend-mode: screen;
+  opacity: 0.3;
+  transform: rotate(-36deg);
+}
+:root[data-theme='swiatlo'] [class*='_backdrop_']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 75% at 50% 38%, transparent 30%, #060709 80%);
+}
+:root[data-theme='swiatlo'] [class*='_grain_'] {
+  mix-blend-mode: overlay;
+  opacity: 0.38;
+}
+
 /* Maison: ivory paper, black ink, antique gold, an editorial serif, almost square corners. */
 :root[data-theme='maison'] {
   --canopy: #f3efe7;

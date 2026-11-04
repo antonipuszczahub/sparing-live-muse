@@ -4,7 +4,7 @@ import { applyTheme, initialTheme, THEMES, type Theme } from '../lib/theme.ts';
 import ui from './ui.module.css';
 import styles from './VoicePicker.module.css';
 
-const NAME = { classic: 'themeClassic', maison: 'themeMaison', atelier: 'themeAtelier', galerie: 'themeGalerie' } as const satisfies Record<Theme, string>;
+const NAME = { classic: 'themeClassic', swiatlo: 'themeSwiatlo', maison: 'themeMaison', atelier: 'themeAtelier', galerie: 'themeGalerie' } as const satisfies Record<Theme, string>;
 
 /** The look of the whole app: the same screens in a different palette, face and shape. Remembered in this browser. */
 export function ThemePicker() {

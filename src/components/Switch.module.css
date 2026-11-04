@@ -12,9 +12,9 @@
   flex: none;
   width: 52px;
   height: 30px;
-  border: 1px solid rgba(27, 19, 13, 0.3);
+  border: 1px solid var(--hairline-strong, rgba(27, 19, 13, 0.3));
   border-radius: var(--r-pill);
-  background: rgba(27, 19, 13, 0.08);
+  background: var(--hover-fill, rgba(27, 19, 13, 0.08));
   transition:
     background 0.4s,
     border-color 0.4s;

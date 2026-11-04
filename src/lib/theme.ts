@@ -1,5 +1,5 @@
 /** The looks the visitor can choose from. 'classic' is the default (no data-theme on the page). */
-export const THEMES = ['classic', 'maison', 'atelier', 'galerie'] as const;
+export const THEMES = ['classic', 'swiatlo', 'maison', 'atelier', 'galerie'] as const;
 export type Theme = (typeof THEMES)[number];
 
 const KEY = 'sl.theme';
