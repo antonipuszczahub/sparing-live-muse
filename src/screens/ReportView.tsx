@@ -204,7 +204,7 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                 </ol>
               </div>
             )}
-            <ClipMaker session={session} scenario={config.scenario} persona={persona} turns={turns} audit={result} lang={lang} userGender={config.user?.gender} />
+            <ClipMaker session={session} scenario={config.scenario} persona={persona} turns={turns} audit={result} lang={lang} userGender={config.user?.gender} open={config.provider === 'open'} />
           </section>
 
           {trace && trace.length > 0 && (

@@ -31,6 +31,7 @@ export function ClipMaker({
   audit,
   lang = 'en',
   userGender = 'm',
+  open = false,
 }: {
   session: string;
   scenario: ScenarioId;
@@ -40,6 +41,8 @@ export function ClipMaker({
   lang?: Lang;
   /** Polish first-person text ("Przećwiczyłem" / "Przećwiczyłam") follows the user's gender. */
   userGender?: 'm' | 'f';
+  /** The character ran on open weights: the clip says so. */
+  open?: boolean;
 }) {
   useLang();
   const [progress, setProgress] = useState<number | null>(null);
@@ -70,6 +73,7 @@ export function ClipMaker({
         siteLabel: clipLink(),
         lang,
         userGender,
+        open,
         onProgress: setProgress,
       });
       setClip({ ...result, url: URL.createObjectURL(result.blob) });
@@ -129,7 +133,7 @@ export function ClipMaker({
         </div>
         <div className={styles.thought}>{previewThought(turns, audit)}</div>
         {audit && <div className={styles.score}>{audit.score}</div>}
-        <div className={styles.built}>{t('clipBuilt').toUpperCase()}</div>
+        <div className={styles.built}>{(open ? `${t('clipBuilt')} · ${t('clipOpen')}` : t('clipBuilt')).toUpperCase()}</div>
       </div>
     </section>
   );

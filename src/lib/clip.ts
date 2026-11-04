@@ -19,6 +19,8 @@ export interface ClipInput {
   lang?: Lang;
   /** The user's gender, for the Polish first-person intro ("Przećwiczyłem" / "Przećwiczyłam"). */
   userGender?: 'm' | 'f';
+  /** The character ran on open weights (Muse Spark Open): the corner of the clip says so. */
+  open?: boolean;
   onProgress?: (fraction: number) => void;
 }
 
@@ -190,6 +192,11 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     ctx.font = `18px ${FONT}`;
     ctx.textAlign = 'right';
     ctx.fillText(say('clipBuilt'), W - 36, 50);
+    if (input.open) {
+      ctx.fillStyle = ORANGE;
+      ctx.font = `600 15px ${FONT}`;
+      ctx.fillText(say('clipOpen'), W - 36, 74);
+    }
 
     // face
     const fx = 190;

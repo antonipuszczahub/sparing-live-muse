@@ -186,6 +186,7 @@ Zbudowane na modelach Muse od @AIatMeta dla @cerebral_valley. Wypróbuj: ${origi
   clipIntro1: (gender) => (gender === 'f' ? 'Przećwiczyłam tę rozmowę' : 'Przećwiczyłem tę rozmowę'),
   clipIntro2: 'z AI, która ukrywa swoje myśli',
   clipBuilt: 'na modelach Meta Muse',
+  clipOpen: 'Muse Spark Open, otwarte wagi',
   clipOver: 'Koniec rozmowy',
   clipPractice: (host) => `Poćwicz swoją: ${host}`,
   drawingPortrait: 'rysuję portret…',
