@@ -60,6 +60,36 @@
   letter-spacing: -0.042em;
   text-wrap: balance;
 }
+/* the Demo button says "start here" once, with a soft pulse, until it has been opened */
+.demoPill {
+  position: relative;
+}
+.demoPill[data-new='true']::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--brass-hi);
+  box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.55);
+  animation: nudge 2.2s ease-out infinite;
+}
+@keyframes nudge {
+  70% {
+    box-shadow: 0 0 0 11px rgba(255, 90, 31, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 90, 31, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demoPill[data-new='true']::after {
+    animation: none;
+  }
+}
+
 /* a quiet line for what it runs on */
 .built {
   display: flex;

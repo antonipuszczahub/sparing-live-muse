@@ -10,6 +10,7 @@ import { Switch } from '../components/Switch.tsx';
 import { AboutSheet } from '../components/AboutSheet.tsx';
 import { AudioCheck } from '../components/AudioCheck.tsx';
 import { MicPicker } from '../components/MicPicker.tsx';
+import { hasSeenAbout, markAboutSeen } from '../lib/seen.ts';
 import { Progress } from '../components/Progress.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
 import ui from '../components/ui.module.css';
@@ -54,6 +55,7 @@ export function SetupScreen({
   const [user, setUser] = useState<UserProfile>(loadUser);
   const [voices, setVoices] = useState(false);
   const [about, setAbout] = useState(false);
+  const [seenAbout, setSeenAbout] = useState(hasSeenAbout);
   const rails = useRef<HTMLElement>(null);
   const { list: voiceList, total: voiceTotal } = useVoiceList(lang);
   const missingVoice = voiceTotal > 0 && voiceList.length === 0;
@@ -152,8 +154,13 @@ export function SetupScreen({
           <button
             type="button"
             className={`${ui.pill} ${s.demoPill}`}
+            data-new={!seenAbout}
             title={t('demoPresetBody')}
-            onClick={() => setAbout(true)}
+            onClick={() => {
+              markAboutSeen();
+              setSeenAbout(true);
+              setAbout(true);
+            }}
           >
             <Icon name="phone" size={16} />
             {t('demoPreset')}
