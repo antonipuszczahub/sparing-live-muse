@@ -604,3 +604,16 @@
   justify-content: flex-end;
   gap: 10px;
 }
+
+@media (max-width: 640px) {
+  /* the review's actions: two small buttons side by side, the main one across the whole width */
+  .topActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+  .topActions > :last-child {
+    grid-column: 1 / -1;
+  }
+}
