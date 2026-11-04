@@ -47,7 +47,7 @@
   padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
   border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--c) 14%, transparent);
+  background: color-mix(in srgb, var(--c) 14%, var(--outcome-base, transparent));
   color: var(--c);
   font-family: var(--font-mono);
   font-size: 13px;

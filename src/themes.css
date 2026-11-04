@@ -50,6 +50,7 @@
   --cta-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28), 0 0 44px -8px rgba(246, 95, 49, 0.75);
   --face-gap: #0a0b0e;
   --sticky-fade: linear-gradient(180deg, rgba(6, 7, 9, 0), rgba(6, 7, 9, 0.94) 46%);
+  --outcome-base: rgba(8, 9, 12, 0.72); /* the outcome pill needs a dark backing: amber on the hazy light is hard to read */
   --note-bg: rgba(245, 187, 71, 0.1);
   --note-bad-bg: rgba(255, 90, 74, 0.12);
 }
