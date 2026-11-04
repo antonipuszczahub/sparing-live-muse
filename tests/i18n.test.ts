@@ -9,9 +9,12 @@ test('both languages have exactly the same keys', () => {
   assert.deepEqual(Object.keys(pl).sort(), Object.keys(en).sort());
 });
 
+// proper names that are the same in both languages
+const SAME = new Set<string>(['themeMaison', 'themeAtelier', 'themeGalerie']);
+
 test('no Polish text is a copy of the English one', () => {
   for (const k of Object.keys(en) as (keyof typeof en)[]) {
-    if (typeof en[k] === 'string') assert.notEqual(pl[k], en[k], `"${k}" is still English`);
+    if (typeof en[k] === 'string' && !SAME.has(k)) assert.notEqual(pl[k], en[k], `"${k}" is still English`);
   }
 });
 

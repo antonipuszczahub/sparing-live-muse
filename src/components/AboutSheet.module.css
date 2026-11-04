@@ -67,13 +67,13 @@ p.text {
 
 .next li {
   padding-left: 14px;
-  border-left: 2px solid rgba(255, 90, 31, 0.45);
+  border-left: 2px solid color-mix(in srgb, var(--brass-hi) 45%, transparent);
 }
 
 .badge {
   padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(255, 90, 31, 0.12);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--brass-hi) 12%, transparent);
   color: var(--brass);
   font-family: inherit;
   font-size: 11px;
@@ -92,7 +92,7 @@ p.text {
   min-height: 52px;
   padding: 0 28px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--ink);
   color: #fff;
   font: inherit;
@@ -119,7 +119,7 @@ p.text {
   margin-top: 8px;
   padding: 0 24px;
   border: 1.5px solid var(--ink);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: transparent;
   color: var(--ink);
   font: inherit;

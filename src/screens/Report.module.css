@@ -46,7 +46,7 @@
   min-height: 40px;
   padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--c) 14%, transparent);
   color: var(--c);
   font-family: var(--font-mono);
@@ -139,7 +139,7 @@
 
 .chart {
   padding: clamp(18px, 2vw, 30px);
-  border-radius: 26px;
+  border-radius: calc(26px * var(--round));
 }
 
 .two {
@@ -205,13 +205,13 @@
   position: relative;
   height: 8px;
   margin-top: 10px;
-  border-radius: 99px;
+  border-radius: var(--r-pill);
   background: rgba(27, 19, 13, 0.1);
 }
 .bar i {
   display: block;
   height: 8px;
-  border-radius: 99px;
+  border-radius: var(--r-pill);
   background: linear-gradient(90deg, #3f7a3a, var(--brass));
   box-shadow: 0 0 16px -2px rgba(194, 65, 12, 0.5);
   transform-origin: left;
@@ -403,7 +403,7 @@
   margin-top: 14px;
   padding: 20px 22px;
   border: 1px solid rgba(27, 19, 13, 0.1);
-  border-radius: 18px;
+  border-radius: calc(18px * var(--round));
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.72), rgba(255, 252, 247, 0.82));
   backdrop-filter: blur(14px);
 }
@@ -415,7 +415,7 @@
   align-items: center;
   min-height: 26px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--c);
   color: #fffaf3;
   font-family: var(--font-mono);
@@ -437,7 +437,7 @@
 .say {
   margin-top: 14px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: calc(14px * var(--round));
   background: rgba(27, 19, 13, 0.06);
   color: var(--ink-soft);
   font-size: 16px;
@@ -494,7 +494,7 @@
 }
 .traceTable code {
   padding: 2px 8px;
-  border-radius: 7px;
+  border-radius: calc(7px * var(--round));
   background: rgba(20, 17, 14, 0.06);
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
   font-size: 12.5px;
@@ -511,7 +511,7 @@
   margin-right: 8px;
   border-radius: 50%;
   background: var(--brass-hi);
-  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.16);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass-hi) 16%, transparent);
 }
 .traceNote {
   margin: 14px 2px 0;
@@ -574,7 +574,7 @@
   }
   .chart {
     padding: 20px 14px 14px;
-    border-radius: 22px;
+    border-radius: calc(22px * var(--round));
   }
   .h2 {
     font-size: 28px;

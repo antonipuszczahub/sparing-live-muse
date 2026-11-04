@@ -12,7 +12,7 @@
   max-width: calc(100vw - 24px);
   padding: 7px 8px 7px 14px;
   transform: translateX(-50%);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(27, 19, 13, 0.88);
   color: #fff;
   font-size: 13px;
@@ -32,14 +32,14 @@
   height: 8px;
   flex: none;
   border-radius: 50%;
-  background: #ff5a1f;
+  background: var(--brass-hi);
 }
 
 .btn {
   min-height: 32px;
   padding: 0 14px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.14);
   color: inherit;
   font: inherit;
@@ -53,7 +53,7 @@
 
 @media (max-width: 700px) {
   .bar {
-    border-radius: 20px;
+    border-radius: calc(20px * var(--round));
     font-size: 12px;
   }
 }

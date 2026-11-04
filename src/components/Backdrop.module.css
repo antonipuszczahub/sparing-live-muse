@@ -10,7 +10,7 @@
   overflow: hidden;
   pointer-events: none;
   /* paper at the top, orange at the bottom */
-  background: linear-gradient(180deg, #faf7f2 0%, #f6f1ea 52%, #f6e3d2 80%, #fbc9a4 100%);
+  background: var(--bg-grad);
 }
 
 /* pools of light: --mc (the character's mood) only tints them, so the start screen stays orange */
@@ -26,7 +26,7 @@
   height: 78vmax;
   left: -22vmax;
   bottom: -46vmax;
-  background: radial-gradient(circle, color-mix(in srgb, var(--mc) 22%, #ff7a2e) 0%, transparent 66%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--mc) 22%, var(--glow-a)) 0%, transparent 66%);
   opacity: 0.62;
   transform: translate(calc(var(--px) * 46px), calc(var(--py) * 30px));
   animation: driftA 34s ease-in-out infinite alternate;
@@ -36,7 +36,7 @@
   height: 66vmax;
   right: -24vmax;
   bottom: -40vmax;
-  background: radial-gradient(circle, color-mix(in srgb, var(--mc) 18%, #ff5a1f) 0%, transparent 64%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--mc) 18%, var(--glow-b)) 0%, transparent 64%);
   opacity: 0.5;
   transform: translate(calc(var(--px) * -64px), calc(var(--py) * -34px));
   animation: driftB 41s ease-in-out infinite alternate;
@@ -46,7 +46,7 @@
   height: 54vmax;
   left: 34%;
   top: -34vmax;
-  background: radial-gradient(circle, #ffe3cc 0%, transparent 66%);
+  background: radial-gradient(circle, var(--glow-c) 0%, transparent 66%);
   opacity: 0.55;
   transform: translate(calc(var(--px) * 30px), calc(var(--py) * 20px));
   animation: driftC 47s ease-in-out infinite alternate;

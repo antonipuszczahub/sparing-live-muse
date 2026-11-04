@@ -118,7 +118,7 @@
   gap: 9px;
   min-height: 44px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(14px);
@@ -142,7 +142,7 @@ button.pill:hover {
   height: 8px;
   border-radius: 50%;
   background: var(--brass-hi);
-  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.18);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass-hi) 18%, transparent);
   animation: breathe 3.2s ease-in-out infinite;
 }
 .pillOff b {
@@ -155,7 +155,7 @@ button.pill:hover {
 .seg {
   display: flex;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--line);
   backdrop-filter: blur(14px);
@@ -165,7 +165,7 @@ button.pill:hover {
   min-height: 36px;
   padding: 0 16px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: transparent;
   font: inherit;
   font-size: 13.5px;
@@ -193,7 +193,7 @@ button.pill:hover {
   min-height: 48px;
   padding: 0 24px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(14px);
   font: inherit;

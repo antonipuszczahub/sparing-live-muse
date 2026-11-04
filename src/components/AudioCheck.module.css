@@ -28,14 +28,14 @@
 .meter {
   height: 8px;
   overflow: hidden;
-  border-radius: 99px;
+  border-radius: var(--r-pill);
   background: rgba(27, 19, 13, 0.1);
 }
 
 .bar {
   height: 100%;
   width: 0;
-  border-radius: 99px;
+  border-radius: var(--r-pill);
   background: var(--brass-hi);
   transition: width 60ms linear;
 }
@@ -57,7 +57,7 @@
 .bad {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: calc(12px * var(--round));
   font-size: 14px;
   line-height: 1.45;
 }
@@ -83,7 +83,7 @@
   gap: 10px;
   padding: 16px 18px;
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: calc(22px * var(--round));
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(10px);
 }
@@ -108,5 +108,5 @@
 }
 .dotWarn {
   background: var(--brass-hi);
-  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.18);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass-hi) 18%, transparent);
 }

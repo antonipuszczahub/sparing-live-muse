@@ -5,7 +5,7 @@
   align-items: center;
   padding: clamp(24px, 3vw, 44px);
   border: 1px solid rgba(27, 19, 13, 0.1);
-  border-radius: 28px;
+  border-radius: calc(28px * var(--round));
   background:
     radial-gradient(600px 300px at 100% 0, rgba(194, 65, 12, 0.14), transparent 70%),
     linear-gradient(180deg, rgba(255, 252, 247, 0.7), rgba(255, 252, 247, 0.8));
@@ -79,7 +79,7 @@
   width: 208px;
   height: 370px;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: calc(22px * var(--round));
   background: #0e0c0a;
   box-shadow: 0 40px 70px -34px rgba(110, 50, 15, 0.7);
   transform: rotate(3deg);
@@ -92,7 +92,7 @@
   height: 140px;
   margin-left: -56px;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: calc(14px * var(--round));
   box-shadow: 0 0 0 2px var(--c);
 }
 .who {
@@ -172,6 +172,6 @@
 @media (max-width: 640px) {
   .clip {
     padding: 26px 20px 30px;
-    border-radius: 22px;
+    border-radius: calc(22px * var(--round));
   }
 }

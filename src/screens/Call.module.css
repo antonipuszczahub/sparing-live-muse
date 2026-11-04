@@ -30,7 +30,7 @@
   min-height: 46px;
   padding: 0 20px;
   border: 1px solid rgba(27, 19, 13, 0.12);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 252, 247, 0.68);
   backdrop-filter: blur(14px);
   font-family: var(--font-mono);
@@ -91,7 +91,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 28px;
+  border-radius: calc(28px * var(--round));
 }
 
 /* --mc is the mood colour: the ring and its glow change with it */
@@ -157,7 +157,7 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: calc(18px * var(--round));
   background: #000;
 }
 .self video {
@@ -169,7 +169,7 @@
 .faceBox {
   position: absolute;
   border: 2px solid var(--brass);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--round));
   transition: all 0.4s;
 }
 .samBadge {
@@ -277,7 +277,7 @@
   min-height: 44px;
   padding: 0 16px;
   border: 1px solid rgba(194, 65, 12, 0.35);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(194, 65, 12, 0.08);
   font-family: var(--font-mono);
   font-size: 12px;
@@ -298,7 +298,7 @@
   margin: 0;
   padding: 16px 18px;
   transform: translateX(-50%);
-  border-radius: 16px;
+  border-radius: calc(16px * var(--round));
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(27, 19, 13, 0.14);
   font-size: 14px;
@@ -385,7 +385,7 @@
   height: 52px;
   padding: 0 22px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
   font: inherit;
@@ -401,7 +401,7 @@
 .typ:focus {
   border-color: var(--ink);
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.22);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass-hi) 22%, transparent);
 }
 
 .ib {
@@ -619,7 +619,7 @@
   }
   .face,
   .wave {
-    border-radius: 22px;
+    border-radius: calc(22px * var(--round));
   }
   .voice {
     display: none;
@@ -678,7 +678,7 @@
       'mic cam hang share';
     gap: 10px;
     padding: 12px 14px 14px;
-    border-radius: 22px;
+    border-radius: calc(22px * var(--round));
   }
   .stat {
     justify-content: space-between;

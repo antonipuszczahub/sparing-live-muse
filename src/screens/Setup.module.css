@@ -73,15 +73,15 @@
   height: 11px;
   border-radius: 50%;
   background: var(--brass-hi);
-  box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.55);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-hi) 55%, transparent);
   animation: nudge 2.2s ease-out infinite;
 }
 @keyframes nudge {
   70% {
-    box-shadow: 0 0 0 11px rgba(255, 90, 31, 0);
+    box-shadow: 0 0 0 11px color-mix(in srgb, var(--brass-hi) 0%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 90, 31, 0);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brass-hi) 0%, transparent);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -186,7 +186,7 @@
 }
 .in:focus {
   border-color: var(--ink);
-  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.22);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass-hi) 22%, transparent);
 }
 
 /* difficulty: a segmented control, the chosen level is a black pill */
@@ -195,7 +195,7 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(20, 17, 14, 0.06);
 }
 .lvl {
@@ -204,7 +204,7 @@
   place-items: center;
   min-height: 44px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   color: var(--lichen);
   font-size: 14px;
   font-weight: 500;
@@ -251,7 +251,7 @@
   min-height: 64px;
   padding: 0 10px 0 30px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--ink);
   color: #fff;
   font-family: var(--font-body);
@@ -325,7 +325,7 @@
   gap: 10px;
   padding: 16px 18px 8px;
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: calc(22px * var(--round));
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(10px);
 }
@@ -343,7 +343,7 @@
 .chip {
   padding: 6px 14px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.7);
   color: var(--ink);
   font-size: 13px;
@@ -408,7 +408,7 @@
   position: relative;
   display: block;
   aspect-ratio: 1 / 1.06;
-  border-radius: 28px;
+  border-radius: calc(28px * var(--round));
   overflow: hidden;
   background: var(--mud);
   box-shadow: 0 34px 60px -38px rgba(110, 50, 15, 0.55);
@@ -448,7 +448,7 @@
   top: 14px;
   left: 14px;
   padding: 4px 11px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(8px);
   font-size: 12px;

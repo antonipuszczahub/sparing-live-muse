@@ -25,6 +25,13 @@
   --ember: #d9381e;
   --r-card: 24px;
   --r-field: 14px;
+  /* Shape and light, so a theme can change them: --round scales the rounded corners, --r-pill is the pills */
+  --round: 1;
+  --r-pill: 999px;
+  --bg-grad: linear-gradient(180deg, #faf7f2 0%, #f6f1ea 52%, #f6e3d2 80%, #fbc9a4 100%);
+  --glow-a: #ff7a2e;
+  --glow-b: #ff5a1f;
+  --glow-c: #ffe3cc;
   --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;

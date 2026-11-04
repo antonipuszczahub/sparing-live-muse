@@ -11,6 +11,7 @@ import { AboutSheet } from '../components/AboutSheet.tsx';
 import { AudioCheck } from '../components/AudioCheck.tsx';
 import { MicPicker } from '../components/MicPicker.tsx';
 import { PushToTalk } from '../components/PushToTalk.tsx';
+import { ThemePicker } from '../components/ThemePicker.tsx';
 import { hasSeenAbout, markAboutSeen } from '../lib/seen.ts';
 import { Progress } from '../components/Progress.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
@@ -362,6 +363,7 @@ export function SetupScreen({
         <VoicePicker lang={lang} list={voiceList} />
         <MicPicker />
         <PushToTalk />
+        <ThemePicker />
         <AudioCheck lang={lang} />
       </Sheet>
     </main>
