@@ -143,7 +143,8 @@ Wear headphones, so the character does not hear itself.
 | `npm run check:open` | Probes the open-weights host (see `.env.example` for Baseten, Fireworks, Modal, Ollama) |
 | `npm run manifest` | Rebuilds [`docs/MANIFEST.md`](docs/MANIFEST.md) from the budget ledger: models, tokens, cost, latency, open-weights share |
 | `npm test` | Unit tests: stream parser, text helpers, budget ledger, metrics, both languages |
-| `npm run eval` | Behaviour evaluation against the live model, writes `docs/EVAL.md` (`-- --lang pl` writes `docs/EVAL.pl.md`) |
+| `npm run eval` | Behaviour evaluation against the live model, writes `docs/EVAL.md` (`-- --lang pl` writes `docs/EVAL.pl.md`; `-- --open` runs it on open weights and writes `docs/EVAL.open.md`) |
+| `npm run eval:inject` | Prompt-injection probe: planted instructions in web research and screen text, both languages, Spark and Spark Open; writes [`docs/EVAL.inject.md`](docs/EVAL.inject.md) |
 
 ## Two languages
 
