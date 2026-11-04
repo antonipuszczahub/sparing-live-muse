@@ -27,7 +27,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 
 ## How it is built
 
-- **Live turn.** Browser `CallEngine` (turn taking, barge-in, silence, hang-up) -> `/api/turn` (SSE) -> `characterTurn`
+- **Live turn.** Browser `CallEngine` (turn taking, barge-in, silence, hang-up, and cutting in on a long monologue at a breath: `src/engine/cutin.ts`, `CUT_IN` by level, the recogniser's running text is remembered so the end of that stretch is not answered twice; tested with a fake recogniser and voice in `tests/cutin.test.ts`, never yet with a real microphone) -> `/api/turn` (SSE) -> `characterTurn`
   streams tagged text `THOUGHT / MOOD / SAY / HANGUP` (JSON mode neither streams nor keeps key order). Speech starts
   while the model is still writing.
 - **Agents** in `server/agents/`: character, twin (web research with Wonder, cached 24 h), eye (reads the shared

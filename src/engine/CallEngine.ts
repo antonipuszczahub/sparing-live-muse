@@ -7,6 +7,7 @@ import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
+import { afterCutIn, CUT_IN, CUT_IN_GRACE_MS, CUT_IN_PAUSE_MS, CutInGate } from './cutin.ts';
 import { EchoWatch, isBotEcho, micClosedForTurnTaking, MIN_BARGE_WORDS, TURN_TAKING_TAIL_MS } from './echo.ts';
 import { pickVoice, pitchFor, Speaker, type SpeechOut } from '../lib/tts.ts';
 
@@ -33,6 +34,12 @@ export interface CallSnapshot {
 
 const SILENCE_MS = 14_000;
 
+/** Replaceable parts, so the engine can be tried without a microphone and a voice (tests). */
+export interface EngineParts {
+  ears?: EarsLike;
+  speaker?: SpeechOut;
+}
+
 export class CallEngine {
   private turns: Turn[] = [];
   private state: CallState = 'connecting';
@@ -57,6 +64,15 @@ export class CallEngine {
   /** The user holds the cut-in key, so the microphone is open even while the character speaks. */
   private cuttingIn = false;
   private reopenTimer: number | undefined;
+  /** Watches how long the user has been talking without a break, so a long monologue is cut in on at a breath. */
+  private rambleGate: CutInGate;
+  /** What the recogniser had heard of the current stretch of speech when the character cut in (its running text still starts with it). */
+  private usedByCutIn = '';
+  private cutInTimer: number | undefined;
+  /** What was used by a cut-in is forgotten after a while even if the recogniser never ends that stretch of speech. */
+  private usedExpiry: number | undefined;
+  /** The character cut in and has not finished its line: the user's continued talking cannot cancel it at once. */
+  private cutInPending = false;
 
   private ears: EarsLike;
   private speaker: SpeechOut;
@@ -78,13 +94,18 @@ export class CallEngine {
     private session: string,
     private onChange: (s: CallSnapshot) => void,
     private screenContext: () => string | undefined = () => undefined,
+    parts: EngineParts = {},
   ) {
     this.lang = langOf(config);
-    // A browser may have no voice of the right gender (Windows ships a single Polish voice): shift the pitch instead.
-    const pick = pickVoice(config.persona.gender, this.lang, config.variant);
-    this.voiceName = pick.voice?.name ?? '';
-    this.speaker = this.useSpeaker(new Speaker(pick.voice, this.lang, pitchFor(pick.matched, config.persona.gender)));
-    this.ears = this.wireEars(new MetaEars(session, this.lang), true);
+    this.rambleGate = new CutInGate(CUT_IN[config.level]);
+    if (parts.speaker) this.speaker = this.useSpeaker(parts.speaker);
+    else {
+      // A browser may have no voice of the right gender (Windows ships a single Polish voice): shift the pitch instead.
+      const pick = pickVoice(config.persona.gender, this.lang, config.variant);
+      this.voiceName = pick.voice?.name ?? '';
+      this.speaker = this.useSpeaker(new Speaker(pick.voice, this.lang, pitchFor(pick.matched, config.persona.gender)));
+    }
+    this.ears = this.wireEars(parts.ears ?? new MetaEars(session, this.lang), !parts.ears);
   }
 
   private useSpeaker<S extends SpeechOut>(speaker: S): S {
@@ -143,7 +164,10 @@ export class CallEngine {
     this.applyEars();
     if (muted) {
       this.liveUser = '';
+      this.usedByCutIn = '';
+      this.rambleGate.reset();
       window.clearTimeout(this.silenceTimer);
+      window.clearTimeout(this.cutInTimer);
     } else if (this.state === 'listening') this.armSilence();
     this.emit();
   }
@@ -186,6 +210,7 @@ export class CallEngine {
   private set(state: CallState) {
     if (this.state === 'ended') return;
     if (this.state === 'speaking' && state !== 'speaking') this.botQuietAt = Date.now();
+    if (state === 'listening') this.cutInPending = false;
     this.state = state;
     this.applyEars();
     this.emit();
@@ -213,13 +238,22 @@ export class CallEngine {
     return this.liveBot || this.turns.findLast((t) => t.role === 'bot')?.text || '';
   }
 
-  private onInterim(text: string) {
+  private onInterim(heard: string) {
     if (this.state === 'ended' || this.muted) return;
+    // After the character cut in, the recogniser's running text still starts with what was already used.
+    const text = this.usedByCutIn ? afterCutIn(heard, this.usedByCutIn, this.lang) : heard;
+    if (!text) return;
     window.clearTimeout(this.silenceTimer);
     this.liveUser = text;
     this.emit();
+    if (this.state === 'listening') {
+      // A long stretch of talking: at the next breath (no new words for a moment) the character cuts in.
+      this.rambleGate.heard(text, Date.now());
+      window.clearTimeout(this.cutInTimer);
+      this.cutInTimer = window.setTimeout(() => this.cutInOnUser(), CUT_IN_PAUSE_MS);
+    }
     // Barge-in: the user talks over the character. Echo of the character's own voice is filtered out.
-    if ((this.state === 'speaking' || this.state === 'thinking') && novelWords(text, this.botText(), this.lang).length >= MIN_BARGE_WORDS) {
+    if ((this.state === 'speaking' || this.state === 'thinking') && !this.inCutInGrace() && novelWords(text, this.botText(), this.lang).length >= MIN_BARGE_WORDS) {
       this.noteBargeIn();
       this.interruptBot();
     }
@@ -240,8 +274,50 @@ export class CallEngine {
     this.emit();
   }
 
+  /**
+   * The character cuts in on a monologue at a breath: what the user has said so far becomes their turn (marked as cut
+   * off), the recogniser's running text is remembered so that what it reports next is not counted twice, and the character
+   * answers with one short interrupting line.
+   */
+  private cutInOnUser() {
+    if (this.state !== 'listening' || this.muted || !this.rambleGate.due(Date.now())) return;
+    const said = this.liveUser.trim();
+    if (!said) return;
+    this.usedByCutIn = `${this.usedByCutIn} ${said}`.trim();
+    window.clearTimeout(this.usedExpiry);
+    this.usedExpiry = window.setTimeout(() => (this.usedByCutIn = ''), 25_000);
+    this.rambleGate.reset();
+    this.liveUser = '';
+    this.cutInPending = true;
+    this.userStoppedAt = Date.now();
+    this.turns.push({ role: 'user', text: `${said} —`, at: this.now() });
+    this.emit();
+    void this.botTurn(simNote('rambling', this.lang));
+  }
+
+  /** Just after a cut-in the character's line (still being written, or just begun) is not cancelled by the user talking on. */
+  private inCutInGrace(): boolean {
+    if (!this.cutInPending) return false;
+    if (this.state === 'thinking') return true;
+    return this.state === 'speaking' && Date.now() - this.speechStartedAt < CUT_IN_GRACE_MS;
+  }
+
   private onFinal(text: string, typed = false) {
     if (this.state === 'ended' || (this.muted && !typed)) return;
+    if (!typed) {
+      window.clearTimeout(this.cutInTimer);
+      this.rambleGate.reset();
+      if (this.usedByCutIn) {
+        // the end of the stretch the character cut in on: only what was said after the cut-in is new
+        const rest = afterCutIn(text, this.usedByCutIn, this.lang).trim();
+        this.usedByCutIn = '';
+        if (!rest) {
+          this.liveUser = '';
+          return;
+        }
+        text = rest;
+      }
+    }
     this.liveUser = '';
     // the character's own voice coming back (while it speaks, or the tail of its line right after): not an answer
     if (isBotEcho(this.state, Date.now() - this.botQuietAt, text, this.botText(), this.lang)) {
@@ -384,6 +460,8 @@ export class CallEngine {
     this.ears.stop();
     window.clearTimeout(this.silenceTimer);
     window.clearTimeout(this.reopenTimer);
+    window.clearTimeout(this.cutInTimer);
+    window.clearTimeout(this.usedExpiry);
     window.clearInterval(this.tick);
     this.endReason = reason;
     this.state = 'ended';
