@@ -177,6 +177,8 @@ export const en = {
   webmNote: 'This browser records WebM. X wants MP4, so convert it or record again in Edge or Chrome.',
   copyPost: 'Copy post text',
   copied: 'Copied',
+  copyReview: 'Copy as text',
+  reviewMoments: 'Key moments',
   clipFailed: 'Could not make the clip.',
   clipPost: (scenario: string, origin: string, _gender: Gender) =>
     `I rehearsed a ${scenario.toLowerCase()} with an AI that hides its thoughts, then watched the replay of what it was really thinking.

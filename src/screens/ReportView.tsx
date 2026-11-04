@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { reviewAsText } from '../lib/reviewText.ts';
 import { measureDelivery, type AuditResult, type Moment } from '../../shared/audit.ts';
 import type { FramingEvent } from '../../shared/framing.ts';
 import type { TraceRow } from '../../shared/trace.ts';
@@ -70,15 +71,49 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
   const nodes: MoodNode[] = turns.flatMap((x, i) => (x.role === 'bot' && x.mood ? [{ turn: i, mood: x.mood, at: x.at }] : []));
   const layout = layoutMoodVine(nodes, moments, narrow);
   const jump = (i: number) => rows.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const [copied, setCopied] = useState(false);
+  function copyReview() {
+    if (!result) return;
+    const text = reviewAsText({
+      who: persona.name,
+      durationMs,
+      result,
+      turns,
+      labels: {
+        review: t('reviewTitle'),
+        outcome: outcomeLabel(result.outcome),
+        skills: t('skillsTitle'),
+        skillNames: { clarity: t('skillClarity'), listening: t('skillListening'), objections: t('skillObjections'), specificity: t('skillSpecificity'), composure: t('skillComposure') },
+        moments: t('reviewMoments'),
+        kinds: { strength: t('kindStrength'), mistake: t('kindMistake'), 'turning-point': t('kindTurning') },
+        sayInstead: t('sayInstead'),
+        workNext: t('workNext'),
+      },
+    });
+    void navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => undefined);
+  }
 
   return (
     <main className={s.page}>
       <header className={`${s.top} ${ui.rise1}`}>
         <Brand size={32} />
-        <button type="button" className={`${ui.btn} ${ui.btnPrimary}`} onClick={onAgain}>
-          {t('newCall')}
-          <Icon name="arrow" size={18} stroke={2} />
-        </button>
+        <div className={s.topActions}>
+          {result && (
+            <button type="button" className={ui.btn} onClick={copyReview}>
+              {copied ? t('copied') : t('copyReview')}
+            </button>
+          )}
+          <button type="button" className={`${ui.btn} ${ui.btnPrimary}`} onClick={onAgain}>
+            {t('newCall')}
+            <Icon name="arrow" size={18} stroke={2} />
+          </button>
+        </div>
       </header>
 
       <section className={`${s.hero} ${ui.rise2}`}>

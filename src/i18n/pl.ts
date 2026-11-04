@@ -178,6 +178,8 @@ export const pl: Dict = {
   webmNote: 'Ta przeglądarka nagrywa w formacie WebM. X wymaga MP4, więc przekonwertuj plik albo nagraj jeszcze raz w Edge lub Chrome.',
   copyPost: 'Skopiuj tekst posta',
   copied: 'Skopiowano',
+  copyReview: 'Kopiuj jako tekst',
+  reviewMoments: 'Kluczowe momenty',
   clipFailed: 'Nie udało się zrobić klipu.',
   clipPost: (scenario, origin, gender) =>
     `${gender === 'f' ? 'Przećwiczyłam' : 'Przećwiczyłem'} rozmowę (${scenario.toLowerCase()}) z AI, która ukrywa swoje myśli, a potem ${gender === 'f' ? 'obejrzałam' : 'obejrzałem'} powtórkę tego, co naprawdę myślała.
