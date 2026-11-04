@@ -78,6 +78,7 @@ export const pl: Dict = {
   callEnded: 'Rozmowa zakończona',
   openBadge: 'Otwarte wagi',
   openFellBack: 'Host otwartych wag nie odpowiedział, więc część tur obsługuje hostowany model Meta.',
+  echoHint: 'Wygląda na to, że postać słyszy samą siebie z Twoich głośników. Załóż słuchawki albo ścisz dźwięk.',
   samBadge: 'Kadrowanie SAM 3.1',
   canSee: (name) => `Notatki o Twoim ekranie (${name} go widzi)`,
   sharingLooking: 'Udostępniasz ekran, trwa analiza…',

@@ -7,7 +7,7 @@ import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
-import { isBotEcho, MIN_BARGE_WORDS } from './echo.ts';
+import { EchoWatch, isBotEcho, MIN_BARGE_WORDS } from './echo.ts';
 import { createCloudSpeaker, resolveCloudVoice } from '../lib/cloudVoice.ts';
 import { pickVoice, pitchFor, Speaker, type SpeechOut, type VoicePick } from '../lib/tts.ts';
 
@@ -44,6 +44,11 @@ export class CallEngine {
   private voiceNotice = '';
   /** Said once when a turn of an open-weights call had to be served by Meta's hosted model. */
   private openNotice = '';
+  /** Said once when the character seems to hear itself through the speakers. */
+  private echoNotice = '';
+  private echo = new EchoWatch();
+  /** When the character last began a spoken line, for telling its echo from a person interrupting. */
+  private speechStartedAt = 0;
   private lastLatencyMs?: number;
 
   private ears: EarsLike;
@@ -80,6 +85,7 @@ export class CallEngine {
   private useSpeaker<S extends SpeechOut>(speaker: S): S {
     speaker.onIdle = () => this.onSpeechIdle();
     speaker.onStart = () => {
+      this.speechStartedAt = Date.now();
       if (this.userStoppedAt) this.lastLatencyMs = Date.now() - this.userStoppedAt;
       this.set('speaking');
     };
@@ -175,7 +181,7 @@ export class CallEngine {
       mood: this.mood,
       elapsedMs: this.state === 'ended' ? this.now() : Date.now() - this.startedAt,
       endReason: this.endReason,
-      error: [this.error, this.voiceNotice, this.openNotice].filter(Boolean).join(' ') || undefined,
+      error: [this.error, this.voiceNotice, this.openNotice, this.echoNotice].filter(Boolean).join(' ') || undefined,
       lastLatencyMs: this.lastLatencyMs,
     });
   }
@@ -193,16 +199,36 @@ export class CallEngine {
     this.emit();
     // Barge-in: the user talks over the character. Echo of the character's own voice is filtered out.
     if ((this.state === 'speaking' || this.state === 'thinking') && novelWords(text, this.botText(), this.lang).length >= MIN_BARGE_WORDS) {
+      this.noteBargeIn();
       this.interruptBot();
     }
+  }
+
+  /** A barge-in right after the character began a line is as likely its echo as a person: after two, say so once. */
+  private noteBargeIn() {
+    if (this.state === 'speaking') this.echo.bargeIn(Date.now() - this.speechStartedAt);
+    this.checkEcho();
+  }
+
+  private checkEcho() {
+    if (this.echoNotice || !this.echo.suspected) return;
+    this.echoNotice = translate(this.lang, 'echoHint');
+    this.emit();
   }
 
   private onFinal(text: string) {
     if (this.state === 'ended') return;
     this.liveUser = '';
     // the character's own voice coming back (while it speaks, or the tail of its line right after): not an answer
-    if (isBotEcho(this.state, Date.now() - this.botQuietAt, text, this.botText(), this.lang)) return;
-    if (this.state === 'speaking' || this.state === 'thinking') this.interruptBot();
+    if (isBotEcho(this.state, Date.now() - this.botQuietAt, text, this.botText(), this.lang)) {
+      this.echo.filtered();
+      this.checkEcho();
+      return;
+    }
+    if (this.state === 'speaking' || this.state === 'thinking') {
+      this.noteBargeIn();
+      this.interruptBot();
+    }
     this.userStoppedAt = Date.now();
     this.turns.push({ role: 'user', text, at: this.now() });
     this.emit();
