@@ -133,7 +133,8 @@ export function ClipMaker({
         </div>
         <div className={styles.thought}>{previewThought(turns, audit)}</div>
         {audit && <div className={styles.score}>{audit.score}</div>}
-        <div className={styles.built}>{(open ? `${t('clipBuilt')} · ${t('clipOpen')}` : t('clipBuilt')).toUpperCase()}</div>
+        {/* the clip itself says both lines at the top; the small preview keeps one short label so it never runs into the quote */}
+        <div className={styles.built}>{(open ? 'Muse Spark Open' : t('clipBuilt')).toUpperCase()}</div>
       </div>
     </section>
   );
