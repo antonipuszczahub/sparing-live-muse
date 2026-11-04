@@ -28,19 +28,20 @@
   height: 22px;
   border-radius: 50%;
   background: var(--lichen);
+  box-shadow: 0 1px 3px rgba(27, 19, 13, 0.3);
   transition:
     left 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
     background 0.4s;
 }
 
 input:checked + .track {
-  background: var(--brass);
-  border-color: rgba(194, 65, 12, 0.6);
+  background: var(--brass-hi);
+  border-color: transparent;
 }
 
 input:checked + .track .knob {
   left: 25px;
-  background: var(--brass);
+  background: #fff;
 }
 
 input:focus-visible + .track {

@@ -10,9 +10,9 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 
 ## What it looks like
 
-![The start screen: four counterparts, a difficulty, and the Demo setup button](docs/img/start.jpg)
+![The start screen: four counterparts, a difficulty, and the Demo button](docs/img/start.jpg)
 
-*Start screen. Pick a counterpart (the portraits are Muse Image output), a difficulty, optionally a real company to research. "Demo setup" fills in an investor pitch in one click.*
+*Start screen. Pick a counterpart (the portraits are Muse Image output), a difficulty, optionally a real company to research. "Demo" opens a short panel on what the project is, what to watch and where it is going, with a button that fills in an investor pitch.*
 
 ![A call in progress: the counterpart's face, live captions, mood meter, and the call controls](docs/img/call.jpg)
 

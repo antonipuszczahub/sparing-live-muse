@@ -264,10 +264,26 @@
   color: var(--lichen);
 }
 
-.weak {
+/* what you keep getting wrong, and the switch that lets the next character aim at it */
+.memory {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 8px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+}
+.memoryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.chips {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 8px;
 }
 .chip {
@@ -299,11 +315,26 @@
 }
 
 .privacy {
-  margin: 0;
   max-width: 100ch;
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.6;
   color: var(--lichen);
+}
+.privacy summary {
+  cursor: pointer;
+  list-style: none;
+}
+.privacy summary::-webkit-details-marker {
+  display: none;
+}
+.privacy summary span {
+  margin-left: 6px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.privacy p {
+  margin: 8px 0 0;
 }
 
 /* the people you can call: --a is the chosen one */
@@ -414,6 +445,14 @@
 }
 
 /* laptops: keep the call button inside the first screen */
+/* on a wide screen the portraits stay in view while the left column scrolls */
+@media (min-width: 1101px) {
+  .cast {
+    position: sticky;
+    top: 24px;
+  }
+}
+
 @media (min-width: 1101px) and (max-height: 860px) {
   .shot {
     aspect-ratio: 1 / 0.82;

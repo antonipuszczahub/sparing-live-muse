@@ -7,6 +7,7 @@ import { Brand } from '../components/Brand.tsx';
 import { Icon } from '../components/Icons.tsx';
 import { Sheet } from '../components/Sheet.tsx';
 import { Switch } from '../components/Switch.tsx';
+import { AboutSheet } from '../components/AboutSheet.tsx';
 import { AudioCheck } from '../components/AudioCheck.tsx';
 import { MicPicker } from '../components/MicPicker.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
@@ -51,6 +52,7 @@ export function SetupScreen({
   const [openWeights, setOpenWeights] = useState(false);
   const [user, setUser] = useState<UserProfile>(loadUser);
   const [voices, setVoices] = useState(false);
+  const [about, setAbout] = useState(false);
   const rails = useRef<HTMLElement>(null);
   const { list: voiceList, total: voiceTotal } = useVoiceList(lang);
   const missingVoice = voiceTotal > 0 && voiceList.length === 0;
@@ -150,12 +152,7 @@ export function SetupScreen({
             type="button"
             className={ui.pill}
             title={t('demoPresetBody')}
-            onClick={() => {
-              // the recording: the investor, a realistic level and a pitch with real numbers in it
-              setScenario('pitch');
-              setLevel(2);
-              setTopic(t('demoTopic'));
-            }}
+            onClick={() => setAbout(true)}
           >
             <Icon name="phone" size={16} />
             {t('demoPreset')}
@@ -258,27 +255,31 @@ export function SetupScreen({
 
           <footer className={s.foot}>
             {weak.length > 0 && (
-              <span className={s.weak}>
-                <span className={ui.lbl}>{t('practising')}</span>
-                {weak.map((w) => (
-                  <span key={w} className={s.chip}>
-                    {w}
-                  </span>
-                ))}
-                <button
-                  type="button"
-                  className={s.forget}
-                  onClick={() => {
-                    clearWeakSpots(lang);
-                    setWeak([]);
-                  }}
-                >
-                  {t('weakForget')}
-                </button>
+              <section className={s.memory}>
+                <div className={s.memoryHead}>
+                  <span className={ui.lbl}>{t('practising')}</span>
+                  <button
+                    type="button"
+                    className={s.forget}
+                    onClick={() => {
+                      clearWeakSpots(lang);
+                      setWeak([]);
+                    }}
+                  >
+                    {t('weakForget')}
+                  </button>
+                </div>
+                <div className={s.chips}>
+                  {weak.map((w) => (
+                    <span key={w} className={s.chip}>
+                      {w}
+                    </span>
+                  ))}
+                </div>
                 <Switch checked={useMemory} onChange={setUseMemory}>
                   {t('weakUse')}
                 </Switch>
-              </span>
+              </section>
             )}
             <span className={s.hint}>
               <Icon name="headphones" size={16} />
@@ -310,9 +311,26 @@ export function SetupScreen({
         </section>
       </div>
 
-      <p className={s.privacy}>{t('privacy')}</p>
+      <details className={s.privacy}>
+        <summary>
+          {t('privacyShort')} <span>{t('privacyMore')}</span>
+        </summary>
+        <p>{t('privacy')}</p>
+      </details>
 
       <div className={s.ctaSticky}>{cta}</div>
+
+      <AboutSheet
+        open={about}
+        onClose={() => setAbout(false)}
+        onStartDemo={() => {
+          // the recording: the investor, a realistic level and a pitch with real numbers in it
+          setScenario('pitch');
+          setLevel(2);
+          setTopic(t('demoTopic'));
+          setAbout(false);
+        }}
+      />
 
       <Sheet open={voices} title={t('voiceTitle')} onClose={() => setVoices(false)}>
         <VoicePicker lang={lang} list={voiceList} />
