@@ -32,10 +32,10 @@ A real-time voice sparring system on Meta's Muse models, in English and Polish. 
 
 | | Muse Spark | Muse Spark Open (Baseten) |
 |---|---|---|
-| English: first spoken word, median / p95 | 2.50 s / 4.75 s | 1.01 s / 2.28 s |
-| Polish: first spoken word, median / p95 | 2.58 s / 4.63 s | 1.26 s / 3.03 s |
+| English: first spoken word, median / p95 | 2.50 s / 4.75 s | 0.96 s / 1.96 s |
+| Polish: first spoken word, median / p95 | 2.58 s / 4.63 s | 1.22 s / 2.37 s |
 | Failed or empty turns | 0 | 0 |
-| Stage directions leaked into speech | 0 of 126 turns (EN) | 0 of 131 turns (EN), 0 of 132 (PL) |
+| Stage directions leaked into speech | 0 of 126 turns (EN) | 0 of 131 turns (EN), 0 of 134 (PL) |
 
 All four columns were measured on 4 Nov. The open-weights column was measured again after I rewrote the character's prompts that evening (shorter turns, no echoing, an opening that fits the situation); the hosted column was measured before that and not repeated, so the two differ in prompt as well as in model. Hosted Spark was faster when I first measured it on 28 Oct (1.13 s English, 1.62 s Polish), and a second hosted run on 4 Nov gave 2.39 s: the hosted service's latency varies, while the same prompts took about 1 s on open weights throughout, which is one reason the live character defaults to Muse Spark Open.
 
@@ -70,7 +70,7 @@ TypeScript, React 19, Vite, Express, WebSockets, Zod, Web Speech and Web Audio A
 
 - Reasoning tokens count against `max_tokens`, JSON mode neither streams nor keeps key order, and web search exists only on the Responses API, so live turns use a tagged plain-text stream and structured JSON is used only where latency does not matter.
 - Muse Spark Open always reasons; the host's default depth was too slow to speak, so the preset sends `low` and the cost and latency are measured, not assumed.
-- Polish uses more tokens (on open weights the median first word is 1.3 s against 1.0 s in English), so the private thought is capped at 12 words there.
+- Polish uses more tokens (on open weights the median first word is 1.2 s against 1.0 s in English), so the private thought is capped at 12 words there.
 - Hosted latency is not constant: the same prompts gave a 1.1 s median on 28 Oct and 2.4-2.5 s on 4 Nov, so the numbers above carry their dates and the character runs on open weights by default.
 - The browser's echo cancellation has no reference for speech synthesis, so on speakers the character can hear itself (seen in testing): the engine filters its echo, and the call tells the user once to use headphones.
 
