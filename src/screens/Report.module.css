@@ -77,6 +77,28 @@
   color: var(--lichen);
 }
 
+/* a long summary shows its first lines; the button opens the rest */
+.sumClamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  overflow: hidden;
+}
+.more {
+  margin: 6px 0 0;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 .reviewing {
   display: flex;
   flex-direction: column;

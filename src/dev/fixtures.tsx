@@ -1,6 +1,6 @@
 /**
  * Development only: the call, review and research screens with made-up data, so the interface can be
- * looked at without spending model calls. Open /?fx=call, call-hostile, call-won, report, report-wait, twin or twin-ready (add &note=echo to a call to see the headphones hint).
+ * looked at without spending model calls. Open /?fx=call, call-hostile, call-won, report, report-wait, twin or twin-ready (add &note=echo to a call to see the headphones hint, &long=1 to a report to see a long summary).
  * main.tsx loads this file only in the dev server; it is not part of the production build.
  */
 import { useRef } from 'react';
@@ -124,7 +124,7 @@ export function FixtureApp({ name }: { name: string }) {
         durationMs={192000}
         hungUp={false}
         camera={[]}
-        result={name === 'report-wait' ? null : result}
+        result={name === 'report-wait' ? null : params.get('long') === '1' ? { ...result, summary: `${result.summary} ${result.summary} ${result.summary}` } : result}
         trace={[
           { kind: 'asr', model: 'muse-voice-transcribe-1.0', served: 'Meta Model API', open: false, calls: 1, medianMs: null, costUsd: 0.002 },
           { kind: 'character-turn', model: 'meta-models/muse-spark-open-1026', served: 'Open weights · Baseten', open: true, calls: 9, medianMs: 1480, costUsd: 0 },

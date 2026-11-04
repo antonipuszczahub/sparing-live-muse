@@ -73,6 +73,8 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
   const layout = layoutMoodVine(nodes, moments, narrow);
   const jump = (i: number) => rows.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   const [copied, setCopied] = useState(false);
+  const [fullSummary, setFullSummary] = useState(false);
+  const long = (result?.summary.length ?? 0) > 340; // about five lines: the rest sits behind a button
   function copyReview() {
     if (!result) return;
     const text = reviewAsText({
@@ -135,7 +137,12 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                 </span>
               </div>
               <h1 className={s.verdict}>{result.verdict}</h1>
-              <p className={s.sum}>{result.summary}</p>
+              <p className={`${s.sum} ${long && !fullSummary ? s.sumClamp : ''}`}>{result.summary}</p>
+              {long && (
+                <button type="button" className={s.more} onClick={() => setFullSummary(!fullSummary)} aria-expanded={fullSummary}>
+                  {fullSummary ? t('summaryLess') : t('summaryMore')}
+                </button>
+              )}
             </>
           ) : error ? (
             <p className={`${ui.note} ${ui.noteBad}`} style={{ marginTop: 18 }}>

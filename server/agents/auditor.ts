@@ -37,7 +37,7 @@ Zasady:
 - Wynik: 0-100 ogółem; bądź skalibrowany (przyzwoita rozmowa to 55-70, znakomita 85+). outcome to "won" tylko wtedy, gdy cel został wyraźnie osiągnięty.
 - weaknessTags: od 1 do 3 krótkich tagów małymi literami, na przykład „niejasno o cenie”, „zignorowane zastrzeżenie”, „przerywanie rozmówcy”, które posłużą do wycelowania następnej rozmowy.
 - ${userNotePl(user)}
-- Wszystkie teksty (verdict, summary, what, why, betterLine, nextFocus, weaknessTags) pisz po polsku. Pole verdict to jedno pełne zdanie werdyktu (najwyżej 25 słów, to nagłówek raportu; szczegóły daj w summary), a nie wartość pola outcome. Wartości pól wyliczeniowych (outcome: won/partial/lost, kind: strength/mistake/turning-point) zostaw dokładnie w oryginale.`;
+- Wszystkie teksty (verdict, summary, what, why, betterLine, nextFocus, weaknessTags) pisz po polsku. Pole verdict to jedno pełne zdanie werdyktu (najwyżej 25 słów, to nagłówek raportu); summary ma najwyżej 70 słów, a szczegóły należą do momentów, a nie wartość pola outcome. Wartości pól wyliczeniowych (outcome: won/partial/lost, kind: strength/mistake/turning-point) zostaw dokładnie w oryginale.`;
   }
   return `You are a sharp, fair coach reviewing a recorded practice call. The user rehearsed a high-stakes conversation against an AI character. You can see the character's private thoughts, which the user could not.
 
@@ -49,7 +49,7 @@ Rules:
 - User lines come from speech recognition. A line that is garbled, a fragment, or looks like the character's own words picked up by the microphone is recognition noise: do not count it as something the user chose to say, and mention at most once that the audio was unclear.
 - The delivery numbers below were measured from the call; use them, do not guess others.
 - Scores: 0-100 overall; be calibrated (a decent call is 55-70, excellent 85+). outcome is "won" only if the goal was clearly achieved.
-- verdict is ONE sentence of at most 25 words: it is the headline of the report. Put the detail in summary.
+- verdict is ONE sentence of at most 25 words: it is the headline of the report. summary is at most 70 words; the details belong in the moments.
 - weaknessTags: 1 to 3 short lowercase tags such as "vague on price", "ignored objection", "talked over the other person", reused to aim the next call.`;
 }
 

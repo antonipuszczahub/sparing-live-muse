@@ -180,6 +180,8 @@ export const en = {
   copyPost: 'Copy post text',
   copied: 'Copied',
   copyReview: 'Copy as text',
+  summaryMore: 'Read the whole summary',
+  summaryLess: 'Show less',
   reviewMoments: 'Key moments',
   clipFailed: 'Could not make the clip.',
   clipPost: (scenario: string, origin: string, _gender: Gender) =>
