@@ -87,3 +87,17 @@ test('the spoken turns get shorter as the difficulty goes up, and equally so in 
   assert.ok(limits[0]! <= 40 && limits[3]! <= 18, 'real phone turns are short: no monologues');
   for (const l of [1, 2, 3, 4] as Level[]) assert.equal(LEVELS_PL[l].maxWords, LEVELS[l].maxWords);
 });
+
+test('the character answers a remark about itself or the call first, does not re-ask, and keeps its thought honest, in both languages', () => {
+  const en = buildSystemPrompt(config('en'));
+  assert.match(en, /# When the user talks about you or about the call/);
+  assert.match(en, /chatbot/);
+  assert.match(en, /never answer it by asking your opening question again/);
+  assert.match(en, /THOUGHT[\s\S]*never mentions acting, playing a role/);
+  const pl = buildSystemPrompt(config('pl'));
+  assert.match(pl, /# Gdy rozmówca mówi o Tobie albo o rozmowie/);
+  assert.match(pl, /chatbotem/);
+  assert.match(pl, /nigdy nie odpowiadaj na to ponownym zadaniem swojego pierwszego pytania/);
+  assert.match(pl, /MYŚL \(THOUGHT\)[\s\S]*Nigdy nie wspomina o graniu/);
+  assert.doesNotMatch(pl, MARKER, 'every gender marker is resolved');
+});

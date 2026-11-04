@@ -12,6 +12,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "check:meta": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/check-meta.ts",
+    "try:provoke": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-provoke.ts",
     "try:turn": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-turn.ts",
     "try:audit": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-audit.ts",
     "try:twin": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-twin.ts",
