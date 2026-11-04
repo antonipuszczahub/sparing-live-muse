@@ -1,6 +1,6 @@
 /**
  * Development only: the call, review and research screens with made-up data, so the interface can be
- * looked at without spending model calls. Open /?fx=call, call-hostile, call-won, report, report-wait, twin or twin-ready.
+ * looked at without spending model calls. Open /?fx=call, call-hostile, call-won, report, report-wait, twin or twin-ready (add &note=echo to a call to see the headphones hint).
  * main.tsx loads this file only in the dev server; it is not part of the production build.
  */
 import { useRef } from 'react';
@@ -8,7 +8,7 @@ import type { AuditResult } from '../../shared/audit.ts';
 import type { Mood, SessionConfig, TwinProfile, Turn } from '../../shared/types.ts';
 import { Backdrop } from '../components/Backdrop.tsx';
 import type { CallSnapshot } from '../engine/CallEngine.ts';
-import { setLang } from '../i18n/index.ts';
+import { getLang, setLang, translate } from '../i18n/index.ts';
 import { useMoodTheme } from '../lib/useMoodTheme.ts';
 import { CallView } from '../screens/CallView.tsx';
 import { ReportView } from '../screens/ReportView.tsx';
@@ -69,8 +69,9 @@ const twin: TwinProfile = {
   sources: ['https://northwind.vc/about', 'https://www.example.com/news/northwind-fund-ii'],
 };
 
-function snapshot(mood: Mood): CallSnapshot {
+function snapshot(mood: Mood, error?: string): CallSnapshot {
   return {
+    error,
     state: 'listening',
     turns: turns.slice(0, 5),
     liveBot: '',
@@ -95,7 +96,7 @@ export function FixtureApp({ name }: { name: string }) {
       <CallView
         session="fixture"
         config={config}
-        snap={snapshot(mood)}
+        snap={snapshot(mood, params.get('note') === 'echo' ? translate(getLang(), 'echoHint') : undefined)}
         voiceName="Microsoft Aria Online (Natural)"
         camOn={false}
         face={null}
