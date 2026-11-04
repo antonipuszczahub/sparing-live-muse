@@ -311,8 +311,8 @@
   align-self: center;
   width: min(1040px, 100%);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
-  grid-template-areas: 'stat typ cam share hang';
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto auto;
+  grid-template-areas: 'stat typ mic cam share hang';
   align-items: center;
   gap: 14px;
   padding: 12px 14px 12px 24px;
@@ -429,6 +429,9 @@
 .hang:disabled {
   opacity: 0.4;
   cursor: default;
+}
+.mic {
+  grid-area: mic;
 }
 .cam {
   grid-area: cam;
@@ -668,11 +671,11 @@
     font-size: 18px;
   }
   .dock {
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 1fr auto 1fr;
     grid-template-areas:
-      'stat stat stat'
-      'typ typ typ'
-      'cam hang share';
+      'stat stat stat stat'
+      'typ typ typ typ'
+      'mic cam hang share';
     gap: 10px;
     padding: 12px 14px 14px;
     border-radius: 22px;

@@ -40,6 +40,9 @@ export class Ears {
   onFinal: (text: string, at: number) => void = () => {};
   onError: (err: string, fatal: boolean) => void = () => {};
   paused = false;
+  setMuted(muted: boolean) {
+    this.paused = muted;
+  }
 
   constructor(private lang: Lang = 'en') {}
 

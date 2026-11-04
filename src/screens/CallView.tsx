@@ -28,6 +28,7 @@ export interface CallViewProps {
   typed: string;
   canCamera: boolean;
   canShare: boolean;
+  onMute: () => void;
   onTyped: (text: string) => void;
   onSend: () => void;
   onCamera: () => void;
@@ -46,7 +47,7 @@ export function CallView(p: CallViewProps) {
   const label = moodLabel(snap.mood, lang, persona.gender);
   const statusText = {
     connecting: t('connecting'),
-    listening: t('listening'),
+    listening: snap.muted ? t('mutedStatus') : t('listening'),
     thinking: t('thinking', first),
     speaking: t('speaking', first),
     ended: snap.endReason === 'hangup' ? t('hungUpBy', first, persona.gender) : t('callEnded'),
@@ -164,6 +165,17 @@ export function CallView(p: CallViewProps) {
           >
             <input className={s.typ} value={p.typed} onChange={(e) => p.onTyped(e.target.value)} placeholder={t('typePlaceholder')} aria-label={t('typePlaceholder')} />
           </form>
+          <button
+            type="button"
+            className={`${s.ib} ${s.mic} ${snap.muted ? s.on : ''}`}
+            onClick={p.onMute}
+            disabled={ended}
+            aria-pressed={snap.muted}
+            aria-label={snap.muted ? t('micUnmute') : t('micMute')}
+            title={snap.muted ? t('micUnmute') : t('micMute')}
+          >
+            <Icon name={snap.muted ? 'micOff' : 'voice'} />
+          </button>
           {p.canCamera && (
             <button
               type="button"

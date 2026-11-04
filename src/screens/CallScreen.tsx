@@ -138,6 +138,7 @@ export function CallScreen({
         if (typed.trim()) engine.current?.sendText(typed.trim());
         setTyped('');
       }}
+      onMute={() => engine.current?.setMuted(!snap.muted)}
       onCamera={toggleCamera}
       onShare={toggleShare}
       onHangUp={() => engine.current?.hangUp()}

@@ -25,6 +25,8 @@ export interface CallSnapshot {
   error?: string;
   /** Latency of the last turn: user stopped talking -> first spoken word. */
   lastLatencyMs?: number;
+  /** The microphone is muted: the character does not hear the user (typing still works). */
+  muted: boolean;
 }
 
 const SILENCE_MS = 14_000;
@@ -47,6 +49,7 @@ export class CallEngine {
   /** When the character last began a spoken line, for telling its echo from a person interrupting. */
   private speechStartedAt = 0;
   private lastLatencyMs?: number;
+  private muted = false;
 
   private ears: EarsLike;
   private speaker: SpeechOut;
@@ -95,6 +98,7 @@ export class CallEngine {
       if (fatal && canFallBack && this.state !== 'ended') {
         this.ears.stop();
         this.ears = this.wireEars(new Ears(this.lang), false);
+        this.ears.setMuted?.(this.muted);
         this.ears.start();
         return;
       }
@@ -124,9 +128,21 @@ export class CallEngine {
     this.finish('user');
   }
 
+  /** Mutes or unmutes the microphone. Whatever was being heard is dropped, and the character stops waiting for an answer. */
+  setMuted(muted: boolean) {
+    if (this.state === 'ended' || muted === this.muted) return;
+    this.muted = muted;
+    this.ears.setMuted?.(muted);
+    if (muted) {
+      this.liveUser = '';
+      window.clearTimeout(this.silenceTimer);
+    } else if (this.state === 'listening') this.armSilence();
+    this.emit();
+  }
+
   /** Text input fallback (also used by tests). */
   sendText(text: string) {
-    this.onFinal(text);
+    this.onFinal(text, true);
   }
 
   get history(): Turn[] {
@@ -155,6 +171,7 @@ export class CallEngine {
       endReason: this.endReason,
       error: [this.error, this.openNotice, this.echoNotice].filter(Boolean).join(' ') || undefined,
       lastLatencyMs: this.lastLatencyMs,
+      muted: this.muted,
     });
   }
 
@@ -165,7 +182,7 @@ export class CallEngine {
   }
 
   private onInterim(text: string) {
-    if (this.state === 'ended') return;
+    if (this.state === 'ended' || this.muted) return;
     window.clearTimeout(this.silenceTimer);
     this.liveUser = text;
     this.emit();
@@ -188,8 +205,8 @@ export class CallEngine {
     this.emit();
   }
 
-  private onFinal(text: string) {
-    if (this.state === 'ended') return;
+  private onFinal(text: string, typed = false) {
+    if (this.state === 'ended' || (this.muted && !typed)) return;
     this.liveUser = '';
     // the character's own voice coming back (while it speaks, or the tail of its line right after): not an answer
     if (isBotEcho(this.state, Date.now() - this.botQuietAt, text, this.botText(), this.lang)) {
@@ -304,7 +321,7 @@ export class CallEngine {
   private armSilence() {
     window.clearTimeout(this.silenceTimer);
     this.silenceTimer = window.setTimeout(() => {
-      if (this.state !== 'listening') return;
+      if (this.state !== 'listening' || this.muted) return;
       void this.botTurn(simNote('silent', this.lang));
     }, SILENCE_MS);
   }

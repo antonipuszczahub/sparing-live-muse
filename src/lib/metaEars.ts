@@ -47,9 +47,15 @@ export interface EarsLike {
   onError: (message: string, fatal: boolean) => void;
   start(): void;
   stop(): void;
+  /** Muted: what the microphone hears is not passed on. */
+  setMuted?(muted: boolean): void;
 }
 
 export class MetaEars implements EarsLike {
+  private muted = false;
+  setMuted(muted: boolean) {
+    this.muted = muted;
+  }
   onInterim: (text: string) => void = () => {};
   onFinal: (text: string, at: number) => void = () => {};
   onError: (message: string, fatal: boolean) => void = () => {};
@@ -107,7 +113,7 @@ export class MetaEars implements EarsLike {
       const src = this.ctx.createMediaStreamSource(this.stream);
       const node = new AudioWorkletNode(this.ctx, 'pcm24');
       node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => {
-        if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(e.data);
+        if (!this.muted && this.ws?.readyState === WebSocket.OPEN) this.ws.send(e.data);
       };
       src.connect(node);
     } catch (e) {

@@ -78,6 +78,7 @@ function snapshot(mood: Mood, error?: string): CallSnapshot {
     liveUser: 'It converts to a yearly plan if the clinic hits',
     mood,
     elapsedMs: 134000,
+    muted: false,
     lastLatencyMs: 1100,
   };
 }
@@ -108,6 +109,7 @@ export function FixtureApp({ name }: { name: string }) {
         canShare
         onTyped={() => undefined}
         onSend={() => undefined}
+        onMute={() => undefined}
         onCamera={() => undefined}
         onShare={() => undefined}
         onHangUp={() => undefined}
