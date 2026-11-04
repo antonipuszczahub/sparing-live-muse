@@ -219,8 +219,8 @@ Zbudowane na modelach Muse od @AIatMeta dla @cerebral_valley. Wypróbuj: ${origi
   micAllow: 'Zezwól na mikrofon, żeby zobaczyć urządzenia',
   micVirtual: (name) =>
     `„${name}” wygląda na wejście wirtualne (Voicemeeter, kabel wirtualny albo Stereo Mix). Jeśli niesie to, co grają głośniki, postać słyszy tylko samą siebie: wybierz mikrofon ze słuchawek.`,
-  micMute: 'Wycisz mikrofon',
-  micUnmute: 'Włącz mikrofon',
+  micMute: 'Wycisz mikrofon (M)',
+  micUnmute: 'Włącz mikrofon (M)',
   mutedStatus: 'Wyciszony: pisz albo włącz mikrofon',
   micDenied: 'Brak zgody na użycie mikrofonu.',
   micFailed: 'Nie udało się uruchomić mikrofonu.',

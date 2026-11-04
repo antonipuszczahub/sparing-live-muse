@@ -118,6 +118,20 @@ export function CallScreen({
   }, [snap]);
   useEffect(() => () => window.clearTimeout(endTimer.current), []);
 
+  // M mutes and unmutes the microphone, unless a text field has the keyboard
+  const mutedNow = useRef(false);
+  mutedNow.current = Boolean(snap?.muted);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== 'm' || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+      engine.current?.setMuted(!mutedNow.current);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   if (!snap) return null;
   return (
     <CallView
