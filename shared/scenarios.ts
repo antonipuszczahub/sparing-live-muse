@@ -18,6 +18,11 @@ export interface ScenarioDef {
   winCondition: string;
   /** Can the user share a screen (slides, code, portfolio) in this scenario? */
   screenHint: string;
+  /**
+   * Short lines in the sound a real person makes in this situation, original and written to be spoken. They go into the
+   * character's prompt as style only: the model learns how a phone call sounds from examples, not from rules.
+   */
+  sounds: string[];
 }
 
 export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
@@ -29,9 +34,10 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'A redesign of their website, 3,000 USD, two weeks',
     twinExample: 'e.g. basecamp.com, or the website of the company you will call',
     situation: 'The user is calling you to sell something. You did not ask for this call.',
-    opening: 'You pick up the phone, busy, and say who is speaking. You do not know why they are calling.',
+    opening: 'You pick up the phone, busy, with one short line ("Hello?" or "Yes, speaking."). You do not know why they are calling, and you say nothing more until they tell you.',
     winCondition: 'Earn a concrete next step (a meeting or a trial), not a polite brush-off.',
     screenHint: 'Share your portfolio or offer page and the buyer will react to it.',
+    sounds: ['Hello?', 'Yes? Who is this?', 'Hm. Where did you get this number?', 'Okay. And what does that cost me?', 'Wait. Seven seconds, on which phone?', 'Look, I have two minutes.'],
   },
   defense: {
     id: 'defense',
@@ -41,9 +47,10 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'A mobile app that predicts bus delays, engineering thesis',
     twinExample: '',
     situation: 'The user is defending their work in front of you. You have read it and have questions.',
-    opening: 'You welcome the candidate, glance at the notes, and ask them to begin with what they consider the most important result.',
+    opening: 'This is a scheduled defense, not a call from a stranger. You welcome the candidate in one sentence ("Good morning, go ahead."), glance at the notes, and ask them to begin with what they consider the most important result.',
     winCondition: 'Defend decisions with reasons, admit real limits, and never bluff.',
     screenHint: 'Share your slides or your code. The examiner will ask about specific lines and slides.',
+    sounds: ['Good morning, go ahead.', 'Hm. And how did you test that?', 'Why that and not the simpler option?', 'Let me stop you there. Which dataset?', 'Okay. What would break it?'],
   },
   salary: {
     id: 'salary',
@@ -53,9 +60,10 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'A 15% raise after two years as a backend developer',
     twinExample: 'e.g. the company you work for or are joining',
     situation: 'The user booked this meeting to ask you for money.',
-    opening: 'You greet them and say you have a few minutes; you ask what they wanted to talk about.',
+    opening: 'This is a scheduled meeting, not a call from a stranger. You greet them briefly ("Hi, come in."), say you have a few minutes, and ask what they wanted to talk about.',
     winCondition: 'Leave with a number or a dated, written commitment, without an ultimatum.',
     screenHint: 'Share your list of achievements and the manager will cross-examine it.',
+    sounds: ['Hi, come in. I have fifteen minutes.', 'Okay. What did you have in mind?', 'I hear you. But the budget is what it is.', 'What changed this year, concretely?', 'I cannot promise anything today.'],
   },
   pitch: {
     id: 'pitch',
@@ -65,9 +73,10 @@ export const SCENARIOS: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'B2B tool that automates invoice reconciliation for logistics firms',
     twinExample: 'e.g. the fund you are pitching, such as ycombinator.com',
     situation: 'The user is pitching you for seed funding. You get pitched every day.',
-    opening: 'You say you have about ten minutes and ask them to start with the problem.',
+    opening: 'This is a scheduled meeting, not a call from a stranger. You greet them briefly, say you have about ten minutes and ask them to start with the problem.',
     winCondition: 'Get a second meeting by showing real customers, real money and a credible team.',
     screenHint: 'Share your deck and the investor will go straight to the weakest slide.',
+    sounds: ['Hi. Ten minutes. Start with the problem.', 'Mhm. Who pays you today?', 'Hm. That is a big number. What is yours?', 'Okay. Why wouldn\'t they just leave?', 'What does a customer pay per month?'],
   },
 };
 
@@ -86,7 +95,7 @@ export const LEVELS: Record<Level, LevelDef> = {
     level: 1,
     name: 'Friendly',
     blurb: 'Patient. Gives you room, raises small objections.',
-    maxWords: 45,
+    maxWords: 40,
     rules: [
       'You are patient and let the user finish their point.',
       'You raise at most one mild objection per turn and soften it.',
@@ -97,7 +106,7 @@ export const LEVELS: Record<Level, LevelDef> = {
     level: 2,
     name: 'Realistic',
     blurb: 'A normal person on a normal day. Skeptical until convinced.',
-    maxWords: 40,
+    maxWords: 32,
     rules: [
       'You are skeptical by default and move only when the user gives a concrete reason.',
       'You raise real objections and ask for specifics. Vague answers get a short, direct follow-up.',
@@ -108,7 +117,7 @@ export const LEVELS: Record<Level, LevelDef> = {
     level: 3,
     name: 'Tough',
     blurb: 'Short on time, blunt, interrupts rambling.',
-    maxWords: 32,
+    maxWords: 24,
     rules: [
       'You are short on time. Rambling gets cut off with a one-line reaction.',
       'You challenge claims with numbers and ask about the downside.',
@@ -119,7 +128,7 @@ export const LEVELS: Record<Level, LevelDef> = {
     level: 4,
     name: 'Brutal',
     blurb: 'A bad day. Cuts in, pushes back hard, may hang up.',
-    maxWords: 26,
+    maxWords: 18,
     rules: [
       'You are having a bad day and it shows: clipped sentences, little patience.',
       'You interrupt weak arguments and test whether the user holds under pressure.',

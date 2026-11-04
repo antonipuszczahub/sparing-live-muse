@@ -70,7 +70,7 @@ test('the Polish prompt states the gender of both people and the form of address
 test('the Polish prompt carries the difficulty limit, the twin and the screen', () => {
   const twin = { company: 'Acme', url: '', buyerRole: 'Dyrektor produktu', buyerBio: 'Odpowiada za rozwój.', summary: 'Robią oprogramowanie.', customers: 'Firmy', pains: ['cena'], objections: ['za drogo'], vocabulary: ['projekty'], sources: [] };
   const p = buildSystemPrompt(config({ level: 4, twin, focus: ['niejasno o cenie'] }), { screen: 'Slajd 3: 94%' });
-  assert.match(p, /najwyżej 26 słów/);
+  assert.match(p, /najwyżej 18 słów/);
   assert.match(p, /Acme/);
   assert.match(p, /za drogo/);
   assert.match(p, /niejasno o cenie/);

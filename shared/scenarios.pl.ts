@@ -15,9 +15,10 @@ export const SCENARIOS_PL: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'Przebudowa ich strony internetowej, 12 000 zł, dwa tygodnie',
     twinExample: 'np. basecamp.com albo strona firmy, do której zadzwonisz',
     situation: 'Rozmówca dzwoni do Ciebie, żeby coś sprzedać. To zimny telefon, na który nie czekasz.',
-    opening: 'Odbierasz telefon w biegu i mówisz, kto z tej strony. Nie masz pojęcia, po co ktoś dzwoni.',
+    opening: 'Odbierasz telefon w biegu jednym krótkim zdaniem („Halo?” albo „Tak, słucham.”). Nie masz pojęcia, po co ktoś dzwoni, i na razie nic więcej nie mówisz, dopóki rozmówca nie powie, o co chodzi.',
     winCondition: 'Wywalczyć konkretny następny krok (spotkanie albo okres próbny), a nie uprzejme „dziękuję, nie”.',
     screenHint: 'Udostępnij portfolio albo stronę z ofertą, a rozmówca zareaguje na to, co zobaczy.',
+    sounds: ['Halo?', 'Tak, słucham?', 'Hm. A skąd ten numer?', 'No dobrze. A ile to kosztuje?', 'Moment. Siedem sekund, na jakim telefonie?', 'Mam dwie minuty, proszę do rzeczy.'],
   },
   defense: {
     id: 'defense',
@@ -27,9 +28,10 @@ export const SCENARIOS_PL: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'Aplikacja mobilna przewidująca opóźnienia autobusów, praca inżynierska',
     twinExample: '',
     situation: 'Rozmówca broni przed Tobą swojej pracy. Znasz ją i masz pytania.',
-    opening: 'Witasz dyplomanta, zerkasz w notatki i prosisz, żeby zaczął od tego, co sam uważa za najważniejszy wynik.',
+    opening: 'To umówiona obrona, nie telefon od obcego. Witasz dyplomanta jednym zdaniem („Dzień dobry, proszę.”), zerkasz w notatki i prosisz, żeby zaczął od tego, co sam uważa za najważniejszy wynik.',
     winCondition: 'Uzasadniać decyzje, przyznawać realne ograniczenia i nigdy nie blefować.',
     screenHint: 'Udostępnij slajdy albo kod. Egzaminator zapyta o konkretne linijki i konkretne slajdy.',
+    sounds: ['Dzień dobry, proszę zaczynać.', 'Hm. A jak to zostało sprawdzone?', 'Dlaczego tak, a nie prościej?', 'Przepraszam, przerwę. Jakie to dane?', 'No dobrze. A co by to złamało?'],
   },
   salary: {
     id: 'salary',
@@ -39,9 +41,10 @@ export const SCENARIOS_PL: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'Podwyżka o 15% po dwóch latach pracy jako programista backendu',
     twinExample: 'np. firma, w której pracujesz albo do której dołączasz',
     situation: 'Rozmówca umówił to spotkanie, żeby prosić Cię o pieniądze.',
-    opening: 'Witasz się, mówisz, że masz kilka minut, i pytasz, w jakiej sprawie to spotkanie.',
+    opening: 'To umówione spotkanie, nie telefon od obcego. Witasz się krótko („Cześć, wchodź.” albo „Dzień dobry.”), mówisz, że masz kilka minut, i pytasz, o czym rozmówca chce porozmawiać.',
     winCondition: 'Wyjść z konkretną kwotą albo datowanym, pisemnym zobowiązaniem, bez stawiania ultimatum.',
     screenHint: 'Udostępnij listę swoich osiągnięć, a przełożony przepyta Cię z niej punkt po punkcie.',
+    sounds: ['Dzień dobry, proszę. Mam kwadrans.', 'No dobrze. O czym była mowa?', 'Rozumiem. Tylko budżet jest, jaki jest.', 'A co się zmieniło w tym roku, konkretnie?', 'Dziś niczego nie obiecam.'],
   },
   pitch: {
     id: 'pitch',
@@ -51,9 +54,10 @@ export const SCENARIOS_PL: Record<ScenarioId, ScenarioDef> = {
     topicExample: 'Narzędzie B2B, które automatyzuje uzgadnianie faktur w firmach logistycznych',
     twinExample: 'np. fundusz, któremu prezentujesz, jak ycombinator.com',
     situation: 'Rozmówca prezentuje Ci pitch w poszukiwaniu finansowania na start (seed). Pitche słyszysz codziennie.',
-    opening: 'Mówisz, że masz około dziesięciu minut, i prosisz, żeby rozmówca zaczął od problemu.',
+    opening: 'To umówione spotkanie, nie telefon od obcego. Witasz się krótko, mówisz, że masz około dziesięciu minut, i prosisz, żeby rozmówca zaczął od problemu.',
     winCondition: 'Zdobyć drugie spotkanie, pokazując prawdziwych klientów, prawdziwe pieniądze i wiarygodny zespół.',
     screenHint: 'Udostępnij prezentację, a inwestor od razu pójdzie w najsłabszy slajd.',
+    sounds: ['Dzień dobry. Dziesięć minut. Proszę zacząć od problemu.', 'Mhm. A kto dziś za to płaci?', 'Hm. Duża liczba. A jaka jest ta konkretna?', 'No dobrze. A czemu by nie odeszli?', 'Ile klient płaci miesięcznie?'],
   },
 };
 
@@ -62,7 +66,7 @@ export const LEVELS_PL: Record<Level, LevelDef> = {
     level: 1,
     name: 'Przyjazny',
     blurb: 'Cierpliwy. Daje Ci miejsce, zgłasza drobne zastrzeżenia.',
-    maxWords: 45,
+    maxWords: 40,
     rules: [
       'Jesteś cierpliw{y|a} i pozwalasz rozmówcy dokończyć myśl.',
       'W jednej wypowiedzi zgłaszasz najwyżej jedno łagodne zastrzeżenie i je łagodzisz.',
@@ -73,7 +77,7 @@ export const LEVELS_PL: Record<Level, LevelDef> = {
     level: 2,
     name: 'Realistyczny',
     blurb: 'Zwykły człowiek w zwykły dzień. Sceptyczny, dopóki go nie przekonasz.',
-    maxWords: 40,
+    maxWords: 32,
     rules: [
       'Domyślnie jesteś sceptyczn{y|a} i ustępujesz tylko wtedy, gdy rozmówca poda konkretny powód.',
       'Zgłaszasz prawdziwe zastrzeżenia i dopytujesz o szczegóły. Na wymijającą odpowiedź reagujesz krótkim, wprost zadanym pytaniem.',
@@ -84,7 +88,7 @@ export const LEVELS_PL: Record<Level, LevelDef> = {
     level: 3,
     name: 'Twardy',
     blurb: 'Mało czasu, mówi wprost, ucina rozwlekłe wywody.',
-    maxWords: 32,
+    maxWords: 24,
     rules: [
       'Masz mało czasu. Rozwlekłą wypowiedź ucinasz jednym zdaniem reakcji.',
       'Kwestionujesz twierdzenia liczbami i pytasz o ciemną stronę pomysłu.',
@@ -95,7 +99,7 @@ export const LEVELS_PL: Record<Level, LevelDef> = {
     level: 4,
     name: 'Brutalny',
     blurb: 'Zły dzień. Wchodzi w słowo, naciska, może się rozłączyć.',
-    maxWords: 26,
+    maxWords: 18,
     rules: [
       'Masz zły dzień i to słychać: urywane zdania, mało cierpliwości.',
       'Przerywasz słabe argumenty i sprawdzasz, czy rozmówca wytrzyma presję.',

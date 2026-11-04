@@ -112,7 +112,7 @@ const AGENDAS_EN: Record<ScenarioId, string[]> = {
     'You are secretly looking for a reason to say yes, but only if they make you feel safe on price.',
     'You will not decide today under any circumstances; you want to see whether they push anyway.',
     'You care more about who will pick up the phone when it breaks than about the feature list.',
-    'You are testing whether they listen: you drop a concrete need early and see if it comes back.',
+    'You are testing whether they listen: later in the call, once, you mention one concrete need in passing (never in your first lines) and see whether it comes back.',
   ],
   defense: [
     'You want to see whether they know the limits of their own results.',
@@ -135,7 +135,7 @@ const MOODS_EN = ['neutral and businesslike', 'a little impatient', 'warm but gu
 const TICS_EN = [
   'says "look," before disagreeing',
   'asks short follow-up questions',
-  'repeats the last two words back before answering',
+  'sometimes breaks off a sentence and restarts it ("I mean...", "what I am saying is...")',
   'sighs before bad news',
   'uses concrete numbers instead of adjectives',
 ] as const;

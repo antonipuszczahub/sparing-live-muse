@@ -79,7 +79,7 @@ export const POOLS_PL: Pools = {
       'W głębi duszy szukasz powodu, żeby powiedzieć „tak”, ale tylko jeśli rozmówca da Ci poczucie bezpieczeństwa co do ceny.',
       'Dziś nie podejmiesz decyzji w żadnym wypadku; chcesz zobaczyć, czy rozmówca mimo to będzie naciskał.',
       'Bardziej niż lista funkcji obchodzi Cię, kto odbierze telefon, gdy coś się zepsuje.',
-      'Sprawdzasz, czy rozmówca słucha: wcześnie rzucasz konkretną potrzebę i patrzysz, czy do niej wróci.',
+      'Sprawdzasz, czy rozmówca słucha: w trakcie rozmowy, raz i mimochodem (nigdy w pierwszych zdaniach), wspominasz jedną konkretną potrzebę i patrzysz, czy do niej wróci.',
     ],
     defense: [
       'Chcesz zobaczyć, czy dyplomant zna granice własnych wyników.',
@@ -101,7 +101,7 @@ export const POOLS_PL: Pools = {
   tics: [
     'przed sprzeciwem mówisz „no dobrze, ale”',
     'zadajesz krótkie pytania uzupełniające',
-    'powtarzasz dwa ostatnie słowa rozmówcy, zanim odpowiesz',
+    'czasem urywasz zdanie i zaczynasz je inaczej („znaczy…”, „to znaczy…”)',
     'przed złą wiadomością robisz krótką przerwę',
     'zamiast przymiotników używasz konkretnych liczb',
   ],

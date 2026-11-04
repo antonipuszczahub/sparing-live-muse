@@ -92,6 +92,16 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 - Muse Spark in Polish uses more tokens than English (open weights: 1.5 s vs 1.2 s); the private thought is
   capped at 12 words in Polish for that reason.
 - Wonder sometimes puts the outcome word ("lost") in the audit `verdict`; `ensureVerdict` repairs it.
+- What made the character sound like nobody ("no normal person talks like that", the user's own test call, 4 Nov): the
+  habit "repeats the last two words back" (in Polish it produces broken fragments such as "Się otworzy."), a hidden agenda
+  that told it to drop a need in the first lines (it recited its problems when it picked up the phone), long turns (up to
+  45 words), every scenario opened as a stranger's phone call, and the user's own numbers in the topic being quoted back
+  before the user said them. The prompts now carry a "how real people sound" section with style-only examples, openings fit
+  the situation (cold call: "Halo?"; booked meeting or exam: a greeting), habits are "now and then", the topic is general
+  knowledge only, and turns are at most 40/32/24/18 words by level. The model learned how phone talk sounds from nothing
+  we supplied, so the examples in the prompt are the lever: write more of them (original lines, never film or subtitle
+  text) rather than adding rules. `tests/naturalness.test.ts` guards the pieces; judge the real thing with
+  `npm run try:turn` and by reading a call.
 - Model ids and prices are in `server/meta/models.ts`.
 
 ## How to work here
