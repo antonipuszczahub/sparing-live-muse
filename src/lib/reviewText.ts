@@ -1,4 +1,4 @@
-import type { AuditResult, Moment } from '../../shared/audit.ts';
+import type { AuditResult, Moment, Wording } from '../../shared/audit.ts';
 import type { Turn } from '../../shared/types.ts';
 
 /** The words of the page, passed in so this stays pure (the caller translates them). */
@@ -14,6 +14,7 @@ export interface ReviewLabels {
   wording: string;
   wordingSaid: string;
   wordingBetter: string;
+  wordingKinds: Record<Wording['kind'], string>;
 }
 
 const clock = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
@@ -48,7 +49,7 @@ export function reviewAsText(input: { who: string; durationMs: number; result: A
     lines.push(`## ${L.wording}`);
     for (const w of r.wording) {
       const at = turns[w.turn]?.at;
-      lines.push(`- ${at === undefined ? '' : `${clock(at)} · `}${L.wordingSaid}: “${w.said}” → ${L.wordingBetter}: “${w.better}”${w.note ? ` (${w.note})` : ''}`);
+      lines.push(`- ${at === undefined ? '' : `${clock(at)} · `}${L.wordingKinds[w.kind]} · ${L.wordingSaid}: “${w.said}” → ${L.wordingBetter}: “${w.better}”${w.note ? ` (${w.note})` : ''}`);
     }
     lines.push('');
   }

@@ -174,9 +174,11 @@ export const pl: Dict = {
   thinks: 'myśli:',
   sayInstead: 'Powiedz zamiast tego',
   wordingTitle: 'Sformułowania',
-  wordingNote: 'Z transkrypcji. Rozpoznawanie mowy mogło część wygładzić albo poprawić.',
+  wordingNote: 'Błędy językowe i słowa zbyt potoczne jak na tę rozmowę, z transkrypcji. Rozpoznawanie mowy mogło część wygładzić albo poprawić.',
   wordingSaid: 'Padło',
   wordingBetter: 'Lepiej',
+  wordingGrammar: 'Gramatyka',
+  wordingRegister: 'Za potocznie',
 
   // ---- clip
   clipTitle: 'Udostępnij ten moment',

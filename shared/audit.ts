@@ -11,16 +11,24 @@ export interface Moment {
   betterLine?: string;
 }
 
-/** A slip in the user's own words (grammar, a wrong or clumsy word), with the corrected phrase. */
+/**
+ * A slip in the user's own words, with the corrected phrase: a grammar mistake or a wrong word ('grammar'), or wording
+ * that is too casual or slangy for the conversation, such as "gonna", "no worries" or "luzik" in front of an investor
+ * ('register').
+ */
 export interface Wording {
   /** Index into the transcript: always one of the user's lines. */
   turn: number;
+  kind: 'grammar' | 'register';
   /** An exact quote from that line. */
   said: string;
   better: string;
   /** What was wrong, a few words. */
   note: string;
 }
+
+/** Most slips the review lists: enough to teach, few enough to read. */
+export const MAX_WORDING = 5;
 
 export interface AuditResult {
   score: number;
@@ -33,7 +41,7 @@ export interface AuditResult {
   nextFocus: string[];
   /** Short tags that are remembered across sessions and aimed at by the next character. */
   weaknessTags: string[];
-  /** Language slips found in what the user said (at most three; empty when there is nothing clear to flag). */
+  /** Language slips found in what the user said (see MAX_WORDING; empty when there is nothing clear to flag). */
   wording?: Wording[];
 }
 
@@ -105,11 +113,12 @@ export const AUDIT_SCHEMA = {
           type: 'object',
           properties: {
             turn: { type: 'integer', minimum: 0 },
+            kind: { type: 'string', enum: ['grammar', 'register'] },
             said: { type: 'string' },
             better: { type: 'string' },
             note: { type: 'string' },
           },
-          required: ['turn', 'said', 'better', 'note'],
+          required: ['turn', 'kind', 'said', 'better', 'note'],
           additionalProperties: false,
         },
       },
@@ -176,7 +185,7 @@ const plain = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').tr
 
 /**
  * The model is asked to quote the user. Only slips whose quote really is in that user line are kept (a quote that was not
- * said is dropped, so the report never puts words in the user's mouth), at most three, in the order of the call.
+ * said is dropped, so the report never puts words in the user's mouth), at most MAX_WORDING, in the order of the call.
  */
 export function cleanWording(items: Wording[] | undefined, turns: Turn[]): Wording[] {
   const out: Wording[] = [];
@@ -186,9 +195,46 @@ export function cleanWording(items: Wording[] | undefined, turns: Turn[]): Wordi
     const better = (w.better ?? '').trim();
     if (!line || line.role !== 'user' || plain(said).length < 3 || !better) continue;
     if (!plain(line.text).includes(plain(said)) || plain(said) === plain(better)) continue;
-    out.push({ turn: w.turn, said, better, note: (w.note ?? '').trim() });
+    out.push({ turn: w.turn, kind: w.kind === 'register' ? 'register' : 'grammar', said, better, note: (w.note ?? '').trim() });
   }
-  return out.sort((a, b) => a.turn - b.turn).slice(0, 3);
+  return out.sort((a, b) => a.turn - b.turn).slice(0, MAX_WORDING);
+}
+
+/** A stretch of a user line, with the slip that covers it when there is one. */
+export interface Piece {
+  text: string;
+  slip?: Wording;
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Cuts a user line into pieces so the slips can be underlined where they were said. A slip is marked at its first match
+ * (case does not matter, punctuation around the quote is ignored); one that cannot be found as written, or that would
+ * overlap another, is left unmarked and still appears in the list below.
+ */
+export function markWording(text: string, slips: Wording[]): Piece[] {
+  const spans: { start: number; end: number; slip: Wording }[] = [];
+  for (const slip of slips) {
+    const needle = slip.said.trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+    if (needle.length < 2) continue;
+    const m = new RegExp(escapeRe(needle), 'iu').exec(text);
+    if (!m) continue;
+    const start = m.index;
+    const end = start + m[0].length;
+    if (spans.some((s) => start < s.end && end > s.start)) continue;
+    spans.push({ start, end, slip });
+  }
+  spans.sort((a, b) => a.start - b.start);
+  const pieces: Piece[] = [];
+  let at = 0;
+  for (const s of spans) {
+    if (s.start > at) pieces.push({ text: text.slice(at, s.start) });
+    pieces.push({ text: text.slice(s.start, s.end), slip: s.slip });
+    at = s.end;
+  }
+  if (at < text.length) pieces.push({ text: text.slice(at) });
+  return pieces.length ? pieces : [{ text }];
 }
 
 /** Delivery numbers measured from the transcript, so the audit cites facts instead of guesses. */

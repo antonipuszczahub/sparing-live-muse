@@ -74,7 +74,10 @@ const RESULT_EN: AuditResult = {
   ],
   nextFocus: ['Lead with the paying customer in your first ten seconds.', 'State the price before you are asked.', 'Answer in two sentences, then stop.'],
   weaknessTags: [],
-  wording: [{ turn: 7, said: 'a third sign next month', better: 'a third signs next month', note: 'A singular subject takes “signs”.' }],
+  wording: [
+    { turn: 5, kind: 'register', said: 'like forty billion', better: 'roughly forty billion', note: '“Like” sounds too casual in front of an investor.' },
+    { turn: 7, kind: 'grammar', said: 'a third sign next month', better: 'a third signs next month', note: 'A singular subject takes “signs”.' },
+  ],
 };
 
 const RESULT_PL: AuditResult = {
@@ -95,7 +98,10 @@ const RESULT_PL: AuditResult = {
   ],
   nextFocus: ['Zacznij od płacącego klienta w pierwszych dziesięciu sekundach.', 'Podaj cenę, zanim o nią zapytają.', 'Odpowiadaj dwoma zdaniami, potem przestań.'],
   weaknessTags: [],
-  wording: [{ turn: 7, said: 'trzeci podpisują', better: 'trzeci podpisuje', note: 'Orzeczenie zgadza się z podmiotem: „trzeci” to liczba pojedyncza.' }],
+  wording: [
+    { turn: 5, kind: 'register', said: 'jakieś czterdzieści miliardów', better: 'około czterdziestu miliardów', note: '„Jakieś” brzmi zbyt potocznie wobec inwestorki.' },
+    { turn: 7, kind: 'grammar', said: 'trzeci podpisują', better: 'trzeci podpisuje', note: 'Orzeczenie zgadza się z podmiotem: „trzeci” to liczba pojedyncza.' },
+  ],
 };
 
 export const sampleResult = (lang: Lang): AuditResult => (lang === 'pl' ? RESULT_PL : RESULT_EN);

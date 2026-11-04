@@ -15,6 +15,7 @@ const labels: ReviewLabels = {
   wording: 'Wording',
   wordingSaid: 'You said',
   wordingBetter: 'Better',
+  wordingKinds: { grammar: 'Grammar', register: 'Too casual' },
 };
 
 const result: AuditResult = {
@@ -47,9 +48,15 @@ test('the review becomes Markdown with the score, verdict, skills, moments in or
 });
 
 test('language slips are listed with the time, the quote, the better phrase and the note', () => {
-  const withWording = { ...result, wording: [{ turn: 2, said: 'a third sign', better: 'a third signs', note: 'Singular subject.' }] };
+  const withWording: AuditResult = {
+    ...result,
+    wording: [
+      { turn: 2, kind: 'register', said: 'big', better: 'substantial', note: 'Too casual.' },
+      { turn: 2, kind: 'grammar', said: 'a third sign', better: 'a third signs', note: 'Singular subject.' },
+    ],
+  };
   const md = reviewAsText({ who: 'Dana', durationMs: 192000, result: withWording, turns, labels });
-  assert.match(md, /## Wording\n- 1:41 · You said: “a third sign” → Better: “a third signs” \(Singular subject\.\)\n\n## Work on next/);
+  assert.match(md, /## Wording\n- 1:41 · Too casual · You said: “big” → Better: “substantial” \(Too casual\.\)\n- 1:41 · Grammar · You said: “a third sign” → Better: “a third signs” \(Singular subject\.\)\n\n## Work on next/);
   assert.ok(!reviewAsText({ who: 'Dana', durationMs: 5000, result, turns, labels }).includes('## Wording'), 'no slips, no section');
 });
 

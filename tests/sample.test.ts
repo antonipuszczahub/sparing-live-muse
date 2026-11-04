@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cleanWording } from '../shared/audit.ts';
+import { cleanWording, markWording } from '../shared/audit.ts';
 import { ABOUT } from '../src/i18n/about.ts';
 import { SAMPLE_TRACE, sampleConfig, sampleResult, sampleTurns } from '../src/sample/data.ts';
 
@@ -33,12 +33,13 @@ test('the sample review points at lines that exist and says why, in each languag
   assert.notEqual(sampleResult('en').summary, sampleResult('pl').summary);
 });
 
-test('the sample review shows one language slip, quoted from a line the user really said', () => {
+test('the sample review shows a grammar slip and a too-casual phrase, quoted from lines the user really said', () => {
   for (const lang of LANGS) {
     const turns = sampleTurns(lang);
     const wording = sampleResult(lang).wording ?? [];
-    assert.equal(wording.length, 1, lang);
-    assert.deepEqual(cleanWording(wording, turns), wording, `${lang}: the quote is in the line`);
+    assert.deepEqual(wording.map((w) => w.kind), ['register', 'grammar'], lang);
+    assert.deepEqual(cleanWording(wording, turns), wording, `${lang}: the quotes are in the lines`);
+    for (const w of wording) assert.ok(markWording(turns[w.turn]!.text, [w]).some((p) => p.slip === w), `${lang}: "${w.said}" can be underlined where it was said`);
   }
 });
 

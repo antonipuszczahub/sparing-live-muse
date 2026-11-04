@@ -173,9 +173,11 @@ export const en = {
   thinks: 'thinks:',
   sayInstead: 'Say this instead',
   wordingTitle: 'Wording',
-  wordingNote: 'Read from the transcript. Speech recognition may have smoothed or corrected some of what you said.',
+  wordingNote: 'Grammar slips and wording that is too casual for this conversation, read from the transcript. Speech recognition may have smoothed or corrected some of what you said.',
   wordingSaid: 'You said',
   wordingBetter: 'Better',
+  wordingGrammar: 'Grammar',
+  wordingRegister: 'Too casual',
 
   // ---- clip
   clipTitle: 'Share the moment',

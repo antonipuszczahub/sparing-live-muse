@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cleanWording, countRepeats, ensureVerdict, MAX_VERDICT_CHARS, measureDelivery, type AuditResult, type Wording } from '../shared/audit.ts';
+import { cleanWording, countRepeats, ensureVerdict, markWording, MAX_VERDICT_CHARS, MAX_WORDING, measureDelivery, type AuditResult, type Wording } from '../shared/audit.ts';
 import type { Turn } from '../shared/types.ts';
 
 test('delivery metrics are measured, not guessed', () => {
@@ -100,7 +100,7 @@ const said: Turn[] = [
   { role: 'bot', text: 'A third sign what?', at: 8000 },
   { role: 'user', text: 'The contract, i mean the pilot.', at: 11000 },
 ];
-const w = (turn: number, said: string, better: string, note = 'x'): Wording => ({ turn, said, better, note });
+const w = (turn: number, said: string, better: string, note = 'x', kind: Wording['kind'] = 'grammar'): Wording => ({ turn, kind, said, better, note });
 
 test('a language slip is kept only when its quote was really said by the user', () => {
   const kept = cleanWording([w(1, 'a third sign next month', 'a third signs next month'), w(1, 'We was surprised', 'We were surprised')], said);
@@ -116,10 +116,40 @@ test('a quote is matched without caring about case and punctuation, and an uncha
   assert.deepEqual(cleanWording([w(1, '??', 'x'), w(1, 'a third sign next month', '')], said), [], 'too short, or no correction');
 });
 
-test('at most three slips, in the order of the call, and nothing when the model sent none', () => {
-  const many = [w(3, 'i mean the pilot', 'I meant the pilot'), w(1, 'We was surprised', 'We were surprised'), w(1, 'a third sign next month', 'a third signs next month'), w(3, 'The contract', 'This contract')];
+test('the number of slips is capped, they come in the order of the call, and nothing when the model sent none', () => {
+  const many = [
+    w(3, 'i mean the pilot', 'I meant the pilot'),
+    w(1, 'We was surprised', 'We were surprised'),
+    w(1, 'a third sign next month', 'a third signs next month'),
+    w(3, 'The contract', 'This contract'),
+    w(1, 'Both clinics', 'The two clinics'),
+    w(1, 'next month', 'in the coming month'),
+    w(3, 'the pilot', 'the trial'),
+  ];
   const out = cleanWording(many, said);
-  assert.equal(out.length, 3);
-  assert.deepEqual(out.map((x) => x.turn), [1, 1, 3]);
+  assert.equal(out.length, MAX_WORDING);
+  assert.deepEqual(out.map((x) => x.turn), [...out.map((x) => x.turn)].sort((a, b) => a - b));
   assert.deepEqual(cleanWording(undefined, said), []);
+});
+
+test('the kind of a slip is kept, and anything but "register" counts as grammar', () => {
+  const [a, b] = cleanWording([w(1, 'a third sign next month', 'a third signs next month', 'x', 'register'), { ...w(1, 'We was surprised', 'We were surprised'), kind: 'nonsense' as Wording['kind'] }], said);
+  assert.equal(a!.kind, 'register');
+  assert.equal(b!.kind, 'grammar');
+});
+
+test('a slip is underlined where it was said: case and the punctuation around the quote do not matter', () => {
+  const text = 'It was, like, forty billion. We are gonna grow.';
+  const pieces = markWording(text, [w(0, '“Gonna grow.”', 'going to grow', 'x', 'register'), w(0, 'LIKE', 'roughly', 'x', 'register')]);
+  assert.deepEqual(pieces.map((p) => p.text), ['It was, ', 'like', ', forty billion. We are ', 'gonna grow', '.']);
+  assert.deepEqual(pieces.filter((p) => p.slip).map((p) => p.slip!.better), ['roughly', 'going to grow']);
+  assert.equal(pieces.map((p) => p.text).join(''), text, 'the pieces put the line back together');
+});
+
+test('a slip that cannot be found as written, or overlaps another, is left unmarked; a regex-looking quote is safe', () => {
+  assert.deepEqual(markWording('Nothing to mark here.', [w(0, 'absent words', 'x')]), [{ text: 'Nothing to mark here.' }]);
+  const pieces = markWording('We are gonna grow fast.', [w(0, 'gonna grow', 'going to grow'), w(0, 'grow fast', 'expand quickly')]);
+  assert.equal(pieces.filter((p) => p.slip).length, 1, 'the second one overlaps the first');
+  assert.equal(markWording('Price (USD) is 3.000+', [w(0, '(USD) is 3.000+', 'x')]).filter((p) => p.slip).length, 1);
+  assert.equal(markWording('Wiesz, po prostu spoko.', [w(0, 'spoko', 'w porządku', 'x', 'register')]).find((p) => p.slip)?.text, 'spoko');
 });

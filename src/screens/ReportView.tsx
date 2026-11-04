@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { reviewAsText } from '../lib/reviewText.ts';
-import { measureDelivery, type AuditResult, type Moment } from '../../shared/audit.ts';
+import { markWording, measureDelivery, type AuditResult, type Moment, type Wording } from '../../shared/audit.ts';
 import type { FramingEvent } from '../../shared/framing.ts';
 import type { TraceRow } from '../../shared/trace.ts';
 import { langOf } from '../../shared/lang.ts';
@@ -31,6 +31,10 @@ const SKILLS = {
 
 /** How the review tints the background: a won call is bright, a lost one is cold. */
 const OUTCOME_MOOD = { won: 4, partial: 3, lost: 2 } as const satisfies Record<AuditResult['outcome'], Mood>;
+
+/** Grammar slips are red, wording that is too casual is amber (the same colours underline them in the replay). */
+const wordingColor = (w: Wording) => (w.kind === 'register' ? 'var(--ochre)' : 'var(--ember)');
+const wordingLabel = (w: Wording) => t(w.kind === 'register' ? 'wordingRegister' : 'wordingGrammar');
 
 const fmt = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
 const unit = (n: number) => t('words', n).replace(/^\d+\s*/, '');
@@ -72,6 +76,8 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
   // One card per turn: when the review marks a turn twice, the later note wins, here and on the chart alike.
   const momentByTurn = new Map(result?.moments.map((m) => [m.turn, m]));
   const moments = [...momentByTurn.values()];
+  const wordingByTurn = new Map<number, Wording[]>();
+  for (const w of result?.wording ?? []) wordingByTurn.set(w.turn, [...(wordingByTurn.get(w.turn) ?? []), w]);
   const letters = momentLetters(moments);
   const nodes: MoodNode[] = turns.flatMap((x, i) => (x.role === 'bot' && x.mood ? [{ turn: i, mood: x.mood, at: x.at }] : []));
   const layout = layoutMoodVine(nodes, moments, narrow);
@@ -98,6 +104,7 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
         wording: t('wordingTitle'),
         wordingSaid: t('wordingSaid'),
         wordingBetter: t('wordingBetter'),
+        wordingKinds: { grammar: t('wordingGrammar'), register: t('wordingRegister') },
       },
     });
     void navigator.clipboard
@@ -265,6 +272,11 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                     </button>
                     <div>
                       <p className={s.wLine}>
+                        <span className={s.slipTag} style={vars({ '--c': wordingColor(w) })}>
+                          {wordingLabel(w)}
+                        </span>
+                      </p>
+                      <p className={s.wLine}>
                         <small>{t('wordingSaid')}</small>
                         <span className={s.wBad}>“{w.said}”</span>
                       </p>
@@ -354,7 +366,19 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                     <span>{bot ? first : t('you')}</span>
                     <span>{fmt(turn.at)}</span>
                   </div>
-                  <p className={bot ? s.tD : s.tM}>{turn.text}</p>
+                  <p className={bot ? s.tD : s.tM}>
+                    {bot
+                      ? turn.text
+                      : markWording(turn.text, wordingByTurn.get(i) ?? []).map((p, k) =>
+                          p.slip ? (
+                            <mark key={k} className={`${s.slip} ${p.slip.kind === 'register' ? s.slipReg : ''}`} title={`${t('wordingBetter')}: ${p.slip.better}`}>
+                              {p.text}
+                            </mark>
+                          ) : (
+                            p.text
+                          ),
+                        )}
+                  </p>
                 </div>
                 <span className={`${s.nd} ${m ? s.ndBig : ''}`} style={vars({ '--c': color })} />
                 <div className={s.rt}>
@@ -379,6 +403,15 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                       )}
                     </div>
                   )}
+                  {(wordingByTurn.get(i) ?? []).map((w, k) => (
+                    <div key={`w${k}`} className={s.slipCard} style={vars({ '--c': wordingColor(w) })}>
+                      <span className={s.slipTag}>{wordingLabel(w)}</span>
+                      <div className={s.say}>
+                        <small>{t('wordingBetter')}</small>“{w.better}”
+                      </div>
+                      {w.note && <p className={s.why}>{w.note}</p>}
+                    </div>
+                  ))}
                 </div>
               </div>
             );

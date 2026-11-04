@@ -109,10 +109,10 @@
 }
 /* Screens with text to read over the light (the call, the review) get a dimmer light: they are the ones that set --mood */
 :root[data-theme='swiatlo'][style*='--mood'] [class*='_orb_'] {
-  opacity: 0.46 !important;
+  opacity: 0.34 !important;
 }
 :root[data-theme='swiatlo'][style*='--mood'] [class*='_backdrop_']::before {
-  opacity: 0.28;
+  opacity: 0.2;
 }
 /* the vignette and a veil of white film grain over the light: it is what makes the colours dusty rather than neon */
 :root[data-theme='swiatlo'] [class*='_backdrop_']::after {
