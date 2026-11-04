@@ -7,6 +7,7 @@ import { Brand } from '../components/Brand.tsx';
 import { Icon } from '../components/Icons.tsx';
 import { Sheet } from '../components/Sheet.tsx';
 import { Switch } from '../components/Switch.tsx';
+import { AudioCheck } from '../components/AudioCheck.tsx';
 import { MicPicker } from '../components/MicPicker.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
 import ui from '../components/ui.module.css';
@@ -316,6 +317,7 @@ export function SetupScreen({
       <Sheet open={voices} title={t('voiceTitle')} onClose={() => setVoices(false)}>
         <VoicePicker lang={lang} list={voiceList} />
         <MicPicker />
+        <AudioCheck lang={lang} />
       </Sheet>
     </main>
   );

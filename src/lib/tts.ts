@@ -105,6 +105,26 @@ export function previewVoice(voice: SpeechSynthesisVoice | null, text: string, l
   speechSynthesis.speak(u);
 }
 
+/** Says one line and resolves when it has been spoken (or the browser gave up on it), for the audio check. */
+export function sayOnce(text: string, voice: SpeechSynthesisVoice | null, lang: Lang, pitch = 1): Promise<void> {
+  return new Promise((resolve) => {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = voice?.lang ?? LANG_META[lang].speech;
+    u.pitch = pitch;
+    // some browsers never report the end of an utterance
+    const watchdog = window.setTimeout(done, Math.max(3000, text.length * 110));
+    function done() {
+      window.clearTimeout(watchdog);
+      resolve();
+    }
+    u.onend = done;
+    u.onerror = done;
+    speechSynthesis.speak(u);
+  });
+}
+
 /** Speaks sentences one after another and reports what has actually been spoken. */
 export class Speaker {
   private queue: string[] = [];
