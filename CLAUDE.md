@@ -22,6 +22,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 | `npm run check:meta` / `check:open` / `check:voice` | probe Meta, the open-weights host, ElevenLabs (saves WAV samples) |
 | `npm run try:turn -- [--lang pl] [--open]` | scripted call against the live character |
 | `npm run eval -- [--lang pl] [--open]` | 24 scripted calls, writes `docs/EVAL*.md` (open weights run two at a time: Baseten allows 100 requests a minute) |
+| `npm run eval:inject` | prompt-injection probe (planted instructions in web research and screen text, EN and PL, Spark and open weights), writes `docs/EVAL.inject.md` |
 | `npm run manifest` | rebuilds `docs/MANIFEST.md` from `data/manifest.jsonl`; regenerate before submission |
 
 ## How it is built
