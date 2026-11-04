@@ -28,6 +28,19 @@ export function looksLikeEcho(heard: string, botText: string, lang: Lang = 'en')
   return count >= 4 && novelWords(heard, botText, lang).length <= Math.floor(count * 0.2);
 }
 
+/**
+ * The first clause of a reply, before its first sentence is finished: at least three words and fourteen characters,
+ * closed by a comma, semicolon, colon or dash and followed by a space ("3,5" is never cut). The character can start
+ * speaking it while the model is still writing the rest of the sentence.
+ */
+export function takeFirstClause(buf: string): { clause: string; rest: string } | null {
+  const m = /^(.{14,}?[,;:—–])\s+/s.exec(buf);
+  if (!m) return null;
+  const clause = m[1]!.trim();
+  if (clause.split(/\s+/).length < 3) return null;
+  return { clause, rest: buf.slice(m[0].length) };
+}
+
 /** Split text into complete sentences and a remainder. */
 export function takeSentences(buf: string): { sentences: string[]; rest: string } {
   const sentences: string[] = [];

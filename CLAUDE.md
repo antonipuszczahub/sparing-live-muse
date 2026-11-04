@@ -27,7 +27,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
 
 ## How it is built
 
-- **Live turn.** Browser `CallEngine` (turn taking, barge-in, silence, hang-up, and cutting in on a long monologue at a breath: `src/engine/cutin.ts`, `CUT_IN` by level, the recogniser's running text is remembered so the end of that stretch is not answered twice; tested with a fake recogniser and voice in `tests/cutin.test.ts`, never yet with a real microphone) -> `/api/turn` (SSE) -> `characterTurn`
+- **Live turn.** Browser `CallEngine` (turn taking, barge-in, silence, hang-up, and cutting in on a long monologue at a breath: `src/engine/cutin.ts`, `CUT_IN` by level, the recogniser's running text is remembered so the end of that stretch is not answered twice; tested with a fake recogniser and voice in `tests/cutin.test.ts`, never yet with a real microphone; and a spoken filler, `src/engine/filler.ts`: if the model has not produced a word 650 ms after a user turn of 4+ words, the character says "Hm." / "No tak." from a short list and the reply follows it, never in two exchanges in a row, the duplicate opening of the reply is stripped (`withoutFiller`), the first clause of a long sentence is spoken early (`takeFirstClause`), `lastLatencyMs` is counted to the model's real first word; tests in `tests/filler.test.ts` on the fake rig in `tests/engineRig.ts`, never heard through a real voice) -> `/api/turn` (SSE) -> `characterTurn`
   streams tagged text `THOUGHT / MOOD / SAY / HANGUP` (JSON mode neither streams nor keeps key order). Speech starts
   while the model is still writing.
 - **Agents** in `server/agents/`: character, twin (web research with Wonder, cached 24 h), eye (reads the shared

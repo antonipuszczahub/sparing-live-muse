@@ -6,8 +6,9 @@ import { translate } from '../i18n/index.ts';
 import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
-import { novelWords, takeSentences } from '../lib/text.ts';
+import { novelWords, takeFirstClause, takeSentences } from '../lib/text.ts';
 import { afterCutIn, CUT_IN, CUT_IN_HOLD_MS, CUT_IN_PAUSE_MS, CutInGate } from './cutin.ts';
+import { FILLER_AFTER_MS, pickFiller, wantsFiller, withoutFiller } from './filler.ts';
 import { EchoWatch, isBotEcho, micClosedForTurnTaking, MIN_BARGE_WORDS, TURN_TAKING_TAIL_MS } from './echo.ts';
 import { pickVoice, pitchFor, Speaker, type SpeechOut } from '../lib/tts.ts';
 
@@ -76,6 +77,13 @@ export class CallEngine {
   private cutInAt = 0;
   /** What the user said while the character's cut-in line was on: their next turn, once the line has ended. */
   private heldUser = '';
+  /** The short acknowledgement ("Hm.") said while the model was still thinking in this turn, if any. */
+  private fillerSaid = '';
+  private fillerTimer: number | undefined;
+  /** How many turns of the character there were when the last filler was said (fillers are never in two exchanges in a row). */
+  private lastFillerBotTurns = -99;
+  /** The first spoken piece of this reply has been handed to the voice (so a first clause is not cut a second time). */
+  private firstChunkGiven = false;
 
   private ears: EarsLike;
   private speaker: SpeechOut;
@@ -115,7 +123,8 @@ export class CallEngine {
     speaker.onIdle = () => this.onSpeechIdle();
     speaker.onStart = () => {
       this.speechStartedAt = Date.now();
-      if (this.userStoppedAt) this.lastLatencyMs = Date.now() - this.userStoppedAt;
+      // with a filler the first sound is not the reply: the latency is counted when the reply's first word arrives
+      if (this.userStoppedAt && !this.fillerSaid) this.lastLatencyMs = Date.now() - this.userStoppedAt;
       this.set('speaking');
     };
     return speaker;
@@ -343,7 +352,7 @@ export class CallEngine {
     this.userStoppedAt = Date.now();
     this.turns.push({ role: 'user', text, at: this.now() });
     this.emit();
-    void this.botTurn();
+    void this.botTurn(undefined, text);
   }
 
   private interruptBot() {
@@ -351,9 +360,12 @@ export class CallEngine {
     this.abort?.abort();
     const spoken = this.speaker.spokenText;
     this.speaker.cancel();
-    if (spoken) {
+    window.clearTimeout(this.fillerTimer);
+    // a cut-off "Hm." is not a turn worth recording
+    if (spoken && spoken.trim() !== this.fillerSaid) {
       this.turns.push({ role: 'bot', text: spoken + ' —', thought: this.pendingFinal?.thought, mood: this.mood, at: this.now() });
     }
+    this.fillerSaid = '';
     this.liveBot = '';
     this.rawBot = '';
     this.sentenceBuf = '';
@@ -364,16 +376,26 @@ export class CallEngine {
 
   // ---- the character's turn ---------------------------------------------
 
-  private async botTurn(note?: string) {
+  /**
+   * One turn of the character. `answering` is what the user just said when the turn answers them: if the model has not
+   * started within FILLER_AFTER_MS the character says a short acknowledgement, so the silence is not two seconds long.
+   */
+  private async botTurn(note?: string, answering = '') {
     const id = ++this.turnId;
     this.abort?.abort();
     const ac = (this.abort = new AbortController());
+    window.clearTimeout(this.fillerTimer);
     this.speaker.reset();
     this.liveBot = '';
     this.rawBot = '';
     this.sentenceBuf = '';
     this.pendingFinal = null;
+    this.fillerSaid = '';
+    this.firstChunkGiven = false;
     this.set('thinking');
+    if (answering && wantsFiller(answering, this.botTurnCount() - this.lastFillerBotTurns)) {
+      this.fillerTimer = window.setTimeout(() => this.sayFiller(id), FILLER_AFTER_MS);
+    }
 
     const history = this.turns.map((t) => ({ ...t }));
     if (note) history.push({ role: 'user', text: note, at: this.now() });
@@ -401,14 +423,48 @@ export class CallEngine {
     }
   }
 
+  private botTurnCount(): number {
+    return this.turns.filter((t) => t.role === 'bot').length;
+  }
+
+  /** The model is slow: a short acknowledgement fills the silence, and the reply follows it. */
+  private sayFiller(id: number) {
+    if (id !== this.turnId || this.state !== 'thinking' || this.rawBot) return;
+    this.fillerSaid = pickFiller(this.lang, this.botTurnCount());
+    this.lastFillerBotTurns = this.botTurnCount();
+    this.liveBot = this.fillerSaid;
+    this.speaker.say(this.fillerSaid);
+    this.emit();
+  }
+
+  /** What the character has said so far in this turn: the filler, then the reply without a second copy of it. */
+  private withLead(text: string): string {
+    return this.fillerSaid ? `${this.fillerSaid} ${withoutFiller(text, this.fillerSaid)}`.trim() : text;
+  }
+
   private onSay(delta: string) {
+    if (!this.rawBot) {
+      // the model's first word: no filler is needed any more, and this is the latency the user feels
+      window.clearTimeout(this.fillerTimer);
+      if (this.fillerSaid && this.userStoppedAt) this.lastLatencyMs = Date.now() - this.userStoppedAt;
+    }
     this.rawBot += delta;
-    this.liveBot = cleanSpeech(this.rawBot);
+    this.liveBot = this.withLead(cleanSpeech(this.rawBot));
     this.sentenceBuf += delta;
-    const { sentences, rest } = takeSentences(this.sentenceBuf);
+    let { sentences, rest } = takeSentences(this.sentenceBuf);
+    if (!sentences.length && !this.firstChunkGiven) {
+      // the first clause can be spoken before the sentence is finished
+      const first = takeFirstClause(this.sentenceBuf);
+      if (first) {
+        sentences = [first.clause];
+        rest = first.rest;
+      }
+    }
     this.sentenceBuf = rest;
     for (const s of sentences) {
-      const spoken = cleanSpeech(s);
+      let spoken = cleanSpeech(s);
+      if (this.fillerSaid && !this.firstChunkGiven) spoken = withoutFiller(spoken, this.fillerSaid);
+      this.firstChunkGiven = true;
       if (spoken) this.speaker.say(spoken);
     }
     this.emit();
@@ -416,12 +472,14 @@ export class CallEngine {
 
   private onFinalReply(reply: BotReply) {
     if (this.config.provider === 'open' && reply.servedBy === 'meta' && !this.openNotice) this.openNotice = translate(this.lang, 'openFellBack');
+    window.clearTimeout(this.fillerTimer);
     this.pendingFinal = reply;
     this.mood = reply.mood;
-    const tail = cleanSpeech(this.sentenceBuf).trim();
+    let tail = cleanSpeech(this.sentenceBuf).trim();
+    if (this.fillerSaid && !this.firstChunkGiven) tail = withoutFiller(tail, this.fillerSaid);
     if (tail) this.speaker.say(tail);
     this.sentenceBuf = '';
-    this.liveBot = reply.reply;
+    this.liveBot = this.withLead(reply.reply);
     this.speaker.finish();
     this.emit();
   }
@@ -431,7 +489,7 @@ export class CallEngine {
     const reply = this.pendingFinal;
     if (!reply || this.state === 'ended') return;
     this.pendingFinal = null;
-    this.turns.push({ role: 'bot', text: reply.reply, thought: reply.thought, mood: reply.mood, at: this.now() });
+    this.turns.push({ role: 'bot', text: this.withLead(reply.reply), thought: reply.thought, mood: reply.mood, at: this.now() });
     this.liveBot = '';
     if (reply.hangup) {
       this.finish('hangup');
@@ -445,7 +503,7 @@ export class CallEngine {
       this.userStoppedAt = Date.now();
       this.turns.push({ role: 'user', text: held, at: this.now() });
       this.emit();
-      void this.botTurn();
+      void this.botTurn(undefined, held);
       return;
     }
     this.armSilence();
@@ -463,8 +521,10 @@ export class CallEngine {
     if (this.state === 'ended') return;
     // Hanging up while the character is talking: keep what it was saying in the transcript.
     if (this.state === 'speaking' || this.state === 'thinking') {
-      const text = this.pendingFinal?.reply ?? (this.speaker.spokenText || this.liveBot);
-      if (text.trim()) {
+      const text = this.pendingFinal ? this.withLead(this.pendingFinal.reply) : this.speaker.spokenText || this.liveBot;
+      // a lone "Hm." that was cut off by the hang-up is not a turn worth recording
+      const onlyFiller = !this.pendingFinal && !!this.fillerSaid && text.trim() === this.fillerSaid;
+      if (text.trim() && !onlyFiller) {
         const cut = !this.pendingFinal && text.trim() !== this.liveBot.trim();
         this.turns.push({
           role: 'bot',
@@ -484,6 +544,7 @@ export class CallEngine {
     window.clearTimeout(this.reopenTimer);
     window.clearTimeout(this.cutInTimer);
     window.clearTimeout(this.usedExpiry);
+    window.clearTimeout(this.fillerTimer);
     window.clearInterval(this.tick);
     this.endReason = reason;
     this.state = 'ended';
