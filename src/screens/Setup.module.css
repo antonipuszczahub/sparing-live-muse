@@ -60,6 +60,30 @@
   letter-spacing: -0.042em;
   text-wrap: balance;
 }
+/* a quiet line for what it runs on */
+.built {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  color: var(--lichen);
+}
+.built b {
+  margin-right: 10px;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--ink);
+}
+.built span {
+  white-space: nowrap;
+}
+.built span + span::before {
+  content: '·';
+  margin: 0 6px;
+}
 .h1 em {
   font-style: normal;
   color: var(--brass-hi);

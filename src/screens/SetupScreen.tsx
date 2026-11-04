@@ -179,6 +179,12 @@ export function SetupScreen({
               {t('heroTop')} <em>{t('heroEm')}</em>
             </h1>
             <p className={s.lead}>{t('heroLead')}</p>
+            <p className={s.built}>
+              <b>{t('builtOn')}</b>
+              {['Spark', 'Spark Open', 'Wonder', 'Voice Transcribe', 'Image', 'SAM 3.1'].map((m) => (
+                <span key={m}>{m}</span>
+              ))}
+            </p>
           </section>
 
           {(notices.length > 0 || error) && (

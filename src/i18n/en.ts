@@ -49,6 +49,7 @@ export const en = {
   userWhy: 'The character needs to know this to address you correctly.',
   heroTop: 'Rehearse the call you’re',
   heroEm: 'afraid of.',
+  builtOn: 'Built on Meta Muse',
   heroLead: 'It talks back, interrupts, and can hang up. Afterwards, you read what it was privately thinking.',
   whoSales: 'Business owner',
   whoDefense: 'Examiner',

@@ -50,6 +50,7 @@ export const pl: Dict = {
   userWhy: 'Po polsku czasowniki zależą od płci, a forma „Pan/Pani” zmienia ton rozmowy. Postać musi to wiedzieć, żeby nie pomylić się już w pierwszym zdaniu.',
   heroTop: 'Przećwicz rozmowę, której się',
   heroEm: 'boisz.',
+  builtOn: 'Na modelach Meta Muse',
   heroLead: 'Rozmówca odpowiada, przerywa i potrafi się rozłączyć. Potem czytasz, co naprawdę sobie myślał.',
   whoSales: 'Właściciel firmy',
   whoDefense: 'Egzaminator',
