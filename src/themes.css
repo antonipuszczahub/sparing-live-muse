@@ -17,7 +17,7 @@
   --paper: #101115;
   --ink: #f3f3f5;
   --ink-soft: #d4d4da;
-  --lichen: #aeb0b8;
+  --lichen: #c9cad1;
   --brass: #ff8a5c;
   --brass-hi: #f65f31;
   --line: rgba(255, 255, 255, 0.13);
@@ -27,7 +27,7 @@
   --ember: #ff5a4a;
   --bg-grad: #060709;
   --glow-a: #f65f31;
-  --glow-b: #d1162a;
+  --glow-b: #e21220;
   --glow-c: #f5bb47;
   /* the surfaces that are white glass on the light looks (the other looks leave these unset and keep their own values) */
   --glass-faint: rgba(255, 255, 255, 0.04);
@@ -69,7 +69,7 @@
   border-radius: 99px;
   filter: blur(34px);
   mix-blend-mode: screen;
-  opacity: 0.58 !important;
+  opacity: 0.78 !important;
 }
 :root[data-theme='swiatlo'] [class*='_o1_'] {
   left: -6vmax;
@@ -84,10 +84,11 @@
 }
 :root[data-theme='swiatlo'] [class*='_o2_'] {
   left: 20vmax;
+  top: -34vmax;
   width: 22vmax;
   background: linear-gradient(180deg, transparent 8%, var(--glow-c) 44%, transparent 90%);
   transform: rotate(-36deg) translate(calc(var(--px) * -64px), calc(var(--py) * -34px));
-  opacity: 0.38 !important;
+  opacity: 0.6 !important;
 }
 :root[data-theme='swiatlo'] [class*='_o3_'] {
   left: 44vmax;
@@ -106,18 +107,27 @@
   background: linear-gradient(180deg, transparent 8%, var(--glow-c) 50%, transparent 90%);
   filter: blur(34px);
   mix-blend-mode: screen;
-  opacity: 0.3;
+  opacity: 0.5;
   transform: rotate(-36deg);
 }
+/* Screens with text to read over the light (the call, the review) get a dimmer light: they are the ones that set --mood */
+:root[data-theme='swiatlo'][style*='--mood'] [class*='_orb_'] {
+  opacity: 0.46 !important;
+}
+:root[data-theme='swiatlo'][style*='--mood'] [class*='_backdrop_']::before {
+  opacity: 0.28;
+}
+/* the vignette and a veil of white film grain over the light: it is what makes the colours dusty rather than neon */
 :root[data-theme='swiatlo'] [class*='_backdrop_']::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(120% 75% at 50% 38%, transparent 30%, #060709 80%);
+  background:
+    radial-gradient(120% 70% at 50% 40%, transparent 30%, #060709 78%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 :root[data-theme='swiatlo'] [class*='_grain_'] {
-  mix-blend-mode: overlay;
-  opacity: 0.38;
+  display: none;
 }
 
 /* Maison: ivory paper, black ink, antique gold, an editorial serif, almost square corners. */

@@ -37,7 +37,13 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   addressed to a character carries `{m|f}` gender markers resolved with `gendered()` (`shared/lang.ts`). The start
   screen asks the user's gender and Pan/Pani vs ty because Polish verbs carry gender. UI text is in `src/i18n/`:
   `en.ts` defines the keys and `pl.ts` is typed with them, so a missing string does not compile.
-- **Interface.** Modelled on how Meta, Stripe and Linear look: ONE tight grotesque (Figtree, semibold, negative tracking;
+- **Interface.** The default look is **Światło** (`src/themes.css`, `data-theme='swiatlo'`): the user picked its palette
+  from seven mock-ups on 4 Nov 2026 (a Raycast-like page: near-black, blurred slanted bars of orange, amber and crimson light,
+  a veil of white film grain, dark glass cards, dark glass pills with a glow) and wanted everything else as it was: same
+  layout, same Figtree, same orange accent. Surfaces that are white glass or black ink on the light look are tokens with
+  the old value as the fallback (`var(--glass, rgba(255, 255, 255, 0.72))`): keep that pattern, so the other looks (picker in
+  "Voice and microphone"; `?theme=classic` is the earlier light look) do not change. The rest of this paragraph describes
+  the classic look. Modelled on how Meta, Stripe and Linear look: ONE tight grotesque (Figtree, semibold, negative tracking;
   never a serif or a quirky display face), a calm warm-grey page (`--canopy`) that turns to orange at the bottom with drifting pools of
   light that lean towards the pointer (`Backdrop.tsx`), black pill buttons and segmented controls, white glass cards with 24px radius,
   ONE accent (`--brass` deep orange for small text, `--brass-hi` bright orange for light and the logo; the names are historical), ink

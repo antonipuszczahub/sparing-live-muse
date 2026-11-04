@@ -1,6 +1,10 @@
-/** The looks the visitor can choose from. 'classic' is the default (no data-theme on the page). */
-export const THEMES = ['classic', 'swiatlo', 'maison', 'atelier', 'galerie'] as const;
+/**
+ * The looks the visitor can choose from. 'swiatlo' (dark, lit by bars of light) is the default; 'classic' is the earlier
+ * light look and has no data-theme on the page.
+ */
+export const THEMES = ['swiatlo', 'classic', 'maison', 'atelier', 'galerie'] as const;
 export type Theme = (typeof THEMES)[number];
+export const DEFAULT_THEME: Theme = 'swiatlo';
 
 const KEY = 'sl.theme';
 
@@ -13,9 +17,9 @@ export function initialTheme(search = typeof location === 'undefined' ? '' : loc
   const fromUrl = parseTheme(new URLSearchParams(search).get('theme'));
   if (fromUrl) return fromUrl;
   try {
-    return parseTheme(localStorage.getItem(KEY)) ?? 'classic';
+    return parseTheme(localStorage.getItem(KEY)) ?? DEFAULT_THEME;
   } catch {
-    return 'classic';
+    return DEFAULT_THEME;
   }
 }
 

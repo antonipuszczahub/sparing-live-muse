@@ -4,8 +4,8 @@
   "description": "Rehearse the conversation you are afraid of, against someone who talks back.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0e0c0a",
-  "theme_color": "#f7f4ef",
+  "background_color": "#060709",
+  "theme_color": "#060709",
   "icons": [
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },

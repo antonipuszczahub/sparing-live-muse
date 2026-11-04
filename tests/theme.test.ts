@@ -1,15 +1,17 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { initialTheme, parseTheme, THEMES } from '../src/lib/theme.ts';
+import { DEFAULT_THEME, initialTheme, parseTheme, THEMES } from '../src/lib/theme.ts';
 
 test('only the known looks are accepted, and the URL picks one', () => {
   assert.equal(parseTheme('maison'), 'maison');
   assert.equal(parseTheme('neon'), null);
   assert.equal(parseTheme(null), null);
   assert.equal(initialTheme('?theme=galerie'), 'galerie');
-  assert.equal(initialTheme('?theme=nope'), 'classic', 'an unknown value falls back to the default');
-  assert.equal(initialTheme(''), 'classic');
+  assert.equal(initialTheme('?theme=nope'), DEFAULT_THEME, 'an unknown value falls back to the default');
+  assert.equal(initialTheme(''), DEFAULT_THEME);
+  assert.equal(DEFAULT_THEME, 'swiatlo');
+  assert.equal(initialTheme('?theme=classic'), 'classic', 'the earlier light look is one link away');
 });
 
 test('every look except the default is defined in themes.css, with a name in both languages', () => {

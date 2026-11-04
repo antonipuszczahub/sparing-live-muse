@@ -3,7 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f7f4ef" />
+    <meta name="theme-color" content="#060709" />
+    <script>
+      // the look is set before the first paint, so a dark page does not flash light (same rule as src/lib/theme.ts)
+      (function () {
+        try {
+          var t = new URLSearchParams(location.search).get('theme') || localStorage.getItem('sl.theme') || 'swiatlo';
+          if (t !== 'classic') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'swiatlo');
+        }
+      })();
+    </script>
     <title>Sparing Live</title>
     <meta name="description" content="Rehearse the call you are afraid of: a real-time voice sparring partner on Meta's Muse models that interrupts you, reads your screen, shows its mood and can hang up, and afterwards shows what it was privately thinking." />
     <meta property="og:type" content="website" />
