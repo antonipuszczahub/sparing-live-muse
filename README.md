@@ -1,5 +1,7 @@
 # Sparing Live
 
+![Sparing Live: rehearse the call you are afraid of](docs/img/social.png)
+
 **Rehearse the conversation you are afraid of, against someone who talks back like a real person.**
 
 Sparing Live is a real-time voice system built on Meta's Muse models, in English and in Polish. You call a counterpart (a skeptical buyer, a thesis examiner, your manager, an investor). It listens, thinks, interrupts you, reads your shared screen, changes its face with its mood, and can hang up. Afterwards a reviewer shows you exactly where you lost them, using what the character was privately thinking.
