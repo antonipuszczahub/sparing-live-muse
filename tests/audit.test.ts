@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ensureVerdict, measureDelivery, type AuditResult } from '../shared/audit.ts';
+import { ensureVerdict, MAX_VERDICT_CHARS, measureDelivery, type AuditResult } from '../shared/audit.ts';
 
 test('delivery metrics are measured, not guessed', () => {
   const m = measureDelivery(
@@ -41,6 +41,24 @@ test('a verdict that is only the outcome word is replaced by the first sentence 
 test('a real verdict is left alone', () => {
   const r = result('Był konkret, który zadziałał, ale unik przy cenie zamknął rozmowę.', 'x');
   assert.equal(ensureVerdict(r), r);
+});
+
+test('a verdict that is a whole paragraph becomes a one-sentence headline and the rest joins the summary', () => {
+  const paragraph =
+    'You landed the one claim that mattered: two clinics already pay eight hundred a month. Then you never answered her question about recurring contracts, and she had to prompt you twice through a long silence before her mood dropped.';
+  const r = ensureVerdict(result(paragraph, 'One strong proof line warmed her up.'));
+  assert.equal(r.verdict, 'You landed the one claim that mattered: two clinics already pay eight hundred a month.');
+  assert.ok(r.verdict.length <= MAX_VERDICT_CHARS);
+  assert.equal(r.summary, 'Then you never answered her question about recurring contracts, and she had to prompt you twice through a long silence before her mood dropped. One strong proof line warmed her up.');
+});
+
+test('a single sentence that is too long for a headline is cut at a word and kept whole in the summary', () => {
+  const long = 'You '.repeat(5) + 'opened with a very long and winding sentence that goes on and on about the market, the team, the pilot and the plan without ever stopping for breath or a number the investor could check.';
+  const r = ensureVerdict(result(long, 'Short.'));
+  assert.ok(r.verdict.length <= MAX_VERDICT_CHARS);
+  assert.match(r.verdict, /…$/);
+  assert.ok(!/\s…$/.test(r.verdict), 'no space before the ellipsis');
+  assert.ok(r.summary.startsWith(long), 'the full text is not lost');
 });
 
 test('Polish speech fillers are counted by the delivery metrics', () => {

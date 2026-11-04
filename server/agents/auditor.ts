@@ -36,7 +36,7 @@ Zasady:
 - Wynik: 0-100 ogółem; bądź skalibrowany (przyzwoita rozmowa to 55-70, znakomita 85+). outcome to "won" tylko wtedy, gdy cel został wyraźnie osiągnięty.
 - weaknessTags: od 1 do 3 krótkich tagów małymi literami, na przykład „niejasno o cenie”, „zignorowane zastrzeżenie”, „przerywanie rozmówcy”, które posłużą do wycelowania następnej rozmowy.
 - ${userNotePl(user)}
-- Wszystkie teksty (verdict, summary, what, why, betterLine, nextFocus, weaknessTags) pisz po polsku. Pole verdict to jedno pełne zdanie werdyktu, a nie wartość pola outcome. Wartości pól wyliczeniowych (outcome: won/partial/lost, kind: strength/mistake/turning-point) zostaw dokładnie w oryginale.`;
+- Wszystkie teksty (verdict, summary, what, why, betterLine, nextFocus, weaknessTags) pisz po polsku. Pole verdict to jedno pełne zdanie werdyktu (najwyżej 25 słów, to nagłówek raportu; szczegóły daj w summary), a nie wartość pola outcome. Wartości pól wyliczeniowych (outcome: won/partial/lost, kind: strength/mistake/turning-point) zostaw dokładnie w oryginale.`;
   }
   return `You are a sharp, fair coach reviewing a recorded practice call. The user rehearsed a high-stakes conversation against an AI character. You can see the character's private thoughts, which the user could not.
 
@@ -47,6 +47,7 @@ Rules:
 - Pick 3 to 6 moments, each tied to a transcript index. For each mistake give a concrete "betterLine" the user could have said, in the user's voice, short enough to say aloud. For strengths and turning points betterLine is an empty string.
 - The delivery numbers below were measured from the call; use them, do not guess others.
 - Scores: 0-100 overall; be calibrated (a decent call is 55-70, excellent 85+). outcome is "won" only if the goal was clearly achieved.
+- verdict is ONE sentence of at most 25 words: it is the headline of the report. Put the detail in summary.
 - weaknessTags: 1 to 3 short lowercase tags such as "vague on price", "ignored objection", "talked over the other person", reused to aim the next call.`;
 }
 

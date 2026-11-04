@@ -24,14 +24,28 @@ export interface AuditResult {
   weaknessTags: string[];
 }
 
+/** The longest verdict that still reads as a headline (the report sets it in large type). */
+export const MAX_VERDICT_CHARS = 180;
+
+const firstSentence = (s: string) => s.trim().match(/^.+?[.!?…](?=\s|$)/s)?.[0] ?? s.trim();
+const clip = (s: string) => (s.length > MAX_VERDICT_CHARS ? `${s.slice(0, MAX_VERDICT_CHARS - 3).replace(/\s+\S*$/, '').trimEnd()}…` : s);
+
 /**
  * The verdict is one sentence for the top of the report. The model occasionally copies the outcome
- * word ("lost") into it; then the first sentence of the summary is used instead.
+ * word ("lost") into it; then the first sentence of the summary is used instead. It also sometimes writes a whole
+ * paragraph there, which would fill the screen in headline type: the first sentence stays as the verdict and the rest
+ * moves to the front of the summary, so nothing the coach said is lost.
  */
 export function ensureVerdict(result: AuditResult): AuditResult {
-  if (result.verdict.trim().split(/\s+/).filter(Boolean).length >= 3) return result;
-  const first = result.summary.trim().match(/^.+?[.!?…](?=\s|$)/s)?.[0] ?? result.summary.trim();
-  return { ...result, verdict: first.length > 160 ? `${first.slice(0, 157).trimEnd()}…` : first };
+  const verdict = result.verdict.trim();
+  if (verdict.split(/\s+/).filter(Boolean).length < 3) return { ...result, verdict: clip(firstSentence(result.summary)) };
+  if (verdict.length <= MAX_VERDICT_CHARS) return result;
+  const head = firstSentence(verdict);
+  if (head.length <= MAX_VERDICT_CHARS) {
+    const rest = verdict.slice(head.length).trim();
+    return { ...result, verdict: head, summary: [rest, result.summary.trim()].filter(Boolean).join(' ') };
+  }
+  return { ...result, verdict: clip(head), summary: [verdict, result.summary.trim()].filter(Boolean).join(' ') };
 }
 
 export const AUDIT_SCHEMA = {
