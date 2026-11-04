@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { LANG_META, LANGS } from '../../shared/lang.ts';
 import { levelDef, scenarioDef, SCENARIO_IDS } from '../../shared/scenarios.ts';
 import type { Level, ScenarioId, SessionConfig } from '../../shared/types.ts';
@@ -122,6 +122,11 @@ export function SetupScreen({
     }
   }
 
+  /** Enter in a text field places the call, like the button (not while an input method is still composing a word). */
+  function startOnEnter(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && !busy && !e.nativeEvent.isComposing) void start();
+  }
+
   // The button is drawn twice: inside the bar on wide screens, pinned to the bottom on phones.
   const cta = (
     <button type="button" className={s.cta} onClick={start} disabled={busy}>
@@ -212,14 +217,14 @@ export function SetupScreen({
                   {sc.topicLabel}
                 </span>
               </span>
-              <input className={s.in} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={sc.topicExample} />
+              <input className={s.in} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={sc.topicExample} onKeyDown={startOnEnter} />
             </label>
             {showCompany && (
               <label className={s.fld}>
                 <span className={`${ui.lbl} ${s.lbl}`}>
                   {t('twinLabel')} · {t('optional')}
                 </span>
-                <input className={s.in} value={company} onChange={(e) => setCompany(e.target.value)} placeholder={sc.twinExample} title={t('twinOptional')} />
+                <input className={s.in} value={company} onChange={(e) => setCompany(e.target.value)} placeholder={sc.twinExample} title={t('twinOptional')} onKeyDown={startOnEnter} />
               </label>
             )}
             <div className={s.fld} role="radiogroup" aria-label={t('difficulty')}>
