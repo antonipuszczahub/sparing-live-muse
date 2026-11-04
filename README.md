@@ -53,7 +53,7 @@ The conversations that decide something (a salary, a defence, a pitch, a sales c
 | `muse-wonder-1.0` | **Twin research** with live web search (Responses API); **post-call audit** (JSON schema) | twin about 30 s; audit about 13 s |
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode, language bias per call (English or Polish) | final text 0.36 s after speech ends; a Polish test sentence came back word for word |
 | `muse-image-1.0` | **Face**: one portrait plus two expression edits | first portrait in about 9 s, all three images in about 25 s, 3 cents |
-| Muse Spark Open | The character can run on **open weights**: one tick on the start screen, same protocol, served by Baseten (or Fireworks, Modal, local Ollama); `docs/MANIFEST.md` records which calls ran where, and a failing host falls back to Spark | median first word 1.2 s, 0 failures in 24 scripted calls ([`docs/EVAL.open.md`](docs/EVAL.open.md)); 540 open-weights calls in the manifest |
+| Muse Spark Open | The character can run on **open weights**: one tick on the start screen, same protocol, served by Baseten (or Fireworks, Modal, local Ollama); `docs/MANIFEST.md` records which calls ran where, and a failing host falls back to Spark | median first word 1.2 s, 0 failures in 24 scripted calls ([`docs/EVAL.open.md`](docs/EVAL.open.md)); 835 open-weights calls in the manifest |
 | Browser speech synthesis (not a model) | The character's **voice**: the OS/browser feature, chosen per character gender; see [Voice](#voice-what-is-a-meta-model-and-what-is-not) | no model call |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 

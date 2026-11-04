@@ -21,7 +21,7 @@ Every number below is measured and in the README or `docs/MANIFEST.md`. Change a
 ## X thread (3 more posts under the first)
 
 1. **How it works:** "Full duplex voice: you can talk over the character and it stops mid-sentence. Ears: Muse Voice Transcribe. Character: Muse Spark Open on Baseten (hosted Spark as fallback). Research on a real company: Muse Wonder with live web search. Face: Muse Image. Review: Wonder."
-2. **Measured, not claimed:** "First spoken word: median 1.1 s in English on hosted Spark, 1.2 s on open weights (1.6 s in Polish, which needs more tokens). 0 failed turns in 24 scripted calls per language. `npm run eval` reproduces it. Every model call is in a public ledger: 1,244 calls so far, 540 of them on open weights."
+2. **Measured, not claimed:** "First spoken word: median 1.1 s in English on hosted Spark, 1.2 s on open weights (1.6 s in Polish, which needs more tokens). 0 failed turns in 24 scripted calls per language. `npm run eval` reproduces it. Every model call is in a public ledger: 1,574 calls so far, 835 of them on open weights."
 3. **Try it:** "Open source, MIT. English and Polish (gender and Pan/Pani handled). Runs from the repo with your own Meta key: [repo]"
 
 ## X, Polish
