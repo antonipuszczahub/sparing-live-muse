@@ -117,7 +117,7 @@
 
 .chart {
   padding: clamp(18px, 2vw, 30px);
-  border-radius: 4px;
+  border-radius: 26px;
 }
 
 .two {
@@ -183,13 +183,13 @@
   position: relative;
   height: 8px;
   margin-top: 10px;
-  border-radius: 4px;
+  border-radius: 99px;
   background: rgba(27, 19, 13, 0.1);
 }
 .bar i {
   display: block;
   height: 8px;
-  border-radius: 4px;
+  border-radius: 99px;
   background: linear-gradient(90deg, #3f7a3a, var(--brass));
   box-shadow: 0 0 16px -2px rgba(194, 65, 12, 0.5);
   transform-origin: left;
@@ -381,7 +381,7 @@
   margin-top: 14px;
   padding: 20px 22px;
   border: 1px solid rgba(27, 19, 13, 0.1);
-  border-radius: 4px;
+  border-radius: 18px;
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.72), rgba(255, 252, 247, 0.82));
   backdrop-filter: blur(14px);
 }
@@ -415,7 +415,7 @@
 .say {
   margin-top: 14px;
   padding: 14px 16px;
-  border-radius: 4px;
+  border-radius: 14px;
   background: rgba(27, 19, 13, 0.06);
   color: var(--ink-soft);
   font-size: 16px;
@@ -552,7 +552,7 @@
   }
   .chart {
     padding: 20px 14px 14px;
-    border-radius: 4px;
+    border-radius: 22px;
   }
   .h2 {
     font-size: 28px;
