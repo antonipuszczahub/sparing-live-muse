@@ -261,6 +261,24 @@ app.post('/api/portraits', async (req, res) => {
   }
 });
 
+/**
+ * The neutral portrait of a call that already drew one, for the review's preview of the clip. It never starts a drawing:
+ * a session the server does not know (a restart, the recorded sample) gets a 404 and costs nothing.
+ */
+app.get('/api/portraits/:session/neutral', async (req, res) => {
+  const parsed = z.string().min(4).max(64).safeParse(req.params.session);
+  const job = parsed.success ? portraits.get(parsed.data) : undefined;
+  if (!job) {
+    res.status(404).json({ error: 'No portrait for this session' });
+    return;
+  }
+  try {
+    res.json({ neutral: await job.neutral });
+  } catch {
+    res.status(404).json({ error: 'The portrait failed' });
+  }
+});
+
 /** Which models ran a call, from the budget ledger: the review shows it as proof of what is Meta and what is open weights. */
 app.get('/api/trace/:session', (req, res) => {
   const parsed = z.string().min(4).max(64).safeParse(req.params.session);

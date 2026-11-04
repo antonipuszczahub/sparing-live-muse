@@ -7,7 +7,7 @@ import { postSSE } from '../lib/sse.ts';
 import { MetaEars, type EarsLike } from '../lib/metaEars.ts';
 import { Ears } from '../lib/stt.ts';
 import { novelWords, takeSentences } from '../lib/text.ts';
-import { EchoWatch, isBotEcho, MIN_BARGE_WORDS } from './echo.ts';
+import { EchoWatch, isBotEcho, micClosedForTurnTaking, MIN_BARGE_WORDS, TURN_TAKING_TAIL_MS } from './echo.ts';
 import { pickVoice, pitchFor, Speaker, type SpeechOut } from '../lib/tts.ts';
 
 export type CallState = 'connecting' | 'listening' | 'thinking' | 'speaking' | 'ended';
@@ -27,6 +27,8 @@ export interface CallSnapshot {
   lastLatencyMs?: number;
   /** The microphone is muted: the character does not hear the user (typing still works). */
   muted: boolean;
+  /** The character was hearing itself, so the microphone is closed while it speaks (holding the cut-in key opens it). */
+  turnTaking: boolean;
 }
 
 const SILENCE_MS = 14_000;
@@ -50,6 +52,11 @@ export class CallEngine {
   private speechStartedAt = 0;
   private lastLatencyMs?: number;
   private muted = false;
+  /** Echo was suspected: the microphone is closed while the character speaks (see micClosedForTurnTaking). */
+  private turnTaking = false;
+  /** The user holds the cut-in key, so the microphone is open even while the character speaks. */
+  private cuttingIn = false;
+  private reopenTimer: number | undefined;
 
   private ears: EarsLike;
   private speaker: SpeechOut;
@@ -133,11 +140,34 @@ export class CallEngine {
     if (this.state === 'ended' || muted === this.muted) return;
     this.muted = muted;
     this.ears.setMuted?.(muted);
+    this.applyEars();
     if (muted) {
       this.liveUser = '';
       window.clearTimeout(this.silenceTimer);
     } else if (this.state === 'listening') this.armSilence();
     this.emit();
+  }
+
+  /**
+   * Taking turns: while the character speaks the microphone is closed, and it opens again a moment after the line ends
+   * (its last words are still coming back through a mixer). The user's own mute always wins.
+   */
+  private applyEars() {
+    if (!this.turnTaking || this.state === 'ended') return;
+    window.clearTimeout(this.reopenTimer);
+    if (micClosedForTurnTaking(this.state, true, this.cuttingIn)) this.ears.setMuted?.(true);
+    else this.reopenTimer = window.setTimeout(() => this.ears.setMuted?.(this.muted), this.state === 'speaking' ? 0 : TURN_TAKING_TAIL_MS);
+  }
+
+  /** The cut-in key is held (true) or let go (false): while taking turns, holding it lets the user talk over the character. */
+  cutIn(on: boolean) {
+    if (this.cuttingIn === on) return;
+    this.cuttingIn = on;
+    this.applyEars();
+  }
+
+  get takingTurns(): boolean {
+    return this.turnTaking;
   }
 
   /** Text input fallback (also used by tests). */
@@ -157,6 +187,7 @@ export class CallEngine {
     if (this.state === 'ended') return;
     if (this.state === 'speaking' && state !== 'speaking') this.botQuietAt = Date.now();
     this.state = state;
+    this.applyEars();
     this.emit();
   }
 
@@ -172,6 +203,7 @@ export class CallEngine {
       error: [this.error, this.openNotice, this.echoNotice].filter(Boolean).join(' ') || undefined,
       lastLatencyMs: this.lastLatencyMs,
       muted: this.muted,
+      turnTaking: this.turnTaking,
     });
   }
 
@@ -202,6 +234,9 @@ export class CallEngine {
   private checkEcho() {
     if (this.echoNotice || !this.echo.suspected) return;
     this.echoNotice = translate(this.lang, 'echoHint');
+    // The fix that does not depend on the user's setup: stop listening while the character talks.
+    this.turnTaking = true;
+    this.applyEars();
     this.emit();
   }
 
@@ -348,6 +383,7 @@ export class CallEngine {
     this.speaker.cancel();
     this.ears.stop();
     window.clearTimeout(this.silenceTimer);
+    window.clearTimeout(this.reopenTimer);
     window.clearInterval(this.tick);
     this.endReason = reason;
     this.state = 'ended';

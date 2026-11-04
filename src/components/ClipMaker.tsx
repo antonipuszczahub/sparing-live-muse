@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AuditResult } from '../../shared/audit.ts';
 import { scenarioDef } from '../../shared/scenarios.ts';
 import type { Lang, Mood, Persona, ScenarioId, Turn } from '../../shared/types.ts';
@@ -45,6 +45,19 @@ export function ClipMaker({
   open?: boolean;
 }) {
   useLang();
+  // The preview shows this call's own face when the server still has it (asking costs nothing: it never draws a new one).
+  const [face, setFace] = useState('');
+  useEffect(() => {
+    if (!session) return;
+    let live = true;
+    fetch(`/api/portraits/${encodeURIComponent(session)}/neutral`)
+      .then((r) => (r.ok ? (r.json() as Promise<{ neutral?: string }>) : null))
+      .then((j) => live && j?.neutral && setFace(j.neutral))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [session]);
   const [progress, setProgress] = useState<number | null>(null);
   const [clip, setClip] = useState<(ClipResult & { url: string }) | null>(null);
   const [error, setError] = useState('');
@@ -125,7 +138,7 @@ export function ClipMaker({
       </div>
       <div className={styles.phone} style={vars({ '--c': MOOD_COLOR_ON_DARK[mood] })} aria-hidden="true">
         <div className={styles.face}>
-          <Archetype scenario={scenario} />
+          <Archetype scenario={scenario} gender={persona.gender} src={face || undefined} />
         </div>
         <div className={styles.who}>
           <b>{first}</b>

@@ -128,7 +128,12 @@ export function CallScreen({
   const gate = useRef<TalkGate | null>(null);
   useEffect(() => {
     if (!pttOn) return;
-    const g = new TalkGate((m) => engine.current?.setMuted(m));
+    // Holding the key (or the button) also opens the microphone while the character speaks, if the call is taking turns.
+    const g = new TalkGate((m) => {
+      if (!m) engine.current?.cutIn(true);
+      engine.current?.setMuted(m);
+      if (m) engine.current?.cutIn(false);
+    });
     gate.current = g;
     g.start();
     const typing = (e: KeyboardEvent) => {
@@ -155,6 +160,36 @@ export function CallScreen({
       window.removeEventListener('blur', blur);
       g.dispose();
       gate.current = null;
+    };
+  }, [pttOn, config, session]);
+
+  // Taking turns (the character heard itself, so the microphone is closed while it speaks): Space held opens it to cut in.
+  const takingTurns = useRef(false);
+  takingTurns.current = Boolean(snap?.turnTaking);
+  useEffect(() => {
+    if (pttOn) return; // push to talk already works this way
+    const typing = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      return Boolean(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable));
+    };
+    const down = (e: KeyboardEvent) => {
+      if (e.code !== 'Space' || e.ctrlKey || e.metaKey || e.altKey || typing(e) || !takingTurns.current) return;
+      e.preventDefault(); // a focused button must not be clicked by the same key
+      engine.current?.cutIn(true);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code !== 'Space') return;
+      if (takingTurns.current && !typing(e)) e.preventDefault();
+      engine.current?.cutIn(false);
+    };
+    const blur = () => engine.current?.cutIn(false);
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
     };
   }, [pttOn, config, session]);
 

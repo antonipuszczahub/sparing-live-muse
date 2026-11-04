@@ -65,7 +65,7 @@ export function Portrait({
 
   return (
     <div className={`${styles.portrait} ${speaking ? styles.talking : ''}`}>
-      <Archetype scenario={scenario} blur={!still} />
+      <Archetype scenario={scenario} gender={persona.gender} blur={!still} />
       {!still && !faces.neutral && <span className={styles.wait}>{t('drawingPortrait')}</span>}
       {(Object.keys(faces) as Face[]).map((k) => (
         <img

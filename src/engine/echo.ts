@@ -11,7 +11,19 @@ export const EARLY_BARGE_MS = 1_200;
 /** How many such signs in one call before the user is told about headphones (one deliberate quick interruption must not trigger it). */
 export const ECHO_SIGNS_BEFORE_HINT = 3;
 
+/** After its own line the character's voice is still on its way back (a mixer, a recogniser): the microphone stays closed this long. */
+export const TURN_TAKING_TAIL_MS = 700;
+
 type Phase = 'connecting' | 'listening' | 'thinking' | 'speaking' | 'ended';
+
+/**
+ * Taking turns is the fallback when the character hears itself (speakers, or a mixer such as Voicemeeter that sends its
+ * voice into the microphone): the microphone is closed while the character speaks, so its voice cannot come back as
+ * "the user". Holding the cut-in key opens it, so the user can still talk over the character on purpose.
+ */
+export function micClosedForTurnTaking(phase: Phase, takingTurns: boolean, cuttingIn: boolean): boolean {
+  return takingTurns && phase === 'speaking' && !cuttingIn;
+}
 
 /**
  * Notices when the character seems to be hearing itself (speakers instead of headphones): transcripts that were

@@ -37,6 +37,7 @@ function snapshot(turns: Turn[], mood: Mood, error?: string): CallSnapshot {
     mood,
     elapsedMs: 134000,
     muted: false,
+    turnTaking: false,
     lastLatencyMs: 1100,
   };
 }

@@ -10,6 +10,10 @@ import { recordRun } from '../lib/history.ts';
 import { recordWeakSpots } from '../lib/memory.ts';
 import { ReportView } from './ReportView.tsx';
 
+/** The reviews already asked for, by session and attempt, and the ones already written into the history. */
+const audits = new Map<string, Promise<AuditResult>>();
+const recorded = new Set<string>();
+
 /** Asks for the review of the call and shows it as it arrives. */
 export function ReportScreen({
   session,
@@ -40,11 +44,23 @@ export function ReportScreen({
 
   useEffect(() => {
     let live = true;
-    requestAudit({ session, config, turns, durationMs, hungUp, camera })
+    // One review per session and attempt: React mounts effects twice in development, and a parent that hands over a new
+    // array would start another run. Each extra run is a paid Wonder call of about fifteen seconds.
+    const key = `${session}:${attempt}`;
+    let asked = audits.get(key);
+    if (!asked) {
+      asked = requestAudit({ session, config, turns, durationMs, hungUp, camera });
+      audits.set(key, asked);
+      asked.catch(() => audits.delete(key));
+    }
+    asked
       .then((r) => {
         if (!live) return;
-        recordWeakSpots(r.weaknessTags, lang);
-        recordRun({ t: Date.now(), score: r.score, scenario: config.scenario, level: config.level }, lang);
+        if (!recorded.has(key)) {
+          recorded.add(key);
+          recordWeakSpots(r.weaknessTags, lang);
+          recordRun({ t: Date.now(), score: r.score, scenario: config.scenario, level: config.level }, lang);
+        }
         setResult(r);
         // the review is the last call of the session, so the ledger is complete now
         void requestTrace(session).then((rows) => live && setTrace(rows));

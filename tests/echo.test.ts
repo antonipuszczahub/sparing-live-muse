@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ECHO_SIGNS_BEFORE_HINT, ECHO_TAIL_MS, EARLY_BARGE_MS, EchoWatch, isBotEcho } from '../src/engine/echo.ts';
+import { ECHO_SIGNS_BEFORE_HINT, ECHO_TAIL_MS, EARLY_BARGE_MS, EchoWatch, isBotEcho, micClosedForTurnTaking, TURN_TAKING_TAIL_MS } from '../src/engine/echo.ts';
+import { ARCHETYPE_GENDER, archetypeFor } from '../src/lib/archetype.ts';
 
 const BOT = 'Six months is a trial, not a business. What happens when it ends?';
 
@@ -57,4 +58,21 @@ test('it works in Polish too', () => {
   const pl = 'Halo, jesteś tam? Połączenie jakby zamarło.';
   assert.equal(isBotEcho('listening', 300, 'halo jesteś tam połączenie jakby zamarło', pl, 'pl'), true);
   assert.equal(isBotEcho('listening', 300, 'tak jestem, mówiłem o cenie', pl, 'pl'), false);
+});
+
+test('taking turns closes the microphone only while the character speaks, and holding the cut-in key opens it', () => {
+  assert.equal(micClosedForTurnTaking('speaking', true, false), true);
+  assert.equal(micClosedForTurnTaking('speaking', true, true), false, 'the user cuts in on purpose');
+  assert.equal(micClosedForTurnTaking('speaking', false, false), false, 'until echo is suspected the microphone is never closed');
+  for (const phase of ['connecting', 'listening', 'thinking', 'ended'] as const) assert.equal(micClosedForTurnTaking(phase, true, false), false, phase);
+  assert.ok(TURN_TAKING_TAIL_MS >= 300 && TURN_TAKING_TAIL_MS <= 1500, 'a short tail: long enough for the last words, short enough to answer at once');
+});
+
+test("the stand-in photograph is of a person of the character's gender", () => {
+  for (const scenario of ['sales', 'defense', 'salary', 'pitch'] as const) {
+    for (const gender of ['m', 'f'] as const) assert.equal(ARCHETYPE_GENDER[archetypeFor(scenario, gender)], gender, `${scenario} ${gender}`);
+    assert.equal(archetypeFor(scenario, ARCHETYPE_GENDER[scenario]), scenario, 'the scenario keeps its own photograph when the gender fits');
+    assert.equal(archetypeFor(scenario), scenario, 'no gender known: the scenario photograph');
+  }
+  assert.notEqual(archetypeFor('sales', 'f'), 'sales', 'a woman in a sales call is not the man of the sales photograph');
 });

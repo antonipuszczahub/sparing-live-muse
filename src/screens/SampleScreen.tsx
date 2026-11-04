@@ -61,6 +61,7 @@ export function SampleScreen({ onExit }: { onExit: () => void }) {
     mood: mood as CallSnapshot['mood'],
     elapsedMs: line ? line.at : last.at,
     muted: false,
+    turnTaking: false,
     lastLatencyMs: line ? undefined : 1100,
   };
 

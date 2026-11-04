@@ -53,7 +53,7 @@ export function CallView(p: CallViewProps) {
     connecting: t('connecting'),
     listening: p.ptt && snap.muted ? t(matchMedia('(pointer: coarse)').matches ? 'pttIdleTouch' : 'pttIdle') : snap.muted ? t('mutedStatus') : t('listening'),
     thinking: t('thinking', first),
-    speaking: t('speaking', first),
+    speaking: snap.turnTaking && !snap.muted ? t('speakingTurns', first) : t('speaking', first),
     ended: snap.endReason === 'hangup' ? t('hungUpBy', first, persona.gender) : t('callEnded'),
   }[snap.state];
 
