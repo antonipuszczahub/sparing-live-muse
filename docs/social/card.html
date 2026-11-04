@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Social card (1280x640)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* The picture shown when the repository or the demo link is shared (GitHub: Settings, Social preview).
+     Open it through the dev server (http://localhost:5173/docs/social/card.html) and screenshot it at 1280x640. */
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    font-family: 'Figtree', system-ui, sans-serif;
+    color: #1b130d;
+    background:
+      radial-gradient(900px 420px at 0% 100%, rgba(255, 130, 60, 0.55), transparent 70%),
+      radial-gradient(700px 360px at 100% 100%, rgba(255, 150, 90, 0.5), transparent 70%),
+      linear-gradient(180deg, #fbf8f3 0%, #f7f1e8 55%, #f6d9bf 100%);
+    display: grid;
+    grid-template-columns: 1fr 470px;
+    gap: 40px;
+    padding: 64px 64px 56px 72px;
+  }
+  .left { display: flex; flex-direction: column; justify-content: space-between; }
+  .brand { display: flex; align-items: baseline; gap: 0; font-size: 42px; font-weight: 700; letter-spacing: -0.04em; }
+  .brand svg { width: 0.651em; height: 0.76em; color: #ff5a1f; margin-right: -0.13em; transform: translateY(0.038em); }
+  .brand i { font-style: normal; color: #ff5a1f; margin-left: 0.22em; }
+  h1 { font-size: 78px; line-height: 1.02; font-weight: 650; letter-spacing: -0.045em; max-width: 12ch; }
+  h1 em { font-style: normal; color: #ff5a1f; }
+  .sub { margin-top: 22px; font-size: 25px; line-height: 1.42; color: #5a5148; max-width: 31ch; }
+  .foot { display: flex; align-items: center; gap: 14px; font-size: 19px; font-weight: 600; color: #3a3028; white-space: nowrap; }
+  .pill { padding: 9px 20px; border-radius: 999px; background: #1b130d; color: #fff; font-size: 20px; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-content: center; }
+  .grid div { aspect-ratio: 1 / 1.08; border-radius: 30px; overflow: hidden; box-shadow: 0 34px 50px -30px rgba(110, 50, 15, 0.6); }
+  .grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .grid div:nth-child(2) { transform: translateY(-14px); }
+  .grid div:nth-child(3) { transform: translateY(14px); }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="brand">
+      <svg viewBox="1.5 1.5 54 63"><path d="M46 8 C32 9 20 16 16.5 29 A6 6 0 0 0 22.5 35 L47.5 31.5 C41 44 24 52 10 56.5" fill="none" stroke="currentColor" stroke-width="13" stroke-linejoin="round" stroke-linecap="round" /></svg>paring<i>Live</i>
+    </div>
+    <div>
+      <h1>Rehearse the call you’re <em>afraid of.</em></h1>
+      <p class="sub">A voice that interrupts you, reads your screen, hangs up, and shows what it was thinking.</p>
+    </div>
+    <div class="foot"><span class="pill">Built on Meta Muse</span><span>Spark Open · Wonder · Voice Transcribe · Image</span></div>
+  </div>
+  <div class="grid">
+    <div><img src="/archetypes/sales.webp" alt="" /></div>
+    <div><img src="/archetypes/defense.webp" alt="" /></div>
+    <div><img src="/archetypes/salary.webp" alt="" /></div>
+    <div><img src="/archetypes/pitch.webp" alt="" /></div>
+  </div>
+</body>
+</html>

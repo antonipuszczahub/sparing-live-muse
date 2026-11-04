@@ -2,6 +2,8 @@
 
 Most Viral counts interactions on the X post until 8 Nov end of day, so post early, with the clip. Community Vote opens 9 Nov: a post in the hackathon Discord (#build-for-your-world) brings votes. Tag the hackathon and Meta accounts yourself, I do not know their exact handles.
 
+**Pictures:** `docs/img/social.png` (1280x640) is the card for the post and for the repository: on GitHub, Settings, General, Social preview, Upload an image, so that a pasted repository link shows it. `docs/social/card.html` is its source.
+
 Every number below is measured and in the README or `docs/MANIFEST.md`. Change a number only if you re-measure it.
 
 ## X, English (one post, attach the clip from the review screen)
