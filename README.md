@@ -8,6 +8,20 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 
 > Built for the Meta Global AI Developer Hackathon (26 Oct – 4 Nov 2026). Everything in this repository was written during the hackathon. An earlier Polish prototype on a local model existed before; this is a from-scratch rebuild on the Meta Model API, in English.
 
+## What it looks like
+
+![The start screen: four counterparts, a difficulty, and the Demo setup button](docs/img/start.jpg)
+
+*Start screen. Pick a counterpart (the portraits are Muse Image output), a difficulty, optionally a real company to research. "Demo setup" fills in an investor pitch in one click.*
+
+![A call in progress: the counterpart's face, live captions, mood meter, and the call controls](docs/img/call.jpg)
+
+*The call. The face is drawn by Muse Image and follows the character's mood (here: hostile). The shared-screen note, camera, and hang-up are in the dock; talking over the character stops it mid-sentence.*
+
+![The review: score, the mood curve of the call with the two turning points, measured speech facts and skills](docs/img/review.jpg)
+
+*The review. The curve is the character's private mood across the call; points A and B mark key moments (a strength and a mistake) that the review explains further down, where the replay shows the character's private thought on every turn. The call and review screens above were captured from the app's built-in sample call (`/?fx=call`, `/?fx=report`, development server only), so no model had to be paid for a screenshot; the portrait is a real Muse Image render.*
+
 ## What makes it different
 
 | | |
