@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Cast</title>
+<body style="margin:0;background:#0b0b0e">
+<canvas id="c" width="1500" height="520"></canvas>
+<script type="module">
+import { drawPerson, CAST } from './cast.js';
+const c = document.getElementById('c').getContext('2d');
+const ids = Object.keys(CAST);
+const q = new URLSearchParams(location.search);
+const mouth = Number(q.get('m') ?? 0.5);
+ids.forEach((id, i) => {
+  c.save();
+  c.translate(150 + i * 300, 330);
+  c.scale(0.95, 0.95);
+  c.beginPath(); c.rect(-140, -330, 280, 460); c.clip();
+  c.fillStyle = '#181a20'; c.fillRect(-150, -340, 300, 480);
+  drawPerson(c, CAST[id], { mouth: i % 2 ? mouth : 0, mood: i === 3 ? -0.3 : 0.4, gesture: id === 'antoni' ? 0.8 : 0 });
+  c.restore();
+});
+</script>

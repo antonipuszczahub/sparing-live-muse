@@ -1,0 +1,20 @@
+[
+  { "id": "a01", "who": "antoni", "text": "Hi, I’m Antoni. I had a small Polish prototype before the hackathon. Everything you’ll see here was built during it, on Meta’s Muse models." },
+  { "id": "a02", "who": "antoni", "text": "Some conversations you only get one shot at. A pitch. A thesis defence. A salary talk. A cold call." },
+  { "id": "c01", "who": "elena", "text": "Forty billion is the whole pie. What is your monthly revenue?" },
+  { "id": "c02", "who": "weber", "text": "Who actually wrote this section?" },
+  { "id": "c03", "who": "marta", "text": "I have two minutes. Why should I give you a raise?" },
+  { "id": "c04", "who": "tom", "text": "Honestly, why would I trust you with this?" },
+  { "id": "a03", "who": "antoni", "text": "And nobody wants to be your sparring partner at midnight. So I built one." },
+  { "id": "a04", "who": "antoni", "text": "Sparing Live. You call them. They listen, they interrupt you, they read your shared screen, and their face shows their mood. They can hang up. And afterwards, a reviewer shows you what they were privately thinking." },
+  { "id": "a05", "who": "antoni", "text": "This is not a chat window. It is a full-duplex voice loop with barge-in, specialised agents, and a hidden state you only see in the review." },
+  { "id": "a06", "who": "antoni", "text": "This is the real app. I press Demo, it fills in a call to a seed-stage investor, and I place the call. In this recording I typed my side, with the sound off. With a headset, you just talk." },
+  { "id": "a07a", "who": "antoni", "text": "She answers in about a second, on Muse Spark Open, served by Baseten." },
+  { "id": "a07b", "who": "antoni", "text": "She goes straight for my weakest line: the market size, with no customers behind it." },
+  { "id": "a07c", "who": "antoni", "text": "Then I give her real numbers: three paying customers, two renewals. Her mood turns, and she agrees to a second meeting." },
+  { "id": "a08", "who": "antoni", "text": "When I hang up, Muse Wonder reviews the call. A score, her attitude over time, and what to fix next." },
+  { "id": "a09", "who": "antoni", "text": "And the app shows which Meta model ran each step of this exact call, straight from its own budget ledger." },
+  { "id": "a10", "who": "antoni", "text": "The replay puts her private thoughts next to my words, so I can see the exact sentence where I lost her." },
+  { "id": "a11", "who": "antoni", "text": "Under the hood, Voice Transcribe hears me, Muse Spark Open plays the character, Wonder researches the company and writes the review, and Muse Image draws the face. On the same scripted calls, open weights answered in about a second. Hosted Spark took two and a half, the day I measured. No failed turns. No repeats." },
+  { "id": "a12", "who": "antoni", "text": "It runs in English and Polish, it is open source under MIT, and the repo has run instructions for Windows, Mac and Linux. Thanks for watching." }
+]

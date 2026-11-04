@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sparing Live: the film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; height: 100%; background: #050506; color: #eee; font-family: Figtree, system-ui, sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { display: block; width: min(100vw, 177.78vh); height: auto; aspect-ratio: 16 / 9; }
+  #ui { position: fixed; left: 12px; top: 12px; display: flex; gap: 8px; align-items: center; z-index: 2; }
+  #ui button { font: 600 14px Figtree, system-ui, sans-serif; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(20,20,24,.85); color: #fff; cursor: pointer; }
+  #ui button:hover { background: rgba(60,60,70,.9); }
+  #status { font-size: 13px; color: #bbb; background: rgba(0,0,0,.5); padding: 6px 10px; border-radius: 8px; }
+  .clean #ui { display: none; }
+  video { display: none; }
+</style>
+</head>
+<body>
+<canvas id="stage" width="1280" height="720"></canvas>
+<div id="ui">
+  <button id="play">Play (with sound)</button>
+  <button id="render">Render video (WebM)</button>
+  <span id="status">loading…</span>
+</div>
+<script type="module">
+import { drawPerson, CAST, shade } from './cast.js';
+
+const W = 1280, H = 720;
+const q = new URLSearchParams(location.search);
+if (q.has('clean')) document.body.classList.add('clean');
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+const statusEl = document.getElementById('status');
+const say = (s) => (statusEl.textContent = s);
+
+const ORANGE = '#f65f31';
+const ORANGE_SOFT = '#ff8a5c';
+const S_PATH = 'M46 8 C32 9 20 16 16.5 29 A6 6 0 0 0 22.5 35 L47.5 31.5 C41 44 24 52 10 56.5';
+const voiceDir = q.get('voice') || 'voice';
+
+/* ------------------------------------------------------------------ script */
+
+const CLIPS = { k1: 'Real app, recorded on localhost', k2a: 'Live call: Muse Spark Open on Baseten (typed, sound off)', k2b: 'Live call: she goes for the market claim', k2c: 'Live call: her mood turns', k3: 'The review, written by Muse Wonder', k4: 'The Meta models that ran this exact call', k5: 'The replay: her private thoughts next to my words' };
+
+const SCRIPT = [
+  { kind: 'title', dur: 3.4, scene: 'title' },
+  { line: 'a01', scene: 'intro', layout: 'solo' },
+  { line: 'a02', scene: 'intro', layout: 'solo', chips: true },
+  { line: 'c01', scene: 'cast', layout: 'split', who: 'elena' },
+  { line: 'c02', scene: 'cast', layout: 'split', who: 'weber' },
+  { line: 'c03', scene: 'cast', layout: 'split', who: 'marta' },
+  { line: 'c04', scene: 'cast', layout: 'split', who: 'tom' },
+  { line: 'a03', scene: 'cast', layout: 'split' },
+  { line: 'a04', scene: 'idea', layout: 'split', pills: true },
+  { line: 'a05', scene: 'idea', layout: 'split', pillars: true },
+  { line: 'a06', scene: 'app', layout: 'pip', clip: 'k1' },
+  { line: 'a07a', scene: 'app', layout: 'pip', clip: 'k2a', gap: 0.1 },
+  { line: 'a07b', scene: 'app', layout: 'pip', clip: 'k2b', gap: 0.1 },
+  { line: 'a07c', scene: 'app', layout: 'pip', clip: 'k2c', gap: 0.1 },
+  { line: 'a08', scene: 'app', layout: 'pip', clip: 'k3', gap: 0.1 },
+  { line: 'a09', scene: 'app', layout: 'pip', clip: 'k4', gap: 0.1 },
+  { line: 'a10', scene: 'app', layout: 'pip', clip: 'k5', gap: 0.1 },
+  { line: 'a11', scene: 'stack', layout: 'pip' },
+  { line: 'a12', scene: 'end', layout: 'split', gap: 0.5, tail: 2.6 },
+];
+
+// where Antoni's window sits for each layout (the window morphs between them)
+const LAYOUT = {
+  solo: { cx: 640, cy: 322, w: 470, h: 560, r: 44, s: 1.3, n: 0.82 },
+  split: { cx: 304, cy: 332, w: 440, h: 560, r: 40, s: 1.24, n: 0.82 },
+  pip: { cx: 1156, cy: 590, w: 188, h: 188, r: 94, s: 0.62, n: 1.0 },
+};
+const TILES = [
+  { id: 'elena', x: 596, y: 52 },
+  { id: 'weber', x: 920, y: 52 },
+  { id: 'marta', x: 596, y: 316 },
+  { id: 'tom', x: 920, y: 316 },
+];
+
+/* ------------------------------------------------------------------ helpers */
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = (x) => { x = clamp(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const lerp = (a, b, p) => a + (b - a) * p;
+const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+
+function rr(c, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function glass(c, x, y, w, h, r, { alpha = 1, edge = 0.14, fill = 0.07 } = {}) {
+  c.save();
+  c.globalAlpha *= alpha;
+  rr(c, x, y, w, h, r);
+  c.fillStyle = `rgba(255,255,255,${fill})`;
+  c.fill();
+  c.lineWidth = 1.5;
+  c.strokeStyle = `rgba(255,255,255,${edge})`;
+  c.stroke();
+  c.restore();
+}
+
+/* ------------------------------------------------------------------ assets */
+
+let actx;
+const lines = await (await fetch('lines.json')).json();
+const byId = Object.fromEntries(lines.map((l) => [l.id, l]));
+const clips = {};
+
+async function loadAudio(ctxA) {
+  for (const l of lines) {
+    const buf = await (await fetch(`${voiceDir}/${l.id}.wav?v=${Date.now()}`)).arrayBuffer();
+    l.buffer = await ctxA.decodeAudioData(buf);
+    l.dur = l.buffer.duration;
+    // a mouth-opening envelope at 60 Hz: loudness, then a fast-attack, slow-release smoothing
+    const d = l.buffer.getChannelData(0);
+    const step = Math.floor(l.buffer.sampleRate / 60);
+    const rms = [];
+    for (let i = 0; i + step <= d.length; i += step) {
+      let s = 0;
+      for (let k = 0; k < step; k++) s += d[i + k] * d[i + k];
+      rms.push(Math.sqrt(s / step));
+    }
+    const sorted = [...rms].sort((a, b) => a - b);
+    const ref = sorted[Math.floor(sorted.length * 0.92)] || 1;
+    let cur = 0;
+    l.env = rms.map((v) => {
+      const target = clamp((v / ref) * 1.05);
+      cur += (target - cur) * (target > cur ? 0.7 : 0.3);
+      return cur < 0.08 ? 0 : cur;
+    });
+  }
+}
+
+function loadClip(name) {
+  return new Promise((res) => {
+    const v = document.createElement('video');
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.src = `clips/${name}.webm`;
+    v.addEventListener('loadeddata', () => res(v), { once: true });
+    v.addEventListener('error', () => res(null), { once: true });
+    document.body.appendChild(v);
+    clips[name] = v;
+  });
+}
+
+/* ------------------------------------------------------------------ timeline */
+
+let BEATS = [];
+let TOTAL = 0;
+function buildTimeline() {
+  let t = 0;
+  BEATS = SCRIPT.map((b) => {
+    const gap = b.gap ?? 0.35;
+    const L = b.line ? byId[b.line] : null;
+    const dur = b.dur ?? gap + L.dur + (b.tail ?? 0.3);
+    const beat = { ...b, t0: t, t1: t + dur, audioAt: b.line ? t + gap : null, L };
+    t += dur;
+    return beat;
+  });
+  TOTAL = t;
+  // scene intervals
+  const sc = {};
+  for (const b of BEATS) {
+    sc[b.scene] ??= { s0: b.t0, s1: b.t1 };
+    sc[b.scene].s1 = b.t1;
+  }
+  BEATS.scenes = sc;
+  // clip speed so that the clip fills its line
+  for (const b of BEATS) {
+    if (b.clip && clips[b.clip]) {
+      const span = b.t1 - b.t0 - 0.25;
+      b.rate = clamp(clips[b.clip].duration / span, 0.5, 6);
+    }
+  }
+}
+
+function beatAt(t) {
+  for (let i = 0; i < BEATS.length; i++) if (t < BEATS[i].t1) return i;
+  return BEATS.length - 1;
+}
+
+/* ------------------------------------------------------------------ background */
+
+const grain = document.createElement('canvas');
+grain.width = grain.height = 256;
+{
+  const g = grain.getContext('2d');
+  const img = g.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = Math.random() * 255;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+}
+function bar(color, w = 1000, h = 190) {
+  const c = document.createElement('canvas');
+  c.width = w + 300;
+  c.height = h + 300;
+  const g = c.getContext('2d');
+  g.filter = 'blur(60px)';
+  g.fillStyle = color;
+  rr(g, 150, 150, w, h, h / 2);
+  g.fill();
+  return c;
+}
+let bars;
+function initBars() {
+  bars = [
+    { s: bar('rgba(255,112,40,0.78)'), x: 520, y: 150, ph: 0.0, rot: -0.42 },
+    { s: bar('rgba(255,176,60,0.55)', 800, 150), x: 880, y: 330, ph: 1.7, rot: -0.38 },
+    { s: bar('rgba(214,52,72,0.7)', 1100, 220), x: 380, y: 560, ph: 3.1, rot: -0.46 },
+    { s: bar('rgba(255,90,40,0.45)', 700, 130), x: 1000, y: 40, ph: 4.4, rot: -0.4 },
+  ];
+}
+function background(c, t) {
+  c.fillStyle = '#07080a';
+  c.fillRect(0, 0, W, H);
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (const b of bars) {
+    c.save();
+    c.translate(b.x + Math.sin(t * 0.21 + b.ph) * 90, b.y + Math.cos(t * 0.17 + b.ph) * 50);
+    c.rotate(b.rot + Math.sin(t * 0.13 + b.ph) * 0.05);
+    c.globalAlpha = 0.5;
+    c.drawImage(b.s, -b.s.width / 2, -b.s.height / 2);
+    c.restore();
+  }
+  c.restore();
+  // a dark veil so the light stays behind the content
+  const grd = c.createLinearGradient(0, 0, 0, H);
+  grd.addColorStop(0, 'rgba(5,6,8,0.78)');
+  grd.addColorStop(0.55, 'rgba(5,6,8,0.5)');
+  grd.addColorStop(1, 'rgba(5,6,8,0.8)');
+  c.fillStyle = grd;
+  c.fillRect(0, 0, W, H);
+  // film grain
+  c.save();
+  c.globalAlpha = 0.07;
+  c.globalCompositeOperation = 'overlay';
+  const ox = Math.floor(hash(Math.floor(t * 24)) * 256);
+  const oy = Math.floor(hash(Math.floor(t * 24) + 9) * 256);
+  for (let x = -ox; x < W; x += 256) for (let y = -oy; y < H; y += 256) c.drawImage(grain, x, y);
+  c.restore();
+}
+
+/* ------------------------------------------------------------------ people */
+
+function envAt(L, local) {
+  if (!L || local < 0 || local > L.dur) return 0;
+  const f = local * 60;
+  const i = Math.floor(f);
+  const a = L.env[i] ?? 0;
+  const b = L.env[i + 1] ?? a;
+  return lerp(a, b, f - i);
+}
+
+function activeLine(t, who) {
+  for (const b of BEATS) if (b.L && b.L.who === who && t >= b.audioAt && t <= b.audioAt + b.L.dur) return { L: b.L, local: t - b.audioAt, beat: b };
+  return null;
+}
+
+const PHASE = { antoni: 0.3, elena: 1.9, weber: 3.4, marta: 5.1, tom: 6.6 };
+function personState(id, t, extra = {}) {
+  const ph = PHASE[id] ?? 0;
+  const act = activeLine(t, id);
+  const env = act ? envAt(act.L, act.local) : 0;
+  const talking = act ? 1 : 0;
+  // blinks: one every ~3 s, at an irregular moment, lasting ~0.16 s
+  const k = Math.floor((t + ph) / 3.1);
+  const tb = k * 3.1 - ph + 0.5 + hash(k + ph * 7) * 2;
+  const dt = t - tb;
+  const blink = dt > 0 && dt < 0.17 ? 1 - Math.abs(dt - 0.085) / 0.085 : 0;
+  // gestures follow the energy of the speech, in slow swells
+  let gesture = 0;
+  if (act) {
+    const swell = 0.5 + 0.5 * Math.sin(act.local * 2.1 + ph);
+    gesture = clamp(swell * 1.15 - 0.2) * clamp(act.local / 0.6) * clamp((act.L.dur - act.local) / 0.5);
+  }
+  return {
+    mouth: env * 0.82,
+    mood: extra.mood ?? (talking ? 0.35 + env * 0.25 : 0.18),
+    blink,
+    look: { x: Math.sin(t * 0.55 + ph) * 0.45 + (extra.lookX ?? 0), y: Math.sin(t * 0.37 + ph) * 0.25 },
+    tilt: Math.sin(t * 0.9 + ph) * 0.014 + talking * Math.sin(t * 2.7 + ph) * 0.03 * (0.4 + env),
+    bob: Math.sin(t * 1.6 + ph) * 2 + talking * Math.sin(t * 7 + ph) * 1.2 * env,
+    gesture: id === 'antoni' ? gesture * 0.85 : 0,
+    brow: clamp((talking ? 0.35 : 0.05) + env * 0.5),
+  };
+}
+
+function drawPersonIn(c, id, t, box, scale, extra) {
+  c.save();
+  rr(c, box.x, box.y, box.w, box.h, box.r);
+  c.clip();
+  c.translate(box.x + box.w / 2, box.y + box.h * (box.neck ?? 0.76));
+  c.scale(scale, scale);
+  drawPerson(c, CAST[id], personState(id, t, extra));
+  c.restore();
+}
+
+/* ------------------------------------------------------------------ scenes */
+
+function sceneAlpha(name, t) {
+  const s = BEATS.scenes[name];
+  if (!s) return 0;
+  return clamp((t - s.s0) / 0.45 + 0.0) * clamp((s.s1 - t) / 0.45 + 0.0);
+}
+
+function textBlock(c, text, x, y, { size = 30, weight = 700, color = '#fff', align = 'left', alpha = 1, font = 'Figtree' } = {}) {
+  c.save();
+  c.globalAlpha *= alpha;
+  c.font = `${weight} ${size}px ${font}, system-ui, sans-serif`;
+  c.fillStyle = color;
+  c.textAlign = align;
+  c.textBaseline = 'alphabetic';
+  c.fillText(text, x, y);
+  c.restore();
+}
+
+function pill(c, text, x, y, p, { size = 26, fill = 'rgba(255,255,255,0.09)', color = '#fff', accent = ORANGE_SOFT, h = 58, icon = true } = {}) {
+  if (p <= 0) return;
+  const e = easeOut(p);
+  c.save();
+  c.font = `700 ${size}px Figtree, system-ui, sans-serif`;
+  const tw = c.measureText(text).width;
+  const w = tw + 70;
+  c.translate(x, y + (1 - e) * 22);
+  c.globalAlpha *= e;
+  c.shadowColor = 'rgba(255,110,50,0.35)';
+  c.shadowBlur = 26;
+  rr(c, 0, 0, w, h, h / 2);
+  c.fillStyle = fill;
+  c.fill();
+  c.shadowBlur = 0;
+  c.lineWidth = 1.5;
+  c.strokeStyle = 'rgba(255,255,255,0.18)';
+  c.stroke();
+  if (icon) {
+    c.beginPath();
+    c.arc(30, h / 2, 7, 0, Math.PI * 2);
+    c.fillStyle = accent;
+    c.fill();
+  }
+  c.fillStyle = color;
+  c.textBaseline = 'middle';
+  c.fillText(text, icon ? 52 : 28, h / 2 + 1);
+  c.restore();
+  return w;
+}
+
+function drawLogo(c, x, y, scale, draw = 1) {
+  c.save();
+  c.translate(x, y);
+  c.scale(scale, scale);
+  c.lineCap = 'round';
+  c.lineJoin = 'round';
+  c.lineWidth = 13;
+  c.strokeStyle = ORANGE;
+  c.setLineDash([210, 210]);
+  c.lineDashOffset = 210 * (1 - clamp(draw));
+  c.stroke(new Path2D(S_PATH));
+  c.restore();
+}
+
+function sceneTitle(c, t, a) {
+  const s = BEATS.scenes.title;
+  const lt = t - s.s0;
+  c.save();
+  c.globalAlpha = a;
+  drawLogo(c, 236, 252, 2.9, easeOut(lt / 0.9));
+  textBlock(c, 'paring Live', 392, 392, { size: 118, weight: 800, alpha: easeOut((lt - 0.5) / 0.6), color: '#f4f4f6' });
+  textBlock(c, 'Rehearse the call you’re afraid of.', 640, 478, { size: 38, weight: 600, align: 'center', color: '#ff9a72', alpha: easeOut((lt - 1.1) / 0.6) });
+  textBlock(c, 'Built on Meta Muse · Meta Global AI Developer Hackathon', 640, 560, { size: 22, weight: 500, align: 'center', color: 'rgba(255,255,255,0.62)', alpha: easeOut((lt - 1.8) / 0.6) });
+  c.restore();
+}
+
+function sceneIntro(c, t, a, beat) {
+  const b = BEATS.find((x) => x.chips);
+  if (!b) return;
+  const f = clamp((t - b.audioAt) / b.L.dur);
+  const items = [['A pitch', 0.3], ['A thesis defence', 0.46], ['A salary talk', 0.64], ['A cold call', 0.82]];
+  c.save();
+  c.globalAlpha = a;
+  items.forEach(([txt, at], i) => {
+    const p = clamp((f - at) / 0.12);
+    const side = i % 2 ? 1 : -1;
+    pill(c, txt, side > 0 ? 930 : 70, 150 + i * 120, p, { size: 28, h: 64 });
+  });
+  c.restore();
+}
+
+function sceneCast(c, t, a) {
+  const s = BEATS.scenes.cast;
+  c.save();
+  c.globalAlpha = a;
+  const speaker = BEATS.find((b) => b.who && t >= b.audioAt - 0.05 && t <= b.audioAt + b.L.dur + 0.25)?.who;
+  TILES.forEach((tile, i) => {
+    const cast = CAST[tile.id];
+    const inP = easeOut((t - s.s0 - 0.12 * i) / 0.6);
+    const on = speaker === tile.id;
+    const lift = on ? -8 : 0;
+    const x = tile.x;
+    const y = tile.y + lift + (1 - inP) * 40;
+    c.save();
+    c.globalAlpha *= inP;
+    if (on) {
+      c.shadowColor = 'rgba(255,110,50,0.55)';
+      c.shadowBlur = 50;
+    }
+    rr(c, x, y, 304, 252, 30);
+    c.fillStyle = on ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)';
+    c.fill();
+    c.shadowBlur = 0;
+    c.lineWidth = on ? 3 : 1.5;
+    c.strokeStyle = on ? ORANGE : 'rgba(255,255,255,0.14)';
+    c.stroke();
+    drawPersonIn(c, tile.id, t, { x: x + 4, y: y + 4, w: 296, h: 244, r: 27, neck: 0.8 }, 0.68, { lookX: speaker && speaker !== tile.id ? 0.2 : 0, mood: on ? undefined : 0.05 });
+    // name tag
+    c.font = '700 20px Figtree, system-ui, sans-serif';
+    const tw = c.measureText(cast.name).width;
+    rr(c, x + 14, y + 198, tw + 28, 38, 19);
+    c.fillStyle = 'rgba(8,8,10,0.78)';
+    c.fill();
+    c.fillStyle = '#fff';
+    c.textBaseline = 'middle';
+    c.fillText(cast.name, x + 28, y + 218);
+    c.restore();
+  });
+  c.restore();
+}
+
+function sceneIdea(c, t, a) {
+  const bPills = BEATS.find((x) => x.pills);
+  const bPillars = BEATS.find((x) => x.pillars);
+  c.save();
+  c.globalAlpha = a;
+  const X = 590;
+  const P = [
+    ['Interrupts you', 0.2], ['Reads your shared screen', 0.3], ['Its face shows its mood', 0.42], ['Can hang up', 0.55], ['Private thoughts, shown in the review', 0.7],
+  ];
+  const f1 = clamp((t - bPills.audioAt) / bPills.L.dur);
+  const out = 1 - clamp((t - bPills.t1 + 0.1) / 0.5);
+  textBlock(c, 'You call them.', X, 110, { size: 54, weight: 800, alpha: easeOut((t - bPills.t0) / 0.5) * out });
+  P.forEach(([txt, at], i) => pill(c, txt, X, 150 + i * 82, clamp((f1 - at) / 0.1) * out, { size: 28, h: 62 }));
+  const f2 = clamp((t - bPillars.audioAt) / bPillars.L.dur);
+  const PL = [
+    ['Full-duplex voice loop', 'barge-in: talk over it and it stops mid-sentence', 0.1],
+    ['Specialised agents', 'character, researcher, screen reader, reviewer', 0.45],
+    ['A hidden state', 'what it thinks is only shown afterwards', 0.74],
+  ];
+  const inn = clamp((t - bPillars.t0) / 0.5);
+  PL.forEach(([h, sub, at], i) => {
+    const p = easeOut(clamp((f2 - at) / 0.12));
+    if (p <= 0) return;
+    c.save();
+    c.globalAlpha *= p * inn;
+    const y = 120 + i * 170 + (1 - p) * 24;
+    glass(c, X, y, 640, 140, 30, { fill: 0.08 });
+    c.beginPath();
+    c.arc(X + 44, y + 70, 9, 0, Math.PI * 2);
+    c.fillStyle = ORANGE;
+    c.fill();
+    textBlock(c, h, X + 76, y + 64, { size: 34, weight: 800 });
+    textBlock(c, sub, X + 76, y + 104, { size: 22, weight: 500, color: 'rgba(255,255,255,0.7)' });
+    c.restore();
+  });
+  c.restore();
+}
+
+function sceneApp(c, t, a, beat) {
+  const b = beat.clip ? beat : BEATS.find((x) => x.clip && t >= x.t0 && t < x.t1) ?? beat;
+  const v = clips[b.clip];
+  c.save();
+  c.globalAlpha = a;
+  const x = 40, y = 30, w = 1000, h = 562;
+  c.save();
+  c.shadowColor = 'rgba(255,110,50,0.28)';
+  c.shadowBlur = 70;
+  rr(c, x, y, w, h, 26);
+  c.fillStyle = '#0b0b0e';
+  c.fill();
+  c.restore();
+  if (v && v.readyState >= 2) {
+    c.save();
+    rr(c, x, y, w, h, 26);
+    c.clip();
+    c.drawImage(v, x, y, w, h);
+    c.restore();
+  }
+  c.lineWidth = 1.5;
+  c.strokeStyle = 'rgba(255,255,255,0.16)';
+  rr(c, x, y, w, h, 26);
+  c.stroke();
+  // what we are looking at
+  const chipP = easeOut((t - b.t0 - 0.1) / 0.4);
+  c.save();
+  c.globalAlpha *= chipP;
+  c.font = '700 20px Figtree, system-ui, sans-serif';
+  const label = CLIPS[b.clip];
+  const tw = c.measureText(label).width;
+  rr(c, x + 18, y + 16, tw + 54, 40, 20);
+  c.fillStyle = 'rgba(8,8,10,0.82)';
+  c.fill();
+  c.beginPath();
+  c.arc(x + 38, y + 36, 6, 0, Math.PI * 2);
+  c.fillStyle = ORANGE;
+  c.fill();
+  c.fillStyle = '#fff';
+  c.textBaseline = 'middle';
+  c.fillText(label, x + 54, y + 37);
+  c.restore();
+  // where we are in the demo
+  const STEPS = ['Demo', 'Call', 'Review', 'Models', 'Replay'];
+  const at = { k1: 0, k2a: 1, k2b: 1, k2c: 1, k3: 2, k4: 3, k5: 4 }[b.clip];
+  STEPS.forEach((name, i) => {
+    const on = i === at;
+    const yy = 52 + i * 64;
+    c.save();
+    c.globalAlpha *= 0.55 + (on ? 0.45 : 0);
+    rr(c, 1066, yy, 176, 46, 23);
+    c.fillStyle = on ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.05)';
+    c.fill();
+    c.lineWidth = on ? 2.5 : 1.2;
+    c.strokeStyle = on ? ORANGE : 'rgba(255,255,255,0.14)';
+    c.stroke();
+    c.beginPath();
+    c.arc(1090, yy + 23, 7, 0, Math.PI * 2);
+    c.fillStyle = on ? ORANGE : i < at ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.28)';
+    c.fill();
+    c.fillStyle = '#fff';
+    c.font = `${on ? 800 : 600} 21px Figtree, system-ui, sans-serif`;
+    c.textBaseline = 'middle';
+    c.fillText(name, 1110, yy + 24);
+    c.restore();
+  });
+  c.restore();
+}
+
+function sceneStack(c, t, a) {
+  const b = BEATS.find((x) => x.scene === 'stack');
+  const f = clamp((t - b.audioAt) / b.L.dur);
+  c.save();
+  c.globalAlpha = a;
+  textBlock(c, 'What ran this call', 60, 92, { size: 46, weight: 800, alpha: easeOut((t - b.t0) / 0.5) });
+  const rows = [
+    ['Voice Transcribe', 'hears me, in English and Polish', 0.1, 0.22],
+    ['Muse Spark Open', 'plays the character: reply, thought, mood, hang-up', 0.22, 0.4],
+    ['Muse Wonder', 'researches the company, writes the review', 0.4, 0.62],
+    ['Muse Image', 'draws her face and its expressions', 0.62, 0.74],
+    ['Budget ledger', 'every call logged, priced and capped', 0.88, 1.01],
+  ];
+  rows.forEach(([name, role, s0, s1], i) => {
+    const p = easeOut((f - (s0 - 0.04)) / 0.08);
+    const on = f >= s0 && f < s1;
+    const y = 130 + i * 92;
+    c.save();
+    c.globalAlpha *= clamp(p * 1.4 + 0.18);
+    c.translate((1 - easeOut(p)) * -30, 0);
+    c.shadowColor = on ? 'rgba(255,110,50,0.5)' : 'transparent';
+    c.shadowBlur = on ? 34 : 0;
+    rr(c, 60, y, 700, 76, 38);
+    c.fillStyle = on ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.055)';
+    c.fill();
+    c.shadowBlur = 0;
+    c.lineWidth = on ? 2.5 : 1.5;
+    c.strokeStyle = on ? ORANGE : 'rgba(255,255,255,0.14)';
+    c.stroke();
+    c.beginPath();
+    c.arc(98, y + 38, 9, 0, Math.PI * 2);
+    c.fillStyle = on ? ORANGE : 'rgba(255,255,255,0.35)';
+    c.fill();
+    textBlock(c, name, 128, y + 36, { size: 30, weight: 800 });
+    textBlock(c, role, 128, y + 62, { size: 19, weight: 500, color: 'rgba(255,255,255,0.68)' });
+    c.restore();
+  });
+  const cards = [
+    ['1.1 s', 'median first spoken word on open weights', 0.62],
+    ['2.5 s', 'hosted Spark, same prompts, the day I measured', 0.74],
+    ['0', 'failed turns and repeats in 24 scripted calls', 0.86],
+  ];
+  cards.forEach(([big, small, at], i) => {
+    const p = easeOut((f - at) / 0.1);
+    if (p <= 0) return;
+    c.save();
+    c.globalAlpha *= p;
+    const x = 800, y = 120 + i * 118 + (1 - p) * 20;
+    glass(c, x, y, 440, 100, 26, { fill: 0.08 });
+    textBlock(c, big, x + 26, y + 66, { size: 54, weight: 800, color: i === 1 ? 'rgba(255,255,255,0.8)' : ORANGE_SOFT });
+    c.save();
+    c.font = '600 19px Figtree, system-ui, sans-serif';
+    c.fillStyle = 'rgba(255,255,255,0.86)';
+    const words = small.split(' ');
+    let line = '';
+    let ly = y + 40;
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w;
+      if (c.measureText(test).width > 255 && line) {
+        c.fillText(line, x + 160, ly);
+        line = w;
+        ly += 24;
+      } else line = test;
+    }
+    c.fillText(line, x + 160, ly);
+    c.restore();
+    c.restore();
+  });
+  c.restore();
+}
+
+function sceneEnd(c, t, a) {
+  const b = BEATS.scenes.end;
+  const lt = t - b.s0;
+  c.save();
+  c.globalAlpha = a;
+  const X = 596;
+  drawLogo(c, X, 112, 1.5, easeOut(lt / 0.8));
+  textBlock(c, 'paring Live', X + 96, 190, { size: 78, weight: 800, alpha: easeOut((lt - 0.2) / 0.5) });
+  textBlock(c, 'Rehearse the call you’re afraid of.', X, 248, { size: 30, weight: 600, color: '#ff9a72', alpha: easeOut((lt - 0.5) / 0.5) });
+  const rows = [
+    ['github.com/antonipuszczahub/sparing-live-muse', 800, 0.9],
+    ['Open source · MIT', 600, 1.1],
+    ['English and Polish · Windows, Mac, Linux', 500, 1.3],
+    ['Built on Meta Muse', 600, 1.5],
+    ['Spark Open · Wonder · Voice Transcribe · Image · SAM 3.1', 500, 1.7],
+  ];
+  rows.forEach(([txt, w, at], i) => {
+    const p = easeOut((lt - at) / 0.45);
+    if (p <= 0) return;
+    c.save();
+    c.globalAlpha *= p;
+    const y = 300 + i * 62 + (1 - p) * 16;
+    const size = i === 0 ? 27 : i === 4 ? 21 : 25;
+    c.font = `${w} ${size}px Figtree, system-ui, sans-serif`;
+    const tw = Math.min(c.measureText(txt).width, 640);
+    glass(c, X, y - 36, tw + 52, 56, 28, { fill: i === 0 ? 0.13 : 0.07, edge: i === 0 ? 0.3 : 0.14 });
+    textBlock(c, txt, X + 26, y + 3, { size, weight: w, color: i === 0 ? '#fff' : 'rgba(255,255,255,0.88)' });
+    c.restore();
+  });
+  c.restore();
+}
+
+/* ------------------------------------------------------------------ captions */
+
+function captions(c, t, beat) {
+  const L = beat.L;
+  if (!L || beat.kind === 'title') return;
+  const local = t - beat.audioAt;
+  if (local < -0.1 || local > L.dur + 0.5) return;
+  const words = L.text.split(/\s+/);
+  const f = clamp(local / (L.dur * 0.97));
+  c.save();
+  const pipScene = beat.layout === 'pip';
+  const cx = pipScene ? 548 : 640;
+  c.font = '700 29px Figtree, system-ui, sans-serif';
+  const maxW = pipScene ? 860 : 980;
+  const rows = [];
+  let cur = [];
+  let curW = 0;
+  const sp = c.measureText(' ').width;
+  words.forEach((w, i) => {
+    const ww = c.measureText(w).width;
+    if (curW + ww > maxW && cur.length) {
+      rows.push({ words: cur, w: curW });
+      cur = [];
+      curW = 0;
+    }
+    cur.push({ w, ww, i });
+    curW += ww + sp;
+  });
+  rows.push({ words: cur, w: curW });
+  // show only the two rows around the spoken word, so a long line never covers the picture
+  const spokenIdx = Math.min(words.length - 1, Math.floor(f * words.length));
+  let rowOf = rows.findIndex((r) => r.words.some((x) => x.i === spokenIdx));
+  const first = Math.max(0, Math.min(rows.length - 2, rowOf - (rowOf > 0 ? 1 : 0)));
+  const shown = rows.slice(first, first + 2);
+  const lh = 40;
+  const boxW = Math.max(...shown.map((r) => r.w)) + 56;
+  const boxH = shown.length * lh + 22 + (L.who !== 'antoni' ? 22 : 0);
+  const bx = cx - boxW / 2;
+  const by = H - 22 - boxH;
+  const fade = clamp(local / 0.2 + 0.2) * clamp((L.dur + 0.5 - local) / 0.3);
+  c.globalAlpha = fade;
+  rr(c, bx, by, boxW, boxH, 24);
+  c.fillStyle = 'rgba(6,6,8,0.78)';
+  c.fill();
+  c.lineWidth = 1.5;
+  c.strokeStyle = 'rgba(255,255,255,0.14)';
+  c.stroke();
+  let y = by + 12 + lh * 0.72;
+  if (L.who !== 'antoni') {
+    const who = CAST[L.who];
+    c.font = '800 15px Figtree, system-ui, sans-serif';
+    c.fillStyle = ORANGE_SOFT;
+    c.textBaseline = 'alphabetic';
+    c.fillText(`${who.name.toUpperCase()} · ${who.role.toUpperCase()}`, bx + 28, by + 25);
+    y += 22;
+  }
+  c.font = '700 29px Figtree, system-ui, sans-serif';
+  c.textAlign = 'left';
+  c.textBaseline = 'alphabetic';
+  shown.forEach((r) => {
+    let x = cx - r.w / 2 + sp / 2;
+    r.words.forEach((wd) => {
+      c.fillStyle = wd.i <= spokenIdx ? '#ffffff' : 'rgba(255,255,255,0.46)';
+      c.fillText(wd.w, x, y);
+      x += wd.ww + sp;
+    });
+    y += lh;
+  });
+  c.restore();
+}
+
+/* ------------------------------------------------------------------ frame */
+
+function antoniWindow(t, i) {
+  const cur = BEATS[i];
+  const prev = BEATS[i - 1] ?? cur;
+  const p = ease((t - cur.t0) / 0.8);
+  const A = LAYOUT[prev.layout ?? 'solo'];
+  const B = LAYOUT[cur.layout ?? 'solo'];
+  return {
+    cx: lerp(A.cx, B.cx, p),
+    cy: lerp(A.cy, B.cy, p),
+    w: lerp(A.w, B.w, p),
+    h: lerp(A.h, B.h, p),
+    r: lerp(A.r, B.r, p),
+    s: lerp(A.s, B.s, p),
+    n: lerp(A.n, B.n, p),
+  };
+}
+
+function drawAntoni(c, t, i, a) {
+  const beat = BEATS[i];
+  const w = antoniWindow(t, i);
+  const x = w.cx - w.w / 2;
+  const y = w.cy - w.h / 2;
+  const small = w.w < 300;
+  c.save();
+  c.globalAlpha = a;
+  c.shadowColor = 'rgba(255,110,50,0.3)';
+  c.shadowBlur = small ? 30 : 60;
+  rr(c, x, y, w.w, w.h, w.r);
+  c.fillStyle = small ? '#15161b' : 'rgba(255,255,255,0.075)';
+  c.fill();
+  c.shadowBlur = 0;
+  const speaking = activeLine(t, 'antoni');
+  c.lineWidth = small ? 4 : 2;
+  c.strokeStyle = speaking && small ? ORANGE : 'rgba(255,255,255,0.18)';
+  c.stroke();
+  const scale = w.s;
+  const listening = beat.scene === 'cast' && beat.who;
+  const toward = listening ? (beat.who === 'elena' || beat.who === 'marta' ? 0.7 : 0.7) : 0;
+  const innerBox = { x, y, w: w.w, h: w.h, r: w.r, neck: w.n };
+  drawPersonIn(c, 'antoni', t, innerBox, scale, { lookX: toward, mood: listening ? 0.0 : undefined });
+  // name tag
+  if (!small) {
+    c.font = '700 21px Figtree, system-ui, sans-serif';
+    const label = 'Antoni';
+    const tw = c.measureText(label).width;
+    rr(c, x + 18, y + 18, tw + 30, 40, 20);
+    c.fillStyle = 'rgba(8,8,10,0.8)';
+    c.fill();
+    c.fillStyle = '#fff';
+    c.textBaseline = 'middle';
+    c.fillText(label, x + 33, y + 39);
+  }
+  c.restore();
+}
+
+function renderFrame(t) {
+  t = clamp(t, 0, TOTAL - 0.001);
+  const i = beatAt(t);
+  const beat = BEATS[i];
+  background(ctx, t);
+  const names = ['title', 'intro', 'cast', 'idea', 'app', 'stack', 'end'];
+  for (const n of names) {
+    const a = sceneAlpha(n, t);
+    if (a <= 0) continue;
+    if (n === 'title') sceneTitle(ctx, t, a);
+    if (n === 'intro') sceneIntro(ctx, t, a, beat);
+    if (n === 'cast') sceneCast(ctx, t, a);
+    if (n === 'idea') sceneIdea(ctx, t, a);
+    if (n === 'app') sceneApp(ctx, t, a, beat);
+    if (n === 'stack') sceneStack(ctx, t, a);
+    if (n === 'end') sceneEnd(ctx, t, a);
+  }
+  if (beat.scene !== 'title' || t > BEATS[0].t1 - 0.4) drawAntoni(ctx, t, i, beat.scene === 'title' ? clamp((t - (BEATS[0].t1 - 0.4)) / 0.4) : 1);
+  captions(ctx, t, beat);
+  if (t < 0.5) {
+    ctx.fillStyle = `rgba(5,6,8,${1 - t / 0.5})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  if (t > TOTAL - 0.7) {
+    ctx.fillStyle = `rgba(5,6,8,${clamp((t - (TOTAL - 0.7)) / 0.7)})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+/* ------------------------------------------------------------------ playback */
+
+let running = false;
+let clipActive = null;
+function syncClips(t) {
+  const i = beatAt(t);
+  const b = BEATS[i];
+  const want = b.clip && t >= b.t0 ? b : null;
+  if (clipActive && (!want || clipActive !== want)) {
+    clips[clipActive.clip].pause();
+    clipActive = null;
+  }
+  if (want && clipActive !== want && clips[want.clip]) {
+    const v = clips[want.clip];
+    v.currentTime = Math.max(0, (t - want.t0 - 0.1) * want.rate);
+    v.playbackRate = want.rate;
+    v.play().catch(() => {});
+    clipActive = want;
+  }
+  // pre-roll the next clip so it is ready the moment it starts
+  const nb = BEATS[i + 1];
+  if (nb?.clip && clips[nb.clip] && clips[nb.clip].currentTime !== 0 && nb !== clipActive) clips[nb.clip].currentTime = 0;
+}
+
+async function start({ record }) {
+  if (running) return;
+  running = true;
+  actx.resume();
+  const adest = actx.createMediaStreamDestination();
+  const startAt = actx.currentTime + 0.35;
+  for (const b of BEATS) {
+    if (!b.L) continue;
+    const src = actx.createBufferSource();
+    src.buffer = b.L.buffer;
+    src.connect(adest);
+    if (!record || q.has('hear')) src.connect(actx.destination);
+    src.start(startAt + b.audioAt);
+  }
+  let rec, chunks = [];
+  if (record) {
+    const stream = canvas.captureStream(30);
+    adest.stream.getAudioTracks().forEach((tr) => stream.addTrack(tr));
+    const mime = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m));
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5_000_000, audioBitsPerSecond: 160_000 });
+    rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+    rec.start(500);
+  }
+  const loop = () => {
+    const t = actx.currentTime - startAt;
+    if (t >= TOTAL + 0.3) return finish();
+    const tt = Math.max(0, t);
+    syncClips(tt);
+    renderFrame(tt);
+    say(`${record ? 'recording ' : 'playing '}${tt.toFixed(1)} / ${TOTAL.toFixed(1)} s`);
+    requestAnimationFrame(loop);
+  };
+  const finish = async () => {
+    running = false;
+    if (clipActive) clips[clipActive.clip].pause();
+    clipActive = null;
+    if (!rec) return say('done');
+    await new Promise((res) => { rec.onstop = res; rec.stop(); });
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    window.__film.blob = blob;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sparing-live-film.webm';
+    a.textContent = `Download sparing-live-film.webm (${(blob.size / 1e6).toFixed(1)} MB)`;
+    a.style.cssText = 'color:#ff9a72;font-weight:700;margin-left:8px';
+    statusEl.replaceChildren(a);
+    const up = q.get('upload');
+    if (up) {
+      say('uploading…');
+      await fetch(up, { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: blob });
+      say('uploaded ' + (blob.size / 1e6).toFixed(1) + ' MB');
+    }
+    window.__film.done = true;
+  };
+  requestAnimationFrame(loop);
+}
+
+/* ------------------------------------------------------------------ boot */
+
+window.__film = { ready: false, done: false };
+await document.fonts.load('700 28px Figtree').catch(() => {});
+await document.fonts.ready;
+actx = new AudioContext();
+initBars();
+say('loading voices…');
+await loadAudio(actx);
+say('loading footage…');
+await Promise.all(['k1', 'k2a', 'k2b', 'k2c', 'k3', 'k4', 'k5'].map(loadClip));
+buildTimeline();
+window.__film.total = TOTAL;
+window.__film.beats = BEATS.map((b) => ({ line: b.line, scene: b.scene, t0: +b.t0.toFixed(2), t1: +b.t1.toFixed(2), rate: b.rate && +b.rate.toFixed(2) }));
+window.__film.seek = async (t) => {
+  const i = beatAt(t);
+  const b = BEATS[i];
+  if (b.clip && clips[b.clip]) {
+    const v = clips[b.clip];
+    v.playbackRate = 1;
+    v.currentTime = clamp((t - b.t0 - 0.1) * b.rate, 0, v.duration - 0.05);
+    await new Promise((res) => { v.onseeked = res; setTimeout(res, 1500); });
+  }
+  renderFrame(t);
+};
+window.__film.ready = true;
+say(`ready · ${TOTAL.toFixed(1)} s`);
+if (q.has('t')) await window.__film.seek(Number(q.get('t')));
+else renderFrame(0);
+document.getElementById('play').onclick = () => start({ record: false });
+document.getElementById('render').onclick = () => start({ record: true });
+if (TOTAL > 180) say(`warning: ${TOTAL.toFixed(0)} s is over the 3:00 limit · ` + statusEl.textContent);
+</script>
+</body>
+</html>
