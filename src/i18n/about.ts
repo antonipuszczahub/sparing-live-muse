@@ -52,7 +52,7 @@ export const ABOUT: Record<Lang, About> = {
       { title: 'Wybierz, do kogo dzwonisz', body: 'Czterech rozmówców, cztery poziomy trudności, po polsku lub po angielsku. Wpisz prawdziwą firmę, a rozmówca wie to, co ta firma.' },
       { title: 'Mów i przerywaj im', body: 'To pełny dupleks: mów, gdy postać mówi, a urwie w pół zdania. Jej twarz i poświata strony podążają za nastrojem.' },
       { title: 'Pokaż slajd', body: 'Czyta Twój ekran i od razu bierze się za twierdzenie bez źródła.' },
-      { title: 'Przeczytaj jej myśli', body: 'Recenzja odtwarza rozmowę z prywatnymi myślami postaci, zdaniem, w którym ją straciłeś, i lepszą kwestią do powiedzenia.' },
+      { title: 'Przeczytaj ukryte myśli', body: 'Recenzja odtwarza rozmowę z prywatnymi myślami postaci, zdaniem, w którym rozmowa zaczęła Ci się wymykać, i lepszą kwestią do powiedzenia.' },
     ],
     builtTitle: 'Na czym działa',
     built:
