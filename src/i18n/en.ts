@@ -28,7 +28,7 @@ export const en = {
     "Privacy: your voice is relayed to Meta's speech model and your words go to Meta's Muse models. While free Meta credits are in use, this content (including shared screens and camera frames, if you turn them on) may be used to train future Meta models. With open weights on, the text of the call goes to the open-weights host instead. This app stores no audio or transcripts; it keeps only a cost log, and your weak spots stay in this browser.",
   budgetToday: (spent: string, limit: string) => `Budget today: $${spent} of $${limit}`,
   noVoice: 'No English voice found in this browser. Use Microsoft Edge for natural voices.',
-  voiceTitle: 'Character voice',
+  voiceTitle: 'Voice and microphone',
   voiceWoman: 'Female character',
   voiceMan: 'Male character',
   voiceAuto: 'Automatic (best available)',
@@ -186,6 +186,11 @@ Built on @AIatMeta Muse models for @cerebral_valley. Try it: ${origin}`,
   drawingPortrait: 'drawing portrait…',
 
   // ---- errors
+  micTitle: 'Microphone',
+  micAuto: 'System default',
+  micAllow: 'Allow the microphone to show its devices',
+  micVirtual: (name: string) =>
+    `"${name}" looks like a virtual input (Voicemeeter, a virtual cable or Stereo Mix). If it carries what the speakers play, the character hears only itself: choose your headset microphone.`,
   micDenied: 'Microphone permission denied.',
   micFailed: 'Could not start the microphone.',
   asrError: 'Speech recognition error',

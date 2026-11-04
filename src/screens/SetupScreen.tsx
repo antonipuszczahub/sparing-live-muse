@@ -7,6 +7,7 @@ import { Brand } from '../components/Brand.tsx';
 import { Icon } from '../components/Icons.tsx';
 import { Sheet } from '../components/Sheet.tsx';
 import { Switch } from '../components/Switch.tsx';
+import { MicPicker } from '../components/MicPicker.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
 import ui from '../components/ui.module.css';
 import { setLang, t, useLang } from '../i18n/index.ts';
@@ -158,12 +159,10 @@ export function SetupScreen({
             <Icon name="phone" size={16} />
             {t('demoPreset')}
           </button>
-          {voiceList.length > 0 && (
-            <button type="button" className={ui.pill} onClick={() => setVoices(true)}>
-              <Icon name="voice" size={16} />
-              {t('voiceTitle')}
-            </button>
-          )}
+          <button type="button" className={ui.pill} onClick={() => setVoices(true)}>
+            <Icon name="voice" size={16} />
+            {t('voiceTitle')}
+          </button>
           <div role="group" aria-label={t('languageLabel')} className={ui.seg}>
             {LANGS.map((l) => (
               <button key={l} type="button" onClick={() => setLang(l)} aria-pressed={lang === l}>
@@ -316,6 +315,7 @@ export function SetupScreen({
 
       <Sheet open={voices} title={t('voiceTitle')} onClose={() => setVoices(false)}>
         <VoicePicker lang={lang} list={voiceList} />
+        <MicPicker />
       </Sheet>
     </main>
   );

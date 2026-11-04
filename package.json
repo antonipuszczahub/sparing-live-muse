@@ -23,6 +23,8 @@
     "eval:inject": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/eval-inject.ts",
     "check:open": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/check-open.ts",
     "manifest": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/manifest.ts",
+    "phone": "tailscale serve --bg 5173",
+    "phone:off": "tailscale serve reset",
     "start": "tsx server/index.ts"
   },
   "dependencies": {

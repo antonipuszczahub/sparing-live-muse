@@ -29,7 +29,7 @@ export const pl: Dict = {
     'Prywatność: Twój głos jest przekazywany do modelu mowy Meta, a Twoje słowa trafiają do modeli Muse firmy Meta. Dopóki używane są darmowe kredyty Meta, te treści (także udostępniany ekran i klatki z kamery, jeśli je włączysz) mogą być użyte do trenowania przyszłych modeli Meta. Przy włączonych otwartych wagach tekst rozmowy trafia do hosta otwartych wag. Ta aplikacja nie przechowuje nagrań ani transkrypcji; zapisuje tylko dziennik kosztów, a Twoje słabe punkty zostają w tej przeglądarce.',
   budgetToday: (spent, limit) => `Budżet na dziś: $${spent} z $${limit}`,
   noVoice: 'Ta przeglądarka nie udostępnia polskiego głosu. Użyj Microsoft Edge: ma polskie głosy „Natural” (Zofia, Marek).',
-  voiceTitle: 'Głos postaci',
+  voiceTitle: 'Głos i mikrofon',
   voiceWoman: 'Postać kobieca',
   voiceMan: 'Postać męska',
   voiceAuto: 'Automatycznie (najlepszy dostępny)',
@@ -187,6 +187,11 @@ Zbudowane na modelach Muse od @AIatMeta dla @cerebral_valley. Wypróbuj: ${origi
   drawingPortrait: 'rysuję portret…',
 
   // ---- errors
+  micTitle: 'Mikrofon',
+  micAuto: 'Domyślny w systemie',
+  micAllow: 'Zezwól na mikrofon, żeby zobaczyć urządzenia',
+  micVirtual: (name) =>
+    `„${name}” wygląda na wejście wirtualne (Voicemeeter, kabel wirtualny albo Stereo Mix). Jeśli niesie to, co grają głośniki, postać słyszy tylko samą siebie: wybierz mikrofon ze słuchawek.`,
   micDenied: 'Brak zgody na użycie mikrofonu.',
   micFailed: 'Nie udało się uruchomić mikrofonu.',
   asrError: 'Błąd rozpoznawania mowy',

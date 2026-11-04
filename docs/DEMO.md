@@ -4,7 +4,7 @@ The submission form takes a link to a video of at most 3:00 (judges stop at 3:00
 
 ## Before recording
 
-- Headphones on, so the character does not hear itself. Microsoft Edge, English UI (the switch is top right), microphone allowed for `localhost`.
+- Headphones on, so the character does not hear itself. With Voicemeeter or another virtual mixer: open the start screen's "Voice and microphone" sheet and pick the headset microphone (not "Voicemeeter Out" or "Stereo Mix"), and route Edge's sound to the headphones in Windows' volume mixer. Microsoft Edge, English UI (the switch is top right), microphone allowed for `localhost`.
 - `npm run dev` (in PowerShell: `npm.cmd run dev`, because PowerShell blocks `npm.ps1`), then in a second tab `npm run preflight`: it must say READY. It checks the server, the key, the budget and the files, and calls no model. Start screen: open weights ticked (it says "Open weights · Baseten").
 - Run the company research once beforehand (type the company on the start screen, wait for it to finish). The result is cached for 24 hours, so on camera it returns in seconds.
 - Have a window open with one weak slide (a claim without a source, such as "94% of clinics lose visits") for the screen share: `docs/demo-slide.html` is ready (open it in a browser window, F11).

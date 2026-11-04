@@ -38,6 +38,7 @@ registerProcessor('pcm24', Pcm);
 
 import type { Lang } from '../../shared/types.ts';
 import { translate } from '../i18n/index.ts';
+import { openMic } from './mic.ts';
 
 export interface EarsLike {
   onInterim: (text: string) => void;
@@ -97,9 +98,7 @@ export class MetaEars implements EarsLike {
 
   private async capture() {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      });
+      this.stream = await openMic();
       if (this.stopped) return this.releaseAudio();
       this.ctx = new AudioContext({ sampleRate: 24000 });
       const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));

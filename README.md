@@ -131,9 +131,14 @@ That is all a judge needs: the one Meta key (`MODEL_API_KEY`). The open-weights 
 
 Wear headphones, so the character does not hear itself.
 
+**Microphone.** The start screen's "Voice and microphone" sheet lists your microphones and warns when the default one looks like a virtual input (Voicemeeter, a virtual cable, Stereo Mix), which can carry the speakers' sound so that the character hears only itself. Pick your headset microphone there; the choice is kept in the browser and falls back to the default if the device is unplugged. (The character's own voice always plays on the browser's default output: route it to the headphones with Windows' per-app volume mixer or your mixer.)
+
+**On a phone, over Tailscale.** The dev server stays on `localhost`; `npm run phone` shares it, over HTTPS and only inside your own Tailscale network, as `https://<this-computer>.<tailnet>.ts.net` (a phone needs HTTPS for the microphone). Run it once while `npm run dev` is running, open that address on the phone with the Tailscale app connected, and `npm run phone:off` stops sharing. Requests from the same computer, which includes the phone arriving through the share, are not rate limited in development. Screen sharing is a desktop feature; the call, the microphone, the camera and the review work on the phone. Do not use `tailscale funnel`: it would publish the app, and with it your API budget, to the internet.
+
 | Command | What it does |
 |---|---|
 | `npm run preflight` | Checks, in one go, that the app is ready to be recorded or submitted (server, key, budget, files, git); calls no model |
+| `npm run phone` / `npm run phone:off` | Shares the dev server with your phone over HTTPS inside your own Tailscale network (needs Tailscale installed and HTTPS enabled for the tailnet), and stops sharing |
 | `npm run check:meta` | Probes the API: chat, streaming, JSON schema, Wonder |
 | `npm run try:turn` | Plays a short scripted call and prints latency per turn (`-- --lang pl` for Polish) |
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |

@@ -49,3 +49,24 @@ test('the allowance comes back once the window has passed', async () => {
   await wait(60);
   assert.ok(call(limit, '4.4.4.4').passed);
 });
+
+test('this machine is never limited in development, but a production deployment limits everyone', () => {
+  const before = process.env.NODE_ENV;
+  try {
+    delete process.env.NODE_ENV;
+    const dev = rateLimit('t-local-dev', 1);
+    for (const ip of ['127.0.0.1', '::1', '::ffff:127.0.0.1']) {
+      for (let i = 0; i < 5; i++) assert.ok(call(dev, ip).passed, `${ip} is exempt in development`);
+    }
+    assert.ok(call(dev, '9.9.9.9').passed);
+    assert.equal(call(dev, '9.9.9.9').passed, false, 'other addresses are still limited');
+
+    process.env.NODE_ENV = 'production';
+    const prod = rateLimit('t-local-prod', 1);
+    assert.ok(call(prod, '127.0.0.1').passed);
+    assert.equal(call(prod, '127.0.0.1').passed, false, 'behind a proxy on the same host everyone looks local, so production does not exempt it');
+  } finally {
+    if (before === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = before;
+  }
+});
