@@ -79,7 +79,7 @@ export function CallView(p: CallViewProps) {
             <span className={`${s.wave} ${snap.state === 'speaking' ? s.speaking : ''}`} />
             <span className={`${s.wave} ${s.w2} ${snap.state === 'speaking' ? s.speaking : ''}`} />
             <span className={s.face}>
-              <Portrait session={p.session} scenario={config.scenario} persona={persona} lang={lang} mood={snap.mood} />
+              <Portrait session={p.session} scenario={config.scenario} persona={persona} lang={lang} mood={snap.mood} speaking={snap.state === 'speaking'} />
             </span>
           </div>
           <div className={s.meta}>

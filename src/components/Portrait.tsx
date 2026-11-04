@@ -39,13 +39,28 @@ function usePortraits(session: string, scenario: ScenarioId, persona: Persona, l
  * cross-faded according to their mood (the neutral one stands in while the others are still being drawn); a blurred
  * photograph of the same kind of person stands in until the first portrait arrives.
  */
-export function Portrait({ session, scenario, persona, mood, lang = 'en' }: { session: string; scenario: ScenarioId; persona: Persona; mood: Mood; lang?: Lang }) {
+export function Portrait({
+  session,
+  scenario,
+  persona,
+  mood,
+  lang = 'en',
+  speaking = false,
+}: {
+  session: string;
+  scenario: ScenarioId;
+  persona: Persona;
+  mood: Mood;
+  lang?: Lang;
+  /** The character is talking: the face moves a little faster and nods slightly, instead of only breathing. */
+  speaking?: boolean;
+}) {
   const faces = usePortraits(session, scenario, persona, lang);
   const wanted: Face = mood <= 2 ? 'cold' : mood >= 4 ? 'warm' : 'neutral';
   const shown: Face = faces[wanted] ? wanted : 'neutral';
 
   return (
-    <div className={styles.portrait}>
+    <div className={`${styles.portrait} ${speaking ? styles.talking : ''}`}>
       <Archetype scenario={scenario} blur />
       {!faces.neutral && <span className={styles.wait}>{t('drawingPortrait')}</span>}
       {(Object.keys(faces) as Face[]).map((k) => (

@@ -21,6 +21,21 @@
     breathe 9s ease-in-out 0.9s infinite;
 }
 
+/* while the character talks the face moves a little quicker and nods: alive, not a photo */
+.talking .image {
+  animation:
+    faceIn 0.9s ease both,
+    talk 0.62s ease-in-out infinite alternate;
+}
+@keyframes talk {
+  from {
+    transform: scale(1.02) translateY(0) rotate(-0.15deg);
+  }
+  to {
+    transform: scale(1.05) translateY(-0.7%) rotate(0.2deg);
+  }
+}
+
 @keyframes faceIn {
   from {
     opacity: 0;
