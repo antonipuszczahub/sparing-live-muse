@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px 10px;
-  max-width: calc(100vw - 24px);
+  max-width: calc(calc(100 * var(--vw, 1vw)) - 24px);
   padding: 7px 8px 7px 14px;
   transform: translateX(-50%);
   border-radius: var(--r-pill);

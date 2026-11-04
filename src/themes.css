@@ -1,15 +1,11 @@
 /*
- * Looks the visitor can switch between (data-theme on <html>, see src/lib/theme.ts). The default has no data-theme and
- * is defined in index.css. Each look is a palette, a display face, how round the corners are, and the light behind the
- * page; the layout is the same in all of them.
+ * The look of the app: Światło (Light). A near-black page lit by diagonal bars of orange, amber and crimson light under a
+ * veil of film grain, glass cards with a hairline edge, dark glass pills with a glow, one orange accent. It is the
+ * palette the user chose from seven mock-ups; the layout, the type and the shapes are the app's own (index.css and the
+ * style sheets next to each screen). It is the only look: <html data-theme="swiatlo"> is set in index.html.
  *
- * The principles are the ones luxury houses share (a great deal of air, one restrained accent, a serif for the big
- * words, sharp or barely rounded edges, quiet motion), not the look of any one house.
- */
-
-/*
- * Światło: a near-black page lit by diagonal bars of orange, amber and crimson light with film grain, glass cards with a
- * hairline edge, one orange accent. The palette of the user's favourite mock-up; the layout is the app's own.
+ * The style sheets write their surfaces as tokens with the earlier light value as the fallback, for example
+ * var(--glass, rgba(255, 255, 255, 0.72)). This file defines the tokens; keep that pattern when adding a surface.
  */
 :root[data-theme='swiatlo'] {
   color-scheme: dark;
@@ -29,7 +25,7 @@
   --glow-a: #f65f31;
   --glow-b: #e21220;
   --glow-c: #f5bb47;
-  /* the surfaces that are white glass on the light looks (the other looks leave these unset and keep their own values) */
+  /* the surfaces that were white glass on the earlier light look */
   --glass-faint: rgba(255, 255, 255, 0.04);
   --glass: rgba(255, 255, 255, 0.055);
   --glass-strong: rgba(255, 255, 255, 0.085);
@@ -61,18 +57,18 @@
 /* The light: slanted bars of orange, amber and crimson, blurred, with a vignette and grain. They still drift and lean
    towards the pointer, and the call tints the brightest one with the character's mood. */
 :root[data-theme='swiatlo'] [class*='_orb_'] {
-  top: -30vmax;
+  top: calc(-30 * var(--vmax, 1vmax));
   right: auto;
   bottom: auto;
-  width: 34vmax;
-  height: 150vmax;
+  width: calc(34 * var(--vmax, 1vmax));
+  height: calc(150 * var(--vmax, 1vmax));
   border-radius: 99px;
   filter: blur(34px);
   mix-blend-mode: screen;
   opacity: 0.78 !important;
 }
 :root[data-theme='swiatlo'] [class*='_o1_'] {
-  left: -6vmax;
+  left: calc(-6 * var(--vmax, 1vmax));
   background: linear-gradient(
     180deg,
     transparent 4%,
@@ -83,26 +79,26 @@
   transform: rotate(-36deg) translate(calc(var(--px) * 46px), calc(var(--py) * 30px));
 }
 :root[data-theme='swiatlo'] [class*='_o2_'] {
-  left: 20vmax;
-  top: -34vmax;
-  width: 22vmax;
+  left: calc(20 * var(--vmax, 1vmax));
+  top: calc(-34 * var(--vmax, 1vmax));
+  width: calc(22 * var(--vmax, 1vmax));
   background: linear-gradient(180deg, transparent 8%, var(--glow-c) 44%, transparent 90%);
   transform: rotate(-36deg) translate(calc(var(--px) * -64px), calc(var(--py) * -34px));
   opacity: 0.6 !important;
 }
 :root[data-theme='swiatlo'] [class*='_o3_'] {
-  left: 44vmax;
-  width: 30vmax;
+  left: calc(44 * var(--vmax, 1vmax));
+  width: calc(30 * var(--vmax, 1vmax));
   background: linear-gradient(180deg, transparent 6%, var(--glow-b) 46%, var(--glow-a) 66%, transparent 94%);
   transform: rotate(-36deg) translate(calc(var(--px) * 30px), calc(var(--py) * 20px));
 }
 :root[data-theme='swiatlo'] [class*='_backdrop_']::before {
   content: '';
   position: absolute;
-  left: 74vmax;
-  top: -34vmax;
-  width: 16vmax;
-  height: 150vmax;
+  left: calc(74 * var(--vmax, 1vmax));
+  top: calc(-34 * var(--vmax, 1vmax));
+  width: calc(16 * var(--vmax, 1vmax));
+  height: calc(150 * var(--vmax, 1vmax));
   border-radius: 99px;
   background: linear-gradient(180deg, transparent 8%, var(--glow-c) 50%, transparent 90%);
   filter: blur(34px);
@@ -128,106 +124,4 @@
 }
 :root[data-theme='swiatlo'] [class*='_grain_'] {
   display: none;
-}
-
-/* Maison: ivory paper, black ink, antique gold, an editorial serif, almost square corners. */
-:root[data-theme='maison'] {
-  --canopy: #f3efe7;
-  --paper: #fffdf8;
-  --ink: #16130f;
-  --ink-soft: #3b352c;
-  --lichen: #6a6254;
-  --brass: #7a5c2e;
-  --brass-hi: #a8842f;
-  --line: rgba(22, 19, 15, 0.16);
-  --mud: #e8e2d6;
-  --round: 0.1;
-  --r-pill: 2px;
-  --r-card: 2px;
-  --r-field: 2px;
-  --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
-  --bg-grad: linear-gradient(180deg, #f7f3ec 0%, #f3efe7 60%, #ece4d6 100%);
-  --glow-a: #d9c08a;
-  --glow-b: #c9a95e;
-  --glow-c: #fff6e2;
-}
-
-/* Atelier: warm stone, deep green, a soft high-contrast serif, gently rounded. */
-:root[data-theme='atelier'] {
-  --canopy: #ebe6dc;
-  --paper: #fbf9f4;
-  --ink: #17201a;
-  --ink-soft: #35403a;
-  --lichen: #5f675f;
-  --brass: #1d4a35;
-  --brass-hi: #2f6b4d;
-  --line: rgba(23, 32, 26, 0.14);
-  --mud: #dfd9cc;
-  --round: 0.45;
-  --r-pill: 12px;
-  --r-card: 12px;
-  --r-field: 8px;
-  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --bg-grad: linear-gradient(180deg, #f0ece3 0%, #e9e4d9 55%, #d7d2c3 100%);
-  --glow-a: #9db8a6;
-  --glow-b: #6f9a82;
-  --glow-c: #eef2e6;
-}
-
-/* Galerie: white wall, thin light type, a single deep red, sharp corners. */
-:root[data-theme='galerie'] {
-  --canopy: #fbfbfa;
-  --paper: #ffffff;
-  --ink: #0e0e0e;
-  --ink-soft: #3a3a3a;
-  --lichen: #6f6f6f;
-  --brass: #8c1c1c;
-  --brass-hi: #a82020;
-  --line: rgba(14, 14, 14, 0.12);
-  --mud: #efefed;
-  --round: 0;
-  --r-pill: 0;
-  --r-card: 0;
-  --r-field: 0;
-  --bg-grad: linear-gradient(180deg, #ffffff 0%, #fbfbfa 70%, #f1f1ef 100%);
-  --glow-a: #e8c8c4;
-  --glow-b: #d9a9a3;
-  --glow-c: #ffffff;
-}
-
-:root[data-theme='maison'] :is(h1, h2, h3),
-:root[data-theme='atelier'] :is(h1, h2, h3) {
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  font-size-adjust: 0.48; /* the serifs have a smaller x-height than the body face: keep the words as large */
-}
-
-:root[data-theme='galerie'] :is(h1, h2, h3) {
-  font-weight: 300;
-  letter-spacing: -0.035em;
-}
-
-/* Labels and buttons: tracked capitals in the quiet looks */
-:root[data-theme='maison'] :is(button, [class*='_lbl_']),
-:root[data-theme='galerie'] :is(button, [class*='_lbl_']) {
-  letter-spacing: 0.04em;
-}
-
-/* No drifting pools of light on a gallery wall, and only a trace on ivory */
-:root[data-theme='galerie'] [class*='_orb_'] {
-  opacity: 0.18 !important;
-}
-:root[data-theme='maison'] [class*='_orb_'] {
-  opacity: 0.32 !important;
-}
-
-/* The serifs default to old-style figures that drop below the line: numbers (the score, the timings) stay lining */
-:root[data-theme='maison'] body,
-:root[data-theme='atelier'] body {
-  font-variant-numeric: lining-nums;
-}
-:root[data-theme='maison'] [class*='_scoreNum_'] {
-  font-weight: 500;
-  line-height: 0.86;
 }

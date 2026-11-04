@@ -3,8 +3,8 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  padding: 24px clamp(24px, 6.4vw, 124px) 80px;
-  gap: clamp(56px, 9vh, 110px);
+  padding: 24px clamp(24px, calc(6.4 * var(--vw, 1vw)), 124px) 80px;
+  gap: clamp(56px, calc(9 * var(--vh, 1vh)), 110px);
 }
 
 .top {
@@ -19,19 +19,19 @@
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: clamp(28px, 5vw, 110px);
+  gap: clamp(28px, calc(5 * var(--vw, 1vw)), 110px);
   align-items: center;
 }
 
 .score {
   display: flex;
   align-items: flex-end;
-  gap: clamp(14px, 2vw, 32px);
+  gap: clamp(14px, calc(2 * var(--vw, 1vw)), 32px);
   margin: 14px 0 8px;
 }
 .scoreNum {
   font-family: var(--font-display);
-  font-size: clamp(150px, 17vw, 310px);
+  font-size: clamp(150px, calc(17 * var(--vw, 1vw)), 310px);
   line-height: 0.78;
   font-weight: 600;
   letter-spacing: -0.035em;
@@ -42,7 +42,7 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  margin-bottom: 0.9vw;
+  margin-bottom: calc(0.9 * var(--vw, 1vw));
   min-height: 40px;
   padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
@@ -65,14 +65,14 @@
   max-width: 17em;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(27px, 2.6vw, 44px);
+  font-size: clamp(27px, calc(2.6 * var(--vw, 1vw)), 44px);
   line-height: 1.08;
   letter-spacing: -0.035em;
 }
 .sum {
   margin: 18px 0 0;
   max-width: 48ch;
-  font-size: clamp(16px, 1.2vw, 19px);
+  font-size: clamp(16px, calc(1.2 * var(--vw, 1vw)), 19px);
   line-height: 1.6;
   color: var(--lichen);
 }
@@ -115,7 +115,7 @@
 }
 .reviewing b {
   font-family: var(--font-display);
-  font-size: clamp(22px, 2vw, 32px);
+  font-size: clamp(22px, calc(2 * var(--vw, 1vw)), 32px);
   font-weight: 600;
   letter-spacing: -0.035em;
 }
@@ -138,21 +138,21 @@
 }
 
 .chart {
-  padding: clamp(18px, 2vw, 30px);
+  padding: clamp(18px, calc(2 * var(--vw, 1vw)), 30px);
   border-radius: calc(26px * var(--round));
 }
 
 .two {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(28px, 5vw, 110px);
+  gap: clamp(28px, calc(5 * var(--vw, 1vw)), 110px);
 }
 
 .h2 {
   margin: 0 0 26px;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(26px, 2.3vw, 38px);
+  font-size: clamp(26px, calc(2.3 * var(--vw, 1vw)), 38px);
   letter-spacing: -0.035em;
   line-height: 1;
 }
@@ -172,7 +172,7 @@
   display: block;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(44px, 4.4vw, 76px);
+  font-size: clamp(44px, calc(4.4 * var(--vw, 1vw)), 76px);
   line-height: 1;
   letter-spacing: -0.035em;
 }
@@ -262,13 +262,13 @@
 .next li b {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(34px, 3vw, 52px);
+  font-size: clamp(34px, calc(3 * var(--vw, 1vw)), 52px);
   line-height: 1;
   letter-spacing: -0.035em;
   color: var(--brass);
 }
 .next li span {
-  font-size: clamp(18px, 1.4vw, 23px);
+  font-size: clamp(18px, calc(1.4 * var(--vw, 1vw)), 23px);
   line-height: 1.35;
   letter-spacing: -0.01em;
 }
@@ -279,13 +279,13 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: clamp(28px, 4vh, 48px);
+  margin-bottom: clamp(28px, calc(4 * var(--vh, 1vh)), 48px);
 }
 .rtitle {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(32px, 3.2vw, 56px);
+  font-size: clamp(32px, calc(3.2 * var(--vw, 1vw)), 56px);
   letter-spacing: -0.035em;
   line-height: 1;
 }
@@ -295,7 +295,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: clamp(26px, 4vh, 46px);
+  gap: clamp(26px, calc(4 * var(--vh, 1vh)), 46px);
 }
 .rp::before {
   content: '';
@@ -313,9 +313,9 @@
 .rw {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
-  gap: 0 clamp(18px, 2.6vw, 52px);
+  gap: 0 clamp(18px, calc(2.6 * var(--vw, 1vw)), 52px);
   align-items: start;
-  scroll-margin-top: 30vh;
+  scroll-margin-top: calc(30 * var(--vh, 1vh));
 }
 .lt {
   text-align: right;
@@ -341,13 +341,13 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(19px, 1.6vw, 26px);
+  font-size: clamp(19px, calc(1.6 * var(--vw, 1vw)), 26px);
   line-height: 1.18;
   letter-spacing: -0.035em;
 }
 .tM {
   margin: 0;
-  font-size: clamp(16px, 1.25vw, 20px);
+  font-size: clamp(16px, calc(1.25 * var(--vw, 1vw)), 20px);
   line-height: 1.45;
   color: var(--brass);
 }
@@ -381,7 +381,7 @@
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(23px, 2vw, 32px);
+  font-size: clamp(23px, calc(2 * var(--vw, 1vw)), 32px);
   line-height: 1.15;
   color: var(--c);
   transition:

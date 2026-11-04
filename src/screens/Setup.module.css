@@ -5,12 +5,12 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1640px;
+  max-width: 2200px; /* the page is zoomed on big monitors (index.css): only an ultra-wide screen still shows margins */
   margin: 0 auto;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 24px clamp(24px, 5vw, 96px) 24px;
-  gap: clamp(18px, 3vh, 36px);
+  min-height: calc(100 * var(--vh, 1vh));
+  min-height: calc(100 * var(--dvh, 1dvh));
+  padding: 24px clamp(24px, calc(5 * var(--vw, 1vw)), 96px) 24px;
+  gap: clamp(18px, calc(3 * var(--vh, 1vh)), 36px);
 }
 
 .top {
@@ -33,7 +33,7 @@
 .stage {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: clamp(32px, 5vw, 96px);
+  gap: clamp(32px, calc(5 * var(--vw, 1vw)), 96px);
   align-items: start;
   flex: 1;
 }
@@ -41,7 +41,7 @@
 .intro {
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2.6vh, 26px);
+  gap: clamp(16px, calc(2.6 * var(--vh, 1vh)), 26px);
   min-width: 0;
 }
 
@@ -55,7 +55,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(40px, 4.5vw, 74px);
+  font-size: clamp(40px, calc(4.5 * var(--vw, 1vw)), 74px);
   line-height: 1.02;
   letter-spacing: -0.042em;
   text-wrap: balance;
@@ -122,7 +122,7 @@
 .lead {
   margin: 0;
   max-width: 36ch;
-  font-size: clamp(16px, 1.25vw, 20px);
+  font-size: clamp(16px, calc(1.25 * var(--vw, 1vw)), 20px);
   line-height: 1.5;
   color: var(--lichen);
 }
@@ -138,7 +138,7 @@
   display: flex;
   flex-direction: column;
   gap: 22px;
-  padding: clamp(22px, 2.4vw, 32px);
+  padding: clamp(22px, calc(2.4 * var(--vw, 1vw)), 32px);
 }
 
 .fld {
@@ -395,7 +395,7 @@
 .cast {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(14px, 1.4vw, 22px);
+  gap: clamp(14px, calc(1.4 * var(--vw, 1vw)), 22px);
 }
 
 .card {
@@ -470,7 +470,7 @@
 .ct {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(20px, 1.7vw, 28px);
+  font-size: clamp(20px, calc(1.7 * var(--vw, 1vw)), 28px);
   line-height: 1.08;
   letter-spacing: -0.03em;
 }
@@ -512,7 +512,7 @@
     aspect-ratio: 1 / 0.82;
   }
   .h1 {
-    font-size: clamp(36px, 3.8vw, 62px);
+    font-size: clamp(36px, calc(3.8 * var(--vw, 1vw)), 62px);
   }
   .bar {
     gap: 16px;
@@ -532,7 +532,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: clamp(18px, 3vh, 30px);
+    gap: clamp(18px, calc(3 * var(--vh, 1vh)), 30px);
   }
   .intro {
     display: contents;

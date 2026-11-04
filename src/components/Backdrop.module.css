@@ -22,30 +22,30 @@
   transition: opacity 0.9s ease;
 }
 .o1 {
-  width: 78vmax;
-  height: 78vmax;
-  left: -22vmax;
-  bottom: -46vmax;
+  width: calc(78 * var(--vmax, 1vmax));
+  height: calc(78 * var(--vmax, 1vmax));
+  left: calc(-22 * var(--vmax, 1vmax));
+  bottom: calc(-46 * var(--vmax, 1vmax));
   background: radial-gradient(circle, color-mix(in srgb, var(--mc) 22%, var(--glow-a)) 0%, transparent 66%);
   opacity: 0.62;
   transform: translate(calc(var(--px) * 46px), calc(var(--py) * 30px));
   animation: driftA 34s ease-in-out infinite alternate;
 }
 .o2 {
-  width: 66vmax;
-  height: 66vmax;
-  right: -24vmax;
-  bottom: -40vmax;
+  width: calc(66 * var(--vmax, 1vmax));
+  height: calc(66 * var(--vmax, 1vmax));
+  right: calc(-24 * var(--vmax, 1vmax));
+  bottom: calc(-40 * var(--vmax, 1vmax));
   background: radial-gradient(circle, color-mix(in srgb, var(--mc) 18%, var(--glow-b)) 0%, transparent 64%);
   opacity: 0.5;
   transform: translate(calc(var(--px) * -64px), calc(var(--py) * -34px));
   animation: driftB 41s ease-in-out infinite alternate;
 }
 .o3 {
-  width: 54vmax;
-  height: 54vmax;
+  width: calc(54 * var(--vmax, 1vmax));
+  height: calc(54 * var(--vmax, 1vmax));
   left: 34%;
-  top: -34vmax;
+  top: calc(-34 * var(--vmax, 1vmax));
   background: radial-gradient(circle, var(--glow-c) 0%, transparent 66%);
   opacity: 0.55;
   transform: translate(calc(var(--px) * 30px), calc(var(--py) * 20px));
@@ -61,7 +61,7 @@
     margin: 0 0 0 0;
   }
   to {
-    margin: -6vmax 0 0 8vmax;
+    margin: calc(-6 * var(--vmax, 1vmax)) 0 0 calc(8 * var(--vmax, 1vmax));
   }
 }
 @keyframes driftB {
@@ -69,7 +69,7 @@
     margin: 0 0 0 0;
   }
   to {
-    margin: -9vmax 0 0 -7vmax;
+    margin: calc(-9 * var(--vmax, 1vmax)) 0 0 calc(-7 * var(--vmax, 1vmax));
   }
 }
 @keyframes driftC {
@@ -77,7 +77,7 @@
     margin: 0 0 0 0;
   }
   to {
-    margin: 4vmax 0 0 -10vmax;
+    margin: calc(4 * var(--vmax, 1vmax)) 0 0 calc(-10 * var(--vmax, 1vmax));
   }
 }
 

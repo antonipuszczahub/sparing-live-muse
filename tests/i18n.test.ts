@@ -10,7 +10,7 @@ test('both languages have exactly the same keys', () => {
 });
 
 // proper names that are the same in both languages
-const SAME = new Set<string>(['themeMaison', 'themeAtelier', 'themeGalerie']);
+const SAME = new Set<string>();
 
 test('no Polish text is a copy of the English one', () => {
   for (const k of Object.keys(en) as (keyof typeof en)[]) {
