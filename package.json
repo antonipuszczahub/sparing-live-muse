@@ -15,6 +15,7 @@
     "try:turn": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-turn.ts",
     "try:audit": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-audit.ts",
     "try:twin": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-twin.ts",
+    "preflight": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/preflight.ts",
     "make:archetypes": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/make-archetypes.ts",
     "try:portrait":"tsx --env-file=.env --env-file-if-exists=.env.local scripts/try-portrait.ts",
     "test": "tsx --test tests/*.test.ts",

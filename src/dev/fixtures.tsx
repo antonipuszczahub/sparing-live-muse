@@ -122,6 +122,15 @@ export function FixtureApp({ name }: { name: string }) {
         hungUp={false}
         camera={[]}
         result={name === 'report-wait' ? null : result}
+        trace={[
+          { kind: 'asr', model: 'muse-voice-transcribe-1.0', served: 'Meta Model API', open: false, calls: 1, medianMs: null, costUsd: 0.002 },
+          { kind: 'character-turn', model: 'meta-models/muse-spark-open-1026', served: 'Open weights · Baseten', open: true, calls: 9, medianMs: 1480, costUsd: 0 },
+          { kind: 'eye', model: 'muse-spark-1.3', served: 'Meta Model API', open: false, calls: 1, medianMs: 2700, costUsd: 0.003 },
+          { kind: 'twin-research', model: 'muse-wonder-1.0', served: 'Meta Model API', open: false, calls: 1, medianMs: 29800, costUsd: 0.16 },
+          { kind: 'portrait', model: 'muse-image-1.0', served: 'Meta Model API', open: false, calls: 1, medianMs: 8600, costUsd: 0.01 },
+          { kind: 'portrait-edit', model: 'muse-image-1.0', served: 'Meta Model API', open: false, calls: 2, medianMs: 16100, costUsd: 0.02 },
+          { kind: 'audit', model: 'muse-wonder-1.0', served: 'Meta Model API', open: false, calls: 1, medianMs: 13200, costUsd: 0.04 },
+        ]}
         error=""
         secs={7}
         onAgain={() => undefined}

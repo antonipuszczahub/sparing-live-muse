@@ -68,29 +68,21 @@
   color: var(--lichen);
 }
 
-/* The logo scales with the font size set on .brand: a tile for the mark, then the name */
+/* The logo scales with the font size set on .brand: the mark, then the name */
 .brand {
   display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
+  align-items: baseline;
   line-height: 1;
 }
 
-.tile {
-  display: grid;
-  place-items: center;
-  width: 1.7em;
-  height: 1.7em;
-  border-radius: 0.5em;
-  background: linear-gradient(145deg, #ff8f45 0%, #ff5a1f 55%, #f23d0a 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.45) inset,
-    0 -1px 0 rgba(160, 30, 0, 0.25) inset,
-    0 0.45em 0.9em -0.4em rgba(255, 90, 31, 0.75);
-}
-.tile svg {
-  width: 74%;
-  height: 74%;
+/* the S is the first letter: a touch taller than the capital L (0.76em against 0.703em), its vertical centre kept level with the L's, and tucked over the p so the two read as one word */
+.mark {
+  position: relative;
+  top: 0.038em;
+  width: 0.651em;
+  height: 0.76em;
+  color: var(--brass-hi);
+  margin-right: -0.13em;
   overflow: visible;
 }
 .arcs {
@@ -107,7 +99,7 @@
 .wm {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.28em;
+  gap: 0.22em;
   font-family: var(--font-display);
   font-size: 1em;
   font-weight: 700;

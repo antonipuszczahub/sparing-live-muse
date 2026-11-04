@@ -63,15 +63,14 @@ export async function drawArchetype(scenario: ScenarioId, gender: 'm' | 'f', ses
   );
 }
 
-/**
- * Muse Image draws the counterpart once, then edits the same face into three expressions
- * so the portrait follows the character's mood during the call. 3 images, about 3 cents.
- */
-export async function drawPortraits(input: { persona: Persona; scenario: ScenarioId; mood: string; session: string; lang?: Lang }): Promise<Portraits> {
+type PortraitInput = { persona: Persona; scenario: ScenarioId; mood: string; session: string; lang?: Lang };
+
+/** The counterpart's neutral portrait: one image, usually ready in 8 to 10 seconds, so the face can appear early. */
+export async function drawNeutral(input: PortraitInput): Promise<string> {
   const { persona, scenario, session } = input;
   const role = input.lang === 'pl' ? ROLE_EN[scenario] : persona.role;
   const who = persona.gender === 'f' ? 'woman' : 'man';
-  const neutral = await post(
+  return post(
     '/images/generations',
     {
       model: MODELS.image,
@@ -83,6 +82,10 @@ export async function drawPortraits(input: { persona: Persona; scenario: Scenari
     session,
     'portrait',
   );
+}
+
+/** The same person with a cold and a warm expression, edited from the neutral portrait. Two images, in parallel. */
+export async function drawExpressions(neutral: string, session: string): Promise<Pick<Portraits, 'cold' | 'warm'>> {
   const edit = (expression: string) =>
     post(
       '/images/edits',
@@ -98,5 +101,14 @@ export async function drawPortraits(input: { persona: Persona; scenario: Scenari
     edit('cold and unimpressed, arms of the face tense, eyebrows slightly furrowed, mouth flat'),
     edit('warm and interested, a genuine small smile, relaxed eyebrows'),
   ]);
-  return { neutral, cold, warm };
+  return { cold, warm };
+}
+
+/**
+ * Muse Image draws the counterpart once, then edits the same face into three expressions
+ * so the portrait follows the character's mood during the call. 3 images, about 3 cents.
+ */
+export async function drawPortraits(input: PortraitInput): Promise<Portraits> {
+  const neutral = await drawNeutral(input);
+  return { neutral, ...(await drawExpressions(neutral, input.session)) };
 }

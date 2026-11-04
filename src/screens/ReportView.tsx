@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { measureDelivery, type AuditResult, type Moment } from '../../shared/audit.ts';
 import type { FramingEvent } from '../../shared/framing.ts';
+import type { TraceRow } from '../../shared/trace.ts';
 import { langOf } from '../../shared/lang.ts';
 import type { Mood, SessionConfig, Turn } from '../../shared/types.ts';
 import { Brand } from '../components/Brand.tsx';
@@ -42,6 +43,8 @@ export interface ReportViewProps {
   camera: FramingEvent[];
   /** Null while the review is being written. */
   result: AuditResult | null;
+  /** Which models ran the call, from the budget ledger; empty or missing when it is not known. */
+  trace?: TraceRow[];
   error: string;
   /** Seconds the review has been running, for the wait message. */
   secs: number;
@@ -49,7 +52,7 @@ export interface ReportViewProps {
 }
 
 /** The review: score, the mood vine, the numbers, and the replay with what the character was thinking. */
-export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, error, secs, onAgain }: ReportViewProps) {
+export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain }: ReportViewProps) {
   const lang = langOf(config);
   const persona = config.persona;
   const first = persona.name.split(' ')[0]!;
@@ -203,6 +206,42 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
             )}
             <ClipMaker session={session} scenario={config.scenario} persona={persona} turns={turns} audit={result} lang={lang} userGender={config.user?.gender} />
           </section>
+
+          {trace && trace.length > 0 && (
+            <section className={s.trace} aria-label={t('traceTitle')}>
+              <h2 className={s.h2}>{t('traceTitle')}</h2>
+              <p className={s.traceLead}>{t('traceLead')}</p>
+              <div className={s.traceWrap}>
+                <table className={s.traceTable}>
+                  <thead>
+                    <tr>
+                      <th>{t('traceWhat')}</th>
+                      <th>{t('traceModel')}</th>
+                      <th>{t('traceWhere')}</th>
+                      <th>{t('traceCalls')}</th>
+                      <th>{t('traceTime')}</th>
+                      <th>{t('traceCost')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trace.map((r) => (
+                      <tr key={`${r.kind}|${r.model}|${r.served}`} data-open={r.open}>
+                        <td>{t('traceRole', r.kind)}</td>
+                        <td>
+                          <code>{r.model}</code>
+                        </td>
+                        <td>{r.served}</td>
+                        <td>{r.calls}</td>
+                        <td>{r.medianMs === null ? '–' : `${(r.medianMs / 1000).toFixed(1)} s`}</td>
+                        <td>{r.costUsd > 0 ? `$${r.costUsd.toFixed(3)}` : '$0'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {trace.some((r) => r.open) && <p className={s.traceNote}>{t('traceOpenNote')}</p>}
+            </section>
+          )}
         </>
       )}
 

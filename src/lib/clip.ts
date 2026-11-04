@@ -1,7 +1,8 @@
 import type { AuditResult } from '../../shared/audit.ts';
 import type { Lang, Mood, Persona, Turn } from '../../shared/types.ts';
 import { moodLabel, translate } from '../i18n/index.ts';
-import { MOOD_COLOR } from './mood.ts';
+import { S_BOX, S_PATH, S_STROKE } from './logo.ts';
+import { MOOD_COLOR_ON_DARK as MOOD_COLOR } from './mood.ts';
 
 /**
  * Renders a short captioned clip of the most telling moment of a call: the counterpart's face
@@ -28,6 +29,16 @@ export interface ClipResult {
 }
 
 const W = 720;
+
+// The clip is black with one orange accent, set in the app's own face.
+const FONT = 'Figtree, Inter, system-ui, sans-serif';
+const BG = '#0e0c0a';
+const INK = '#f5f1ea';
+const DIM = '#a79f94';
+const CARD = '#211c18';
+const ME = '#3a2415';
+const ORANGE = '#ff5a1f';
+
 const H = 900;
 
 interface Step {
@@ -109,7 +120,32 @@ export function clipSupported() {
   return typeof MediaRecorder !== 'undefined' && typeof HTMLCanvasElement.prototype.captureStream === 'function';
 }
 
+/** The logo: the S (drawn from the same path as the page) followed by "paring Live", baseline at `baseline`. */
+function drawBrand(ctx: CanvasRenderingContext2D, x: number, baseline: number, size: number) {
+  const h = size * 0.76;
+  const k = h / S_BOX.h;
+  ctx.save();
+  ctx.translate(x, baseline - h + size * 0.038);
+  ctx.scale(k, k);
+  ctx.translate(-S_BOX.x, -S_BOX.y);
+  ctx.lineWidth = S_STROKE;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = ORANGE;
+  ctx.stroke(new Path2D(S_PATH));
+  ctx.restore();
+  ctx.font = `700 ${size}px ${FONT}`;
+  ctx.textAlign = 'left';
+  const tx = x + S_BOX.w * k - size * 0.13;
+  ctx.fillStyle = INK;
+  ctx.fillText('paring', tx, baseline);
+  ctx.fillStyle = ORANGE;
+  ctx.fillText('Live', tx + ctx.measureText('paring ').width, baseline);
+}
+
 export async function renderClip(input: ClipInput): Promise<ClipResult> {
+  // The canvas only knows fonts that are already loaded.
+  await document.fonts.load(`700 26px ${FONT}`).catch(() => undefined);
   const turns = pickWindow(input.turns, input.audit);
   const plan = schedule(turns);
   const imgs = await loadImages(input.portraits);
@@ -137,7 +173,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
   const face = (m: Mood) => (m <= 2 ? 'cold' : m >= 4 ? 'warm' : 'neutral') as 'cold' | 'neutral' | 'warm';
 
   function frame(t: number) {
-    ctx.fillStyle = '#0d1610';
+    ctx.fillStyle = BG;
     ctx.fillRect(0, 0, W, H);
 
     const step = plan.steps.find((s) => t >= s.start && t < s.end) ?? (t >= plan.total - plan.outro ? null : plan.steps.filter((s) => s.end <= t).at(-1) ?? null);
@@ -146,12 +182,12 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     for (const k of ['cold', 'neutral', 'warm'] as const) alpha[k] += ((face(mood) === k ? 1 : 0) - alpha[k]) * 0.12;
 
     // brand
-    ctx.fillStyle = '#e7ecdd';
-    ctx.font = '600 26px Inter, system-ui, sans-serif';
+    ctx.fillStyle = INK;
+    ctx.font = `600 26px ${FONT}`;
     ctx.textAlign = 'left';
-    ctx.fillText('Sparing Live', 36, 52);
-    ctx.fillStyle = '#8da38b';
-    ctx.font = '18px Inter, system-ui, sans-serif';
+    drawBrand(ctx, 36, 52, 26);
+    ctx.fillStyle = DIM;
+    ctx.font = `18px ${FONT}`;
     ctx.textAlign = 'right';
     ctx.fillText(say('clipBuilt'), W - 36, 50);
 
@@ -162,7 +198,7 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     ctx.save();
     roundRect(ctx, fx, fy, fs, fs, 28);
     ctx.clip();
-    ctx.fillStyle = '#15231a';
+    ctx.fillStyle = CARD;
     ctx.fillRect(fx, fy, fs, fs);
     if (imgs) {
       for (const k of ['neutral', 'cold', 'warm'] as const) {
@@ -171,8 +207,8 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
       }
       ctx.globalAlpha = 1;
     } else {
-      ctx.fillStyle = '#8da38b';
-      ctx.font = '600 96px Inter, system-ui, sans-serif';
+      ctx.fillStyle = DIM;
+      ctx.font = `600 96px ${FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(initials, fx + fs / 2, fy + fs / 2 + 32);
     }
@@ -184,14 +220,14 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
 
     // name + mood
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#e7ecdd';
-    ctx.font = '600 28px Inter, system-ui, sans-serif';
+    ctx.fillStyle = INK;
+    ctx.font = `600 28px ${FONT}`;
     ctx.fillText(input.persona.name, W / 2, fy + fs + 46);
     ctx.fillStyle = MOOD_COLOR[mood]!;
-    ctx.font = '22px Inter, system-ui, sans-serif';
+    ctx.font = `22px ${FONT}`;
     ctx.fillText(moodLabel(mood, lang, input.persona.gender), W / 2, fy + fs + 80);
     for (let i = 1; i <= 5; i++) {
-      ctx.fillStyle = i <= mood ? MOOD_COLOR[mood]! : '#2b4132';
+      ctx.fillStyle = i <= mood ? MOOD_COLOR[mood]! : '#3a332c';
       roundRect(ctx, W / 2 - 130 + (i - 1) * 54, fy + fs + 96, 48, 8, 4);
       ctx.fill();
     }
@@ -200,8 +236,8 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
 
     if (t < plan.intro) {
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#e7ecdd';
-      ctx.font = '600 38px Inter, system-ui, sans-serif';
+      ctx.fillStyle = INK;
+      ctx.font = `600 38px ${FONT}`;
       ctx.fillText(say('clipIntro1', input.userGender ?? 'm'), W / 2, bodyTop + 60);
       ctx.fillText(say('clipIntro2'), W / 2, bodyTop + 108);
       return;
@@ -210,19 +246,23 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     if (t >= plan.total - plan.outro) {
       const a = input.audit;
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#e7ecdd';
-      ctx.font = '600 70px Inter, system-ui, sans-serif';
+      ctx.fillStyle = INK;
+      ctx.font = `600 70px ${FONT}`;
       ctx.fillText(a ? `${a.score}/100` : say('clipOver'), W / 2, bodyTop + 66);
       if (a) {
-        ctx.fillStyle = '#c5d1bd';
-        ctx.font = '26px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#d8d0c5';
+        ctx.font = `26px ${FONT}`;
         wrap(ctx, a.verdict, W - 120)
           .slice(0, 3)
           .forEach((l, i) => ctx.fillText(l, W / 2, bodyTop + 116 + i * 36));
       }
-      ctx.fillStyle = '#a4d65e';
-      ctx.font = '600 24px Inter, system-ui, sans-serif';
-      ctx.fillText(say('clipPractice', input.siteLabel), W / 2, H - 50);
+      ctx.fillStyle = ORANGE;
+      const invite = say('clipPractice', input.siteLabel);
+      // a long address (the repository) shrinks to fit instead of running off the edge
+      let size = 24;
+      ctx.font = `600 ${size}px ${FONT}`;
+      while (ctx.measureText(invite).width > W - 60 && size > 13) ctx.font = `600 ${--size}px ${FONT}`;
+      ctx.fillText(invite, W / 2, H - 50);
       return;
     }
 
@@ -232,25 +272,25 @@ export async function renderClip(input: ClipInput): Promise<ClipResult> {
     const shown = Math.min(turn.text.length, Math.floor((t - step.start) * 46));
     const text = turn.text.slice(0, shown);
 
-    ctx.font = '30px Inter, system-ui, sans-serif';
+    ctx.font = `30px ${FONT}`;
     const lines = wrap(ctx, text || ' ', W - 150).slice(-5);
     const boxH = lines.length * 40 + 36;
     const boxW = W - 90;
     const bx = bot ? 36 : W - 36 - boxW;
-    ctx.fillStyle = bot ? '#15231a' : '#4a3622';
+    ctx.fillStyle = bot ? CARD : ME;
     roundRect(ctx, bx, bodyTop, boxW, boxH, 22);
     ctx.fill();
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#e7ecdd';
+    ctx.fillStyle = INK;
     lines.forEach((l, i) => ctx.fillText(l, bx + 24, bodyTop + 50 + i * 40));
-    ctx.fillStyle = '#8da38b';
-    ctx.font = '16px Inter, system-ui, sans-serif';
+    ctx.fillStyle = DIM;
+    ctx.font = `16px ${FONT}`;
     ctx.fillText(bot ? first : say('you'), bx + 24, bodyTop + 22);
 
     if (bot && turn.thought && t >= step.typeEnd) {
       const k = Math.min(1, (t - step.typeEnd) / 0.35);
       ctx.globalAlpha = k;
-      ctx.font = 'italic 27px Inter, system-ui, sans-serif';
+      ctx.font = `italic 27px ${FONT}`;
       const tl = wrap(ctx, `${say('thinks')} ${turn.thought}`, W - 120).slice(0, 3);
       ctx.fillStyle = MOOD_COLOR[turn.mood ?? 3]!;
       tl.forEach((l, i) => ctx.fillText(l, 52, bodyTop + boxH + 52 + i * 36));

@@ -9,3 +9,6 @@ export const moodColor = (mood: Mood) => MOOD_COLOR[mood];
 export const KIND_COLOR = { strength: '#2f8a1f', mistake: '#c92f15', 'turning-point': '#b86a00' } as const;
 
 export const OUTCOME_COLOR = { won: '#2f8a1f', partial: '#b86a00', lost: '#c92f15' } as const;
+
+/** The same moods, brighter, for the dark shareable clip. */
+export const MOOD_COLOR_ON_DARK = ['', '#ff6a4a', '#f5a524', '#bcb1a3', '#82d452', '#3fdcaa'] as const;

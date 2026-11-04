@@ -29,8 +29,8 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | `muse-spark-1.3` | Live counterpart (streamed, tagged format); the **eye** agent (vision) | first spoken word median 1.1 s; screen read in 2.7 s |
 | `muse-wonder-1.0` | **Twin research** with live web search (Responses API); **post-call audit** (JSON schema) | twin about 30 s; audit about 13 s |
 | `muse-voice-transcribe-1.0` | **Ears**: realtime WebSocket in `ENDPOINTING` mode, language bias per call (English or Polish) | final text 0.36 s after speech ends; a Polish test sentence came back word for word |
-| `muse-image-1.0` | **Face**: one portrait plus two expression edits | three images in about 30 s, 3 cents |
-| Muse Spark Open | The character can run on **open weights**: one tick on the start screen, same protocol, served by Baseten (or Fireworks, Modal, local Ollama); `docs/MANIFEST.md` records which calls ran where, and a failing host falls back to Spark | median first word 1.2 s, 0 failures in 24 scripted calls ([`docs/EVAL.open.md`](docs/EVAL.open.md)); 512 open-weights calls in the manifest |
+| `muse-image-1.0` | **Face**: one portrait plus two expression edits | first portrait in about 9 s, all three images in about 25 s, 3 cents |
+| Muse Spark Open | The character can run on **open weights**: one tick on the start screen, same protocol, served by Baseten (or Fireworks, Modal, local Ollama); `docs/MANIFEST.md` records which calls ran where, and a failing host falls back to Spark | median first word 1.2 s, 0 failures in 24 scripted calls ([`docs/EVAL.open.md`](docs/EVAL.open.md)); 540 open-weights calls in the manifest |
 | Browser speech synthesis (not a model) | The character's **voice**: the OS/browser feature, chosen per character gender; see [Voice](#voice-what-is-a-meta-model-and-what-is-not) | no model call |
 | `sam-3.1` | Optional camera: finds the face in a frame, so the review can cite framing facts (left the frame, leaned back) at the right moment | face box in about 2.7 s |
 
@@ -106,6 +106,7 @@ Wear headphones, so the character does not hear itself.
 
 | Command | What it does |
 |---|---|
+| `npm run preflight` | Checks, in one go, that the app is ready to be recorded or submitted (server, key, no third-party voice, budget, files, git); calls no model |
 | `npm run check:meta` | Probes the API: chat, streaming, JSON schema, Wonder |
 | `npm run try:turn` | Plays a short scripted call and prints latency per turn (`-- --lang pl` for Polish) |
 | `npm run try:twin -- basecamp.com` | Researches a company and prints the twin |
@@ -166,7 +167,7 @@ A calm warm-grey page that turns to orange at the bottom, with three pools of li
 - **Review:** score, mood line, measured numbers, and a replay with what was said on the left and what the character privately thought on the right.
 - **Every screen fits a phone** (the start screen becomes a swipeable row with a pinned call button, the call fills the screen) and wide monitors; motion respects `prefers-reduced-motion`.
 
-The type is Figtree throughout (tight and semibold for headings, regular for text, small tracked capitals for labels). The one accent is orange. The logo is an S built from two arcs, one voice on each side of the conversation, on an orange tile (`Brand.tsx`, also the favicon). The font loads from Google Fonts with system fallbacks and is the only third-party request the page makes. While developing, `/?fx=call`, `call-hostile`, `call-won`, `report`, `report-wait`, `twin` and `twin-ready` open the call, review and research screens with made-up data, so the interface can be looked at without spending model calls apart from the face of the call screens (dev server only, not in the production build).
+The type is Figtree throughout (tight and semibold for headings, regular for text, small tracked capitals for labels). The one accent is orange. The logo is the first letter of the name: a fast S with soft edges in flat orange followed by "paring Live" (`Brand.tsx`); on black it is the app icon (`public/favicon.svg`, the PNG icons and `manifest.webmanifest`). The font loads from Google Fonts with system fallbacks and is the only third-party request the page makes. While developing, `/?fx=call`, `call-hostile`, `call-won`, `report`, `report-wait`, `twin` and `twin-ready` open the call, review and research screens with made-up data, so the interface can be looked at without spending model calls apart from the face of the call screens (dev server only, not in the production build).
 
 ## Layout
 
@@ -185,7 +186,7 @@ tests/           unit tests    scripts/  probes and evaluation
 
 ## Status
 
-Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); an optional ElevenLabs path is built but switched off in this submission because the hackathon allows only Meta models at runtime. Not yet deployed.
+Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); an optional ElevenLabs path is built but switched off in this submission because the hackathon allows only Meta models at runtime. There is no hosted link: the project runs from this repository (see [Run it](#run-it)), and a hosted copy is optional. Before recording or submitting, `npm run preflight` checks the running app, the key, the voice switch, the budget and the files in one go.
 
 ## License
 

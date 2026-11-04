@@ -8,12 +8,13 @@ import { audit } from './agents/auditor.ts';
 import { look } from './agents/eye.ts';
 import { findFaces } from './agents/sam.ts';
 import { characterTurn } from './agents/persona.ts';
-import { drawPortraits, type Portraits } from './agents/portrait.ts';
+import { drawExpressions, drawNeutral, type Portraits } from './agents/portrait.ts';
 import { researchTwin, twinCache, twinKey } from './agents/twinCache.ts';
 import { BudgetError, openWeightsInfo } from './meta/client.ts';
 import { openByDefault, wantsOpenWeights } from './meta/open.ts';
 import { rateLimit } from './limits.ts';
 import { ledger } from './meta/ledger.ts';
+import { traceRows } from './meta/trace.ts';
 import { registerTts, thirdPartyVoiceEnv, voiceHealth } from './tts/route.ts';
 import { SCENARIO_IDS } from '../shared/scenarios.ts';
 import { newSeed, rollVariant } from '../shared/variation.ts';
@@ -112,9 +113,7 @@ app.post('/api/session', rateLimit('session', Number(process.env.SESSIONS_PER_IP
   const session = `s_${variant.toString(36)}_${Date.now().toString(36)}`;
   // Start drawing the face now: by the time the call connects (after twin research, if any) it is ready.
   if (ledger.canSpend(session).ok && process.env.MODEL_API_KEY) {
-    const job = drawPortraits({ persona: v.persona, scenario: scenario as never, mood: '', session, lang });
-    portraitCache.set(session, job);
-    job.catch(() => portraitCache.delete(session));
+    startPortraits({ persona: v.persona, scenario: scenario as never, mood: '', session, lang });
   }
   res.json({ session, config });
 });
@@ -228,30 +227,62 @@ app.post('/api/eye', async (req, res) => {
   }
 });
 
-const portraitCache = new Map<string, Promise<Portraits>>();
+interface PortraitJob {
+  neutral: Promise<string>;
+  rest: Promise<Pick<Portraits, 'cold' | 'warm'>>;
+}
+const portraitCache = new Map<string, PortraitJob>();
 
-/** Muse Image draws the counterpart in three moods. Cached per session; the client loads it in the background. */
+/** Starts drawing a character's face: the neutral portrait first, then the two expressions edited from it. */
+function startPortraits(input: Parameters<typeof drawNeutral>[0]): PortraitJob {
+  const neutral = drawNeutral(input);
+  const rest = neutral.then((n) => drawExpressions(n, input.session));
+  const job: PortraitJob = { neutral, rest };
+  portraitCache.set(input.session, job);
+  // a failed job is forgotten, so the next request draws again; both promises are handled here, so neither goes unhandled
+  Promise.all([neutral, rest]).catch(() => portraitCache.delete(input.session));
+  return job;
+}
+
+/**
+ * Muse Image draws the counterpart in three moods. Cached per session; the client loads it in the background.
+ * `part: 'neutral'` answers as soon as the first portrait is drawn, `part: 'rest'` returns the two expressions edited from it,
+ * and no `part` waits for all three (the clip maker).
+ */
 app.post('/api/portraits', async (req, res) => {
   const parsed = z
-    .object({ session: z.string().min(4).max(64), scenario: z.enum(SCENARIO_IDS as [string, ...string[]]), persona: PersonaSchema, lang: LangSchema.optional() })
+    .object({
+      session: z.string().min(4).max(64),
+      scenario: z.enum(SCENARIO_IDS as [string, ...string[]]),
+      persona: PersonaSchema,
+      lang: LangSchema.optional(),
+      part: z.enum(['neutral', 'rest']).optional(),
+    })
     .safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { session, scenario, persona, lang } = parsed.data;
-  let job = portraitCache.get(session);
-  if (!job) {
-    job = drawPortraits({ persona, scenario: scenario as never, mood: '', session, lang });
-    portraitCache.set(session, job);
-    job.catch(() => portraitCache.delete(session));
-  }
+  const { session, scenario, persona, lang, part } = parsed.data;
+  const job = portraitCache.get(session) ?? startPortraits({ persona, scenario: scenario as never, mood: '', session, lang });
   try {
-    res.json(await job);
+    if (part === 'neutral') res.json({ neutral: await job.neutral });
+    else if (part === 'rest') res.json(await job.rest);
+    else res.json({ neutral: await job.neutral, ...(await job.rest) });
   } catch (e) {
     if (e instanceof BudgetError) res.status(429).json({ error: e.message, budget: e.reason });
     else res.status(502).json({ error: e instanceof Error ? e.message : 'Portrait failed' });
   }
+});
+
+/** Which models ran a call, from the budget ledger: the review shows it as proof of what is Meta and what is open weights. */
+app.get('/api/trace/:session', (req, res) => {
+  const parsed = z.string().min(4).max(64).safeParse(req.params.session);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Bad session' });
+    return;
+  }
+  res.json({ rows: traceRows(ledger.forSession(parsed.data), openWeightsInfo()?.label) });
 });
 
 /** Camera framing: SAM 3.1 finds the face in one JPEG frame. Only boxes leave the server. */

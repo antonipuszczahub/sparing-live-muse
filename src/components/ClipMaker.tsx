@@ -5,7 +5,7 @@ import type { Lang, Mood, Persona, ScenarioId, Turn } from '../../shared/types.t
 import { moodLabel, t, translate, useLang } from '../i18n/index.ts';
 import { clipSupported, renderClip, type ClipResult } from '../lib/clip.ts';
 import { vars } from '../lib/css.ts';
-import { MOOD_COLOR } from '../lib/mood.ts';
+import { MOOD_COLOR_ON_DARK } from '../lib/mood.ts';
 import { Archetype } from './Archetype.tsx';
 import ui from './ui.module.css';
 import styles from './ClipMaker.module.css';
@@ -19,6 +19,10 @@ function previewThought(turns: Turn[], audit: AuditResult | null): string {
 }
 
 /** One-click captioned clip of the call's most telling moment, ready to post. */
+/** What the clip tells people to visit: this site when it is hosted, the repository when the app runs on someone's own machine. */
+const REPO_LINK = 'github.com/antonipuszczahub/sparing-live-muse';
+const clipLink = () => (/^(localhost|127\.|\[::1\]|192\.168\.|10\.)/.test(location.host) ? REPO_LINK : location.host);
+
 export function ClipMaker({
   session,
   scenario,
@@ -63,7 +67,7 @@ export function ClipMaker({
         persona,
         audit,
         portraits,
-        siteLabel: location.host,
+        siteLabel: clipLink(),
         lang,
         userGender,
         onProgress: setProgress,
@@ -115,7 +119,7 @@ export function ClipMaker({
           </div>
         )}
       </div>
-      <div className={styles.phone} style={vars({ '--c': MOOD_COLOR[mood] })} aria-hidden="true">
+      <div className={styles.phone} style={vars({ '--c': MOOD_COLOR_ON_DARK[mood] })} aria-hidden="true">
         <div className={styles.face}>
           <Archetype scenario={scenario} />
         </div>

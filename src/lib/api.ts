@@ -1,4 +1,5 @@
 import type { AuditResult } from '../../shared/audit.ts';
+import type { TraceRow } from '../../shared/trace.ts';
 import type { FramingEvent } from '../../shared/framing.ts';
 import type { SessionConfig, Turn } from '../../shared/types.ts';
 import { t } from '../i18n/index.ts';
@@ -42,5 +43,16 @@ export async function requestAudit(body: {
       }
       throw new ApiError(t('serverUnreachable'));
     }
+  }
+}
+
+/** Which models ran this call (from the server's budget ledger); the review shows it. Quietly empty when it cannot be had. */
+export async function requestTrace(session: string): Promise<TraceRow[]> {
+  try {
+    const res = await fetch(`/api/trace/${encodeURIComponent(session)}`);
+    if (!res.ok) return [];
+    return ((await res.json()) as { rows?: TraceRow[] }).rows ?? [];
+  } catch {
+    return [];
   }
 }

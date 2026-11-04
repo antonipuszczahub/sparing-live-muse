@@ -1,26 +1,26 @@
+import { S_BOX, S_PATH, S_STROKE } from '../lib/logo.ts';
 import ui from './ui.module.css';
 
 /**
- * The mark: an S built from two arcs, one voice on each side of the conversation, on an orange tile.
+ * The mark is the first letter of the name: a fast S with soft edges in flat orange, no gradient.
  * It draws itself once when the page opens.
+ * (The same shape on a flat black square is the app icon.)
  */
 function Mark() {
   return (
-    <span className={ui.tile} aria-hidden="true">
-      <svg viewBox="0 0 48 48">
-        <path className={ui.arcs} pathLength={1} d="M33 15 A9 9 0 1 0 24 24 A9 9 0 1 1 15 33" fill="none" stroke="#fff" strokeWidth="7.5" strokeLinecap="round" />
-      </svg>
-    </span>
+    <svg className={ui.mark} viewBox={`${S_BOX.x} ${S_BOX.y} ${S_BOX.w} ${S_BOX.h}`} aria-hidden="true">
+      <path className={ui.arcs} pathLength={1} d={S_PATH} fill="none" stroke="currentColor" strokeWidth={S_STROKE} strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
   );
 }
 
-/** "Sparing Live" with its mark. `size` is the height of the tile in pixels. */
+/** "Sparing Live" where the mark is the S: it stands on the baseline like a letter. `size` is the logo's height in pixels. */
 export function Brand({ size = 38 }: { size?: number }) {
   return (
-    <div className={ui.brand} role="img" aria-label="Sparing Live" style={{ fontSize: size * 0.58 }}>
+    <div className={ui.brand} role="img" aria-label="Sparing Live" style={{ fontSize: size * 0.64 }}>
       <Mark />
       <span className={ui.wm} aria-hidden="true">
-        <span>Sparing</span>
+        <span>paring</span>
         <i>Live</i>
       </span>
     </div>

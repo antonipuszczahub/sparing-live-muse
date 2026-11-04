@@ -69,6 +69,11 @@ class Ledger {
     return this.entries.filter((e) => e.session === session).reduce((s, e) => s + e.costUsd, 0);
   }
 
+  /** Every call recorded for one session (never prompts or transcripts: the ledger holds none). */
+  forSession(session: string): LedgerEntry[] {
+    return this.entries.filter((e) => e.session === session);
+  }
+
   /** Characters spoken today by a text-to-speech provider, for its own daily cap. */
   charsToday(provider: string): number {
     const today = day(Date.now());

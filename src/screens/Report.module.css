@@ -432,6 +432,71 @@
   font-weight: 600;
 }
 
+/* which models ran the call: a plain table, with the open-weights rows lit */
+.traceLead {
+  max-width: 72ch;
+  margin: -8px 0 22px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--lichen);
+}
+.traceWrap {
+  overflow-x: auto;
+  padding: 6px 22px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--r-card);
+  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 24px 60px -34px rgba(120, 60, 20, 0.3);
+}
+.traceTable {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.traceTable th {
+  padding: 16px 16px 12px 0;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lichen);
+}
+.traceTable td {
+  padding: 13px 16px 13px 0;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+  vertical-align: baseline;
+}
+.traceTable code {
+  padding: 2px 8px;
+  border-radius: 7px;
+  background: rgba(20, 17, 14, 0.06);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12.5px;
+}
+.traceTable tr[data-open='true'] td:nth-child(3) {
+  font-weight: 600;
+  color: var(--brass);
+}
+.traceTable tr[data-open='true'] td:nth-child(3)::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--brass-hi);
+  box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.16);
+}
+.traceNote {
+  margin: 14px 2px 0;
+  font-size: 13.5px;
+  color: var(--lichen);
+}
+
 @media (max-width: 980px) {
   .hero,
   .two {

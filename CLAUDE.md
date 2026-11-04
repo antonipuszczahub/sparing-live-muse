@@ -41,8 +41,8 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   light that lean towards the pointer (`Backdrop.tsx`), black pill buttons and segmented controls, white glass cards with 24px radius,
   ONE accent (`--brass` deep orange for small text, `--brass-hi` bright orange for light and the logo; the names are historical), ink
   for text. Real photographs, not drawings: the start screen shows four archetype portraits (`public/archetypes`, made by
-  `npm run make:archetypes`) and the call shows the generated face. The logo is an S built from two arcs on an orange tile
-  (`Brand.tsx`, `public/favicon.svg`). Do not bring back the dark jungle look, serif headings, vines, square corners or cartoon faces:
+  `npm run make:archetypes`) and the call shows the generated face. The logo is a fast S with soft edges in FLAT orange (no gradient, no glow; its lower stroke curves like a smile), drawn from the user's own sketch, and it IS the
+  first letter: the wordmark is that S followed by "paring Live" (`Brand.tsx`; on a flat black square, with no glow, shadow or gloss, it is the app icon: `public/favicon.svg`, `icon-*.png`, `apple-touch-icon.png`, `manifest.webmanifest`). Do not bring back the dark jungle look, serif headings, vines, square corners or cartoon faces:
   the user rejected three earlier looks. The call sets `--mood`/`--mc` on `:root` (`useMoodTheme`); `--mc` is a registered
   `@property`, so colour changes fade. Each screen is a container (server, state) plus a `*View` that only draws; styles are CSS modules
   next to them and `ui.module.css` holds the shared pieces. Pure layout code (`captions.ts`, `moodVine.ts`) is tested. A glass panel

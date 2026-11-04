@@ -15,6 +15,25 @@
   height: 100%;
   object-fit: cover;
   transition: opacity 0.7s ease;
+  /* a face that is a little alive: it fades in once, then slowly breathes */
+  animation:
+    faceIn 0.9s ease both,
+    breathe 9s ease-in-out 0.9s infinite;
+}
+
+@keyframes faceIn {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1.015) translateY(0);
+  }
+  50% {
+    transform: scale(1.04) translateY(-0.8%);
+  }
 }
 
 .wait {
