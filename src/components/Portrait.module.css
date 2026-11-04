@@ -15,24 +15,32 @@
   height: 100%;
   object-fit: cover;
   transition: opacity 0.7s ease;
-  /* a face that is a little alive: it fades in once, then slowly breathes */
+  /* a face that is a little alive: it fades in once, then slowly breathes; the nod below is always loaded
+     but paused until the character talks, so it starts and stops where it is instead of snapping */
   animation:
     faceIn 0.9s ease both,
-    breathe 9s ease-in-out 0.9s infinite;
+    breathe 9s ease-in-out 0.9s infinite,
+    talk 0.62s ease-in-out infinite alternate;
+  animation-play-state: running, running, paused;
 }
 
-/* while the character talks the face moves a little quicker and nods: alive, not a photo */
+/* while the character talks the face nods a little (individual transform properties compose with breathe) */
 .talking .image {
-  animation:
-    faceIn 0.9s ease both,
-    talk 0.62s ease-in-out infinite alternate;
+  animation-play-state: running, running, running;
 }
 @keyframes talk {
   from {
-    transform: scale(1.02) translateY(0) rotate(-0.15deg);
+    translate: 0 0;
+    rotate: -0.15deg;
   }
   to {
-    transform: scale(1.05) translateY(-0.7%) rotate(0.2deg);
+    translate: 0 -0.7%;
+    rotate: 0.2deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    animation: faceIn 0.9s ease both;
   }
 }
 
