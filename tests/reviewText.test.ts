@@ -12,6 +12,9 @@ const labels: ReviewLabels = {
   kinds: { strength: 'Strength', mistake: 'Mistake', 'turning-point': 'Turning point' },
   sayInstead: 'Say this instead',
   workNext: 'Work on next',
+  wording: 'Wording',
+  wordingSaid: 'You said',
+  wordingBetter: 'Better',
 };
 
 const result: AuditResult = {
@@ -41,6 +44,13 @@ test('the review becomes Markdown with the score, verdict, skills, moments in or
   assert.match(md, /Say this instead: “Eight hundred a month per clinic\.”/);
   assert.equal((md.match(/Say this instead/g) ?? []).length, 1, 'a moment without a better line has none');
   assert.match(md, /## Work on next\n1\. State the price before you are asked\.\n2\. Answer in two sentences, then stop\.\n$/);
+});
+
+test('language slips are listed with the time, the quote, the better phrase and the note', () => {
+  const withWording = { ...result, wording: [{ turn: 2, said: 'a third sign', better: 'a third signs', note: 'Singular subject.' }] };
+  const md = reviewAsText({ who: 'Dana', durationMs: 192000, result: withWording, turns, labels });
+  assert.match(md, /## Wording\n- 1:41 · You said: “a third sign” → Better: “a third signs” \(Singular subject\.\)\n\n## Work on next/);
+  assert.ok(!reviewAsText({ who: 'Dana', durationMs: 5000, result, turns, labels }).includes('## Wording'), 'no slips, no section');
 });
 
 test('a review with no moments and no next steps still reads cleanly', () => {

@@ -168,6 +168,10 @@
 .stat:nth-child(odd) {
   padding-right: 20px;
 }
+/* an odd number of figures: the last one takes the whole row */
+.stat:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 .stat b {
   display: block;
   font-family: var(--font-display);
@@ -243,6 +247,63 @@
   margin-right: 10px;
   font-family: var(--font-mono);
   font-size: 12px;
+  color: var(--lichen);
+}
+
+/* language slips: what was said, the better phrase, and why */
+.wording {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wording li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 20px;
+  align-items: baseline;
+  padding: 18px 0;
+  border-top: 1px solid var(--hairline, rgba(27, 19, 13, 0.14));
+}
+.wTime {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--lichen);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.wLine {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+}
+.wLine small {
+  display: inline-block;
+  min-width: 6.6em;
+  margin-right: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lichen);
+}
+.wBad {
+  text-decoration: line-through;
+  text-decoration-color: var(--ember);
+  text-decoration-thickness: 1.5px;
+  color: var(--ink-soft);
+}
+.wGood {
+  color: var(--ink);
+  font-weight: 600;
+}
+.wNote {
+  grid-column: 2;
+  margin: 0;
+  font-size: 15px;
   color: var(--lichen);
 }
 

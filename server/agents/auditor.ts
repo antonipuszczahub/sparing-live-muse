@@ -1,6 +1,6 @@
 import { langOf } from '../../shared/lang.ts';
 import { scenarioDef } from '../../shared/scenarios.ts';
-import { AUDIT_SCHEMA, ensureVerdict, measureDelivery, type AuditResult } from '../../shared/audit.ts';
+import { AUDIT_SCHEMA, cleanWording, ensureVerdict, measureDelivery, type AuditResult } from '../../shared/audit.ts';
 import type { Lang, SessionConfig, Turn } from '../../shared/types.ts';
 import { rollVariant } from '../../shared/variation.ts';
 import { complete } from '../meta/client.ts';
@@ -36,8 +36,10 @@ Zasady:
 - Parametry wygłosu poniżej zostały zmierzone z nagrania; korzystaj z nich i nie zgaduj innych.
 - Wynik: 0-100 ogółem; bądź skalibrowany (przyzwoita rozmowa to 55-70, znakomita 85+). outcome to "won" tylko wtedy, gdy cel został wyraźnie osiągnięty.
 - weaknessTags: od 1 do 3 krótkich tagów małymi literami, na przykład „niejasno o cenie”, „zignorowane zastrzeżenie”, „przerywanie rozmówcy”, które posłużą do wycelowania następnej rozmowy.
+- wording: do 3 błędów językowych w słowach samego użytkownika (gramatyka, odmiana, zgodność rodzaju i liczby, niewłaściwe albo niezręczne słowo). "said" to DOSŁOWNY cytat z jednej linii UŻYTKOWNIKA, "better" to poprawiona wersja tego fragmentu, "note" ma najwyżej 12 słów o tym, co było nie tak. Tekst pochodzi z rozpoznawania mowy: nigdy nie wskazuj pisowni, wielkich liter, interpunkcji ani słowa, które mogło być błędem rozpoznawania. Jeśli nie ma nic wyraźnego, zwróć pustą tablicę. Niczego nie wymyślaj.
+- Parametr repeats to liczba powtórzonych słów i urwanych początków w transkrypcji: wskazówka o zawahaniu, nie diagnoza. Nigdy nie nazywaj tego jąkaniem ani żadnym zaburzeniem mowy i nie dawaj porad zdrowotnych.
 - ${userNotePl(user)}
-- Wszystkie teksty (verdict, summary, what, why, betterLine, nextFocus, weaknessTags) pisz po polsku. Pole verdict to jedno pełne zdanie werdyktu (najwyżej 25 słów, to nagłówek raportu); summary ma najwyżej 70 słów, a szczegóły należą do momentów, a nie wartość pola outcome. Wartości pól wyliczeniowych (outcome: won/partial/lost, kind: strength/mistake/turning-point) zostaw dokładnie w oryginale.`;
+- Wszystkie teksty (verdict, summary, what, why, betterLine, nextFocus, weaknessTags, better, note) pisz po polsku. Pole verdict to jedno pełne zdanie werdyktu (najwyżej 25 słów, to nagłówek raportu); summary ma najwyżej 70 słów, a szczegóły należą do momentów, a nie wartość pola outcome. Wartości pól wyliczeniowych (outcome: won/partial/lost, kind: strength/mistake/turning-point) zostaw dokładnie w oryginale.`;
   }
   return `You are a sharp, fair coach reviewing a recorded practice call. The user rehearsed a high-stakes conversation against an AI character. You can see the character's private thoughts, which the user could not.
 
@@ -50,7 +52,9 @@ Rules:
 - The delivery numbers below were measured from the call; use them, do not guess others.
 - Scores: 0-100 overall; be calibrated (a decent call is 55-70, excellent 85+). outcome is "won" only if the goal was clearly achieved.
 - verdict is ONE sentence of at most 25 words: it is the headline of the report. summary is at most 70 words; the details belong in the moments.
-- weaknessTags: 1 to 3 short lowercase tags such as "vague on price", "ignored objection", "talked over the other person", reused to aim the next call.`;
+- weaknessTags: 1 to 3 short lowercase tags such as "vague on price", "ignored objection", "talked over the other person", reused to aim the next call.
+- wording: up to 3 language mistakes in the user's own words (grammar, agreement, a wrong or clumsy word or phrase). "said" is an EXACT quote from one USER line, "better" is the corrected version of that fragment, "note" is at most 12 words on what was wrong. The text comes from speech recognition: never flag spelling, capitalisation, punctuation, or a word that may be a recognition error. If nothing is clearly wrong, return an empty array. Do not invent.
+- The repeats number counts words said twice in a row and words that were cut off or restarted in the transcript: a hint of hesitation, not a diagnosis. Never call it a stutter or any speech condition, and give no health advice.`;
 }
 
 const LABEL = {
@@ -120,5 +124,6 @@ ${transcript}`;
   });
   const result = JSON.parse(raw) as AuditResult;
   result.moments = result.moments.filter((m) => m.turn >= 0 && m.turn < turns.length).sort((a, b) => a.turn - b.turn);
+  result.wording = cleanWording(result.wording, turns);
   return ensureVerdict(result);
 }

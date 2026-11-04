@@ -95,6 +95,9 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
         kinds: { strength: t('kindStrength'), mistake: t('kindMistake'), 'turning-point': t('kindTurning') },
         sayInstead: t('sayInstead'),
         workNext: t('workNext'),
+        wording: t('wordingTitle'),
+        wordingSaid: t('wordingSaid'),
+        wordingBetter: t('wordingBetter'),
       },
     });
     void navigator.clipboard
@@ -205,6 +208,10 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                   <span className={ui.lbl}>{t('fillers')}</span>
                 </div>
                 <div className={s.stat}>
+                  <b>{metrics.repeats}</b>
+                  <span className={ui.lbl}>{t('repeats')}</span>
+                </div>
+                <div className={s.stat}>
                   <b>{metrics.interruptions}</b>
                   <span className={ui.lbl}>{t('cutOff')}</span>
                 </div>
@@ -239,6 +246,34 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                   <li key={i}>
                     <span>{fmt(e.at)}</span>
                     {e.text}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {result.wording && result.wording.length > 0 && (
+            <section>
+              <h2 className={s.h2}>
+                {t('wordingTitle')} <span className={ui.lbl}>{t('wordingNote')}</span>
+              </h2>
+              <ul className={s.wording}>
+                {result.wording.map((w, i) => (
+                  <li key={i}>
+                    <button type="button" className={s.wTime} onClick={() => jump(w.turn)}>
+                      {fmt(turns[w.turn]?.at ?? 0)}
+                    </button>
+                    <div>
+                      <p className={s.wLine}>
+                        <small>{t('wordingSaid')}</small>
+                        <span className={s.wBad}>“{w.said}”</span>
+                      </p>
+                      <p className={s.wLine}>
+                        <small>{t('wordingBetter')}</small>
+                        <span className={s.wGood}>“{w.better}”</span>
+                      </p>
+                    </div>
+                    {w.note && <p className={s.wNote}>{w.note}</p>}
                   </li>
                 ))}
               </ul>

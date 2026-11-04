@@ -132,6 +132,7 @@ export const pl: Dict = {
   words: (n) => `${n} ${pluralPl(n, 'słowo', 'słowa', 'słów')}`,
   fillers: 'Słowa-wypełniacze',
   cutOff: 'Przerwania rozmówcy',
+  repeats: 'Powtórzenia i urwane słowa',
   attitude: 'Nastawienie rozmówcy w trakcie rozmowy',
   tooShort: 'Za krótko na wykres.',
   cameraMoments: 'Momenty z kamery',
@@ -172,6 +173,10 @@ export const pl: Dict = {
   readMind: 'Czytaj w myślach rozmówcy',
   thinks: 'myśli:',
   sayInstead: 'Powiedz zamiast tego',
+  wordingTitle: 'Sformułowania',
+  wordingNote: 'Z transkrypcji. Rozpoznawanie mowy mogło część wygładzić albo poprawić.',
+  wordingSaid: 'Padło',
+  wordingBetter: 'Lepiej',
 
   // ---- clip
   clipTitle: 'Udostępnij ten moment',

@@ -11,6 +11,9 @@ export interface ReviewLabels {
   kinds: Record<Moment['kind'], string>;
   sayInstead: string;
   workNext: string;
+  wording: string;
+  wordingSaid: string;
+  wordingBetter: string;
 }
 
 const clock = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
@@ -39,6 +42,15 @@ export function reviewAsText(input: { who: string; durationMs: number; result: A
       if (m.betterLine?.trim()) lines.push('', `${L.sayInstead}: “${m.betterLine.trim()}”`);
       lines.push('');
     }
+  }
+
+  if (r.wording?.length) {
+    lines.push(`## ${L.wording}`);
+    for (const w of r.wording) {
+      const at = turns[w.turn]?.at;
+      lines.push(`- ${at === undefined ? '' : `${clock(at)} · `}${L.wordingSaid}: “${w.said}” → ${L.wordingBetter}: “${w.better}”${w.note ? ` (${w.note})` : ''}`);
+    }
+    lines.push('');
   }
 
   if (r.nextFocus.length) {

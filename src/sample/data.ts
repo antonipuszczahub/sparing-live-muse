@@ -38,7 +38,7 @@ const TURNS_EN: Turn[] = [
   { role: 'bot', text: 'Six months is a trial, not a business. What happens when it ends?', thought: 'Real money, but six months proves nothing. Make me believe in year two.', mood: 3, at: 78000 },
   { role: 'user', text: 'We think the market is, uh, you know, really big, like forty billion, and we are, um, just getting started.', at: 101000 },
   { role: 'bot', text: 'I asked about renewal, not the market.', thought: 'Four fillers in one breath. I am losing interest.', mood: 2, at: 118000 },
-  { role: 'user', text: 'Right. Both clinics renewed for another year, and a third signs next month.', at: 139000 },
+  { role: 'user', text: 'Right. Both clinics renewed for another year, and a third sign next month.', at: 139000 },
   { role: 'bot', text: 'Now that is a sentence I can write down. Send me the contract terms.', thought: 'There it is. A number, a renewal, a next step.', mood: 4, at: 152000 },
 ];
 
@@ -50,7 +50,7 @@ const TURNS_PL: Turn[] = [
   { role: 'bot', text: 'Sześć miesięcy to próba, nie biznes. Co się stanie, gdy się skończy?', thought: 'Prawdziwe pieniądze, ale pół roku nic nie dowodzi. Niech mnie przekona co do drugiego roku.', mood: 3, at: 78000 },
   { role: 'user', text: 'Uważamy, że rynek jest, no, wie Pani, naprawdę duży, jakieś czterdzieści miliardów, a my, yyy, dopiero zaczynamy.', at: 101000 },
   { role: 'bot', text: 'Pytałam o przedłużenie umowy, nie o rynek.', thought: 'Cztery wypełniacze w jednym oddechu. Tracę zainteresowanie.', mood: 2, at: 118000 },
-  { role: 'user', text: 'Racja. Oba gabinety przedłużyły umowę o kolejny rok, a trzeci podpisuje w przyszłym miesiącu.', at: 139000 },
+  { role: 'user', text: 'Racja. Oba gabinety przedłużyły umowę o kolejny rok, a trzeci podpisują w przyszłym miesiącu.', at: 139000 },
   { role: 'bot', text: 'To jest zdanie, które mogę zapisać. Proszę przysłać warunki umowy.', thought: 'Jest. Liczba, przedłużenie, następny krok.', mood: 4, at: 152000 },
 ];
 
@@ -74,6 +74,7 @@ const RESULT_EN: AuditResult = {
   ],
   nextFocus: ['Lead with the paying customer in your first ten seconds.', 'State the price before you are asked.', 'Answer in two sentences, then stop.'],
   weaknessTags: [],
+  wording: [{ turn: 7, said: 'a third sign next month', better: 'a third signs next month', note: 'A singular subject takes “signs”.' }],
 };
 
 const RESULT_PL: AuditResult = {
@@ -94,6 +95,7 @@ const RESULT_PL: AuditResult = {
   ],
   nextFocus: ['Zacznij od płacącego klienta w pierwszych dziesięciu sekundach.', 'Podaj cenę, zanim o nią zapytają.', 'Odpowiadaj dwoma zdaniami, potem przestań.'],
   weaknessTags: [],
+  wording: [{ turn: 7, said: 'trzeci podpisują', better: 'trzeci podpisuje', note: 'Orzeczenie zgadza się z podmiotem: „trzeci” to liczba pojedyncza.' }],
 };
 
 export const sampleResult = (lang: Lang): AuditResult => (lang === 'pl' ? RESULT_PL : RESULT_EN);

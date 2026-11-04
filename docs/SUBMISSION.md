@@ -76,7 +76,7 @@ TypeScript, React 19, Vite, Express, WebSockets, Zod, Web Speech and Web Audio A
 
 ## Known limits (said plainly)
 
-Headphones are recommended. The open-weights switch is verified on Baseten only (Fireworks, Modal and Ollama presets are built, not verified). The character's voice quality depends on the browser: Microsoft Edge with its Natural voices is the recommended setup. There is no hosted link; the project runs from the repository (see the README, "Run it").
+The review reads the transcript, not the audio: it counts filler words, repeats and restarts and lists up to three language slips with exact quotes, but it does not measure pauses, speaking speed or voice, and speech recognition can smooth a stutter or correct a slip before the review sees it. Headphones are recommended. The open-weights switch is verified on Baseten only (Fireworks, Modal and Ollama presets are built, not verified). The character's voice quality depends on the browser: Microsoft Edge with its Natural voices is the recommended setup. There is no hosted link; the project runs from the repository (see the README, "Run it").
 
 ## Links
 

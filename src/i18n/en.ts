@@ -131,6 +131,7 @@ export const en = {
   words: (n: number) => `${n} words`,
   fillers: 'Filler words',
   cutOff: 'Times you cut them off',
+  repeats: 'Repeats and restarts',
   attitude: 'Their attitude over the call',
   tooShort: 'Too short to chart.',
   cameraMoments: 'Camera moments',
@@ -171,6 +172,10 @@ export const en = {
   readMind: 'Read their mind',
   thinks: 'thinks:',
   sayInstead: 'Say this instead',
+  wordingTitle: 'Wording',
+  wordingNote: 'Read from the transcript. Speech recognition may have smoothed or corrected some of what you said.',
+  wordingSaid: 'You said',
+  wordingBetter: 'Better',
 
   // ---- clip
   clipTitle: 'Share the moment',

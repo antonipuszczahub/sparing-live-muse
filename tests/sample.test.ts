@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { cleanWording } from '../shared/audit.ts';
 import { ABOUT } from '../src/i18n/about.ts';
 import { SAMPLE_TRACE, sampleConfig, sampleResult, sampleTurns } from '../src/sample/data.ts';
 
@@ -30,6 +31,15 @@ test('the sample review points at lines that exist and says why, in each languag
     assert.ok(result.verdict.length > 10 && result.nextFocus.length === 3);
   }
   assert.notEqual(sampleResult('en').summary, sampleResult('pl').summary);
+});
+
+test('the sample review shows one language slip, quoted from a line the user really said', () => {
+  for (const lang of LANGS) {
+    const turns = sampleTurns(lang);
+    const wording = sampleResult(lang).wording ?? [];
+    assert.equal(wording.length, 1, lang);
+    assert.deepEqual(cleanWording(wording, turns), wording, `${lang}: the quote is in the line`);
+  }
 });
 
 test('the Polish sample is addressed in the register the config says', () => {
