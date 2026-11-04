@@ -9,11 +9,13 @@ import { redial } from './lib/redial.ts';
 
 import { CallScreen } from './screens/CallScreen.tsx';
 import { ReportScreen } from './screens/ReportScreen.tsx';
+import { SampleScreen } from './screens/SampleScreen.tsx';
 import { SetupScreen } from './screens/SetupScreen.tsx';
 import { TwinScreen } from './screens/TwinScreen.tsx';
 
 type View =
   | { name: 'setup' }
+  | { name: 'sample' }
   | { name: 'twin'; session: string; config: SessionConfig; company: string }
   | { name: 'call'; session: string; config: SessionConfig }
   | { name: 'done'; session: string; config: SessionConfig; turns: Turn[]; durationMs: number; hungUp: boolean; camera: FramingEvent[] };
@@ -44,8 +46,11 @@ export function App() {
       <SetupScreen
         onStart={(session, config) => go({ name: 'call', session, config })}
         onTwin={(session, config, company) => go({ name: 'twin', session, config, company })}
+        onSample={() => go({ name: 'sample' })}
       />
     );
+  } else if (view.name === 'sample') {
+    screen = <SampleScreen onExit={() => go({ name: 'setup' })} />;
   } else if (view.name === 'twin') {
     screen = (
       <TwinScreen

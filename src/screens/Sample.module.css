@@ -1,0 +1,59 @@
+/* The strip above the recorded call: says what it is and lets the visitor leave or skip. */
+.bar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+  max-width: calc(100vw - 24px);
+  padding: 7px 8px 7px 14px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(27, 19, 13, 0.88);
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: -0.005em;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 30px -16px rgba(27, 19, 13, 0.7);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag b {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: #ff5a1f;
+}
+
+.btn {
+  min-height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+@media (max-width: 700px) {
+  .bar {
+    border-radius: 20px;
+    font-size: 12px;
+  }
+}

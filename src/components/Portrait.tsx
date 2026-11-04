@@ -11,9 +11,10 @@ type Faces = Partial<Record<Face, string>>;
  * Loads the three Muse Image portraits in the background so the call is never delayed. The neutral portrait comes
  * first (the server answers as soon as it is drawn); the cold and warm expressions follow, edited from it.
  */
-function usePortraits(session: string, scenario: ScenarioId, persona: Persona, lang: Lang): Faces {
+function usePortraits(session: string, scenario: ScenarioId, persona: Persona, lang: Lang, still: boolean): Faces {
   const [faces, setFaces] = useState<Faces>({});
   useEffect(() => {
+    if (still) return; // the sample call makes no model calls: the photograph of the archetype stays
     let live = true;
     setFaces({});
     const ask = (part: 'neutral' | 'rest') =>
@@ -30,7 +31,7 @@ function usePortraits(session: string, scenario: ScenarioId, persona: Persona, l
     return () => {
       live = false;
     };
-  }, [session, scenario, persona, lang]);
+  }, [session, scenario, persona, lang, still]);
   return faces;
 }
 
@@ -46,6 +47,7 @@ export function Portrait({
   mood,
   lang = 'en',
   speaking = false,
+  still = false,
 }: {
   session: string;
   scenario: ScenarioId;
@@ -54,15 +56,17 @@ export function Portrait({
   lang?: Lang;
   /** The character is talking: the face moves a little faster and nods slightly, instead of only breathing. */
   speaking?: boolean;
+  /** Draw nothing: show the archetype photograph only (the sample call). */
+  still?: boolean;
 }) {
-  const faces = usePortraits(session, scenario, persona, lang);
+  const faces = usePortraits(session, scenario, persona, lang, still);
   const wanted: Face = mood <= 2 ? 'cold' : mood >= 4 ? 'warm' : 'neutral';
   const shown: Face = faces[wanted] ? wanted : 'neutral';
 
   return (
     <div className={`${styles.portrait} ${speaking ? styles.talking : ''}`}>
-      <Archetype scenario={scenario} blur />
-      {!faces.neutral && <span className={styles.wait}>{t('drawingPortrait')}</span>}
+      <Archetype scenario={scenario} blur={!still} />
+      {!still && !faces.neutral && <span className={styles.wait}>{t('drawingPortrait')}</span>}
       {(Object.keys(faces) as Face[]).map((k) => (
         <img
           key={k}

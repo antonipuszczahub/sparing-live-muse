@@ -8,7 +8,7 @@ import styles from './AboutSheet.module.css';
  * Behind the Demo button: what the project is, what to watch for, what it runs on and where it is going, with a
  * button that fills in the demo call. The plans are marked as plans.
  */
-export function AboutSheet({ open, onClose, onStartDemo }: { open: boolean; onClose: () => void; onStartDemo: () => void }) {
+export function AboutSheet({ open, onClose, onStartDemo, onSample }: { open: boolean; onClose: () => void; onStartDemo: () => void; onSample: () => void }) {
   const a = ABOUT[useLang()];
   return (
     <Sheet open={open} title={a.title} onClose={onClose}>
@@ -55,6 +55,10 @@ export function AboutSheet({ open, onClose, onStartDemo }: { open: boolean; onCl
             {a.start}
           </button>
           <p className={styles.note}>{a.startNote}</p>
+          <button type="button" className={styles.ghost} onClick={onSample}>
+            {a.sample}
+          </button>
+          <p className={styles.note}>{a.sampleNote}</p>
         </div>
       </div>
     </Sheet>

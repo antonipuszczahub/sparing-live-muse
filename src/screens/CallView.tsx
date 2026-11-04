@@ -34,6 +34,8 @@ export interface CallViewProps {
   onCamera: () => void;
   onShare: () => void;
   onHangUp: () => void;
+  /** A recorded call: no typing, microphone, camera or screen, and no portraits are drawn. */
+  sample?: boolean;
 }
 
 /** The call: their face, their mood, the words, and the controls. Everything it shows comes in as props. */
@@ -80,7 +82,7 @@ export function CallView(p: CallViewProps) {
             <span className={`${s.wave} ${snap.state === 'speaking' ? s.speaking : ''}`} />
             <span className={`${s.wave} ${s.w2} ${snap.state === 'speaking' ? s.speaking : ''}`} />
             <span className={s.face}>
-              <Portrait session={p.session} scenario={config.scenario} persona={persona} lang={lang} mood={snap.mood} speaking={snap.state === 'speaking'} />
+              <Portrait session={p.session} scenario={config.scenario} persona={persona} lang={lang} mood={snap.mood} speaking={snap.state === 'speaking'} still={p.sample} />
             </span>
           </div>
           <div className={s.meta}>
@@ -156,6 +158,7 @@ export function CallView(p: CallViewProps) {
               {snap.lastLatencyMs != null && <small>{t('firstWord', (snap.lastLatencyMs / 1000).toFixed(1))}</small>}
             </span>
           </div>
+          {!p.sample && (
           <form
             className={s.typeForm}
             onSubmit={(e) => {
@@ -165,6 +168,8 @@ export function CallView(p: CallViewProps) {
           >
             <input className={s.typ} value={p.typed} onChange={(e) => p.onTyped(e.target.value)} placeholder={t('typePlaceholder')} aria-label={t('typePlaceholder')} />
           </form>
+          )}
+          {!p.sample && (
           <button
             type="button"
             className={`${s.ib} ${s.mic} ${snap.muted ? s.on : ''}`}
@@ -176,6 +181,7 @@ export function CallView(p: CallViewProps) {
           >
             <Icon name={snap.muted ? 'micOff' : 'voice'} />
           </button>
+          )}
           {p.canCamera && (
             <button
               type="button"

@@ -53,10 +53,12 @@ export interface ReportViewProps {
   onRedial: () => void;
   /** The review failed: ask for it again (the call itself is kept). */
   onRetry: () => void;
+  /** A recorded call: the clip maker (which draws portraits with Muse Image) is not offered. */
+  sample?: boolean;
 }
 
 /** The review: score, the mood vine, the numbers, and the replay with what the character was thinking. */
-export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain, onRedial, onRetry }: ReportViewProps) {
+export function ReportView({ session, config, turns, durationMs, hungUp, camera, result, trace, error, secs, onAgain, onRedial, onRetry, sample }: ReportViewProps) {
   const lang = langOf(config);
   const persona = config.persona;
   const first = persona.name.split(' ')[0]!;
@@ -257,7 +259,7 @@ export function ReportView({ session, config, turns, durationMs, hungUp, camera,
                 </ol>
               </div>
             )}
-            <ClipMaker session={session} scenario={config.scenario} persona={persona} turns={turns} audit={result} lang={lang} userGender={config.user?.gender} open={config.provider === 'open'} />
+            {!sample && <ClipMaker session={session} scenario={config.scenario} persona={persona} turns={turns} audit={result} lang={lang} userGender={config.user?.gender} open={config.provider === 'open'} />}
           </section>
 
           {trace && trace.length > 0 && (

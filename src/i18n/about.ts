@@ -16,6 +16,8 @@ export interface About {
   next: { title: string; body: string }[];
   start: string;
   startNote: string;
+  sample: string;
+  sampleNote: string;
 }
 
 export const ABOUT: Record<Lang, About> = {
@@ -43,6 +45,8 @@ export const ABOUT: Record<Lang, About> = {
     ],
     start: 'Fill in the demo call',
     startNote: 'An investor at the Realistic level and a pitch with numbers in it. You only press Call.',
+    sample: 'Watch a sample call and its review',
+    sampleNote: 'A recorded call with an investor and the review that follows it. No key needed and no model is called.',
   },
   pl: {
     title: 'Czym jest Sparing Live?',
@@ -68,5 +72,7 @@ export const ABOUT: Record<Lang, About> = {
     ],
     start: 'Przygotuj rozmowę demo',
     startNote: 'Inwestor na poziomie Realistycznym i oferta z liczbami. Zostaje Ci tylko wcisnąć Zadzwoń.',
+    sample: 'Zobacz przykładową rozmowę i recenzję',
+    sampleNote: 'Nagrana rozmowa z inwestorem i recenzja po niej. Klucz niepotrzebny, żaden model nie jest wywoływany.',
   },
 };

@@ -37,9 +37,12 @@ const WHO = { sales: 'whoSales', defense: 'whoDefense', salary: 'whoSalary', pit
 export function SetupScreen({
   onStart,
   onTwin,
+  onSample,
 }: {
   onStart: (session: string, config: SessionConfig) => void;
   onTwin: (session: string, config: SessionConfig, company: string) => void;
+  /** Show the recorded sample call and review (no key, no model calls). */
+  onSample: () => void;
 }) {
   const lang = useLang();
   const [scenario, setScenario] = useState<ScenarioId>('sales');
@@ -344,6 +347,7 @@ export function SetupScreen({
       <AboutSheet
         open={about}
         onClose={() => setAbout(false)}
+        onSample={onSample}
         onStartDemo={() => {
           // the recording: the investor, a realistic level and a pitch with real numbers in it
           setScenario('pitch');
