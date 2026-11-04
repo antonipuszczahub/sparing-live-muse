@@ -16,7 +16,7 @@ The submission form takes a link to a video of at most 3:00 (judges stop at 3:00
 | Time | On screen | Say |
 |---|---|---|
 | 0:00 | Start screen | "Before this week I had a Polish prototype on a local model. Everything you see here was built this week on Meta's Muse models: a voice loop, a set of agents, and a reviewer." |
-| 0:12 | Pick the investor, type the pitch, type the real company, press Call. The research steps scroll | "I'm calling an investor at a real company. Muse Wonder researched it with live web search, so she knows what the company knows." |
+| 0:12 | Press "Demo setup" (it picks the investor, the Realistic level and a ready pitch), type the real company, press Call. The research steps scroll | "I'm calling an investor at a real company. Muse Wonder researched it with live web search, so she knows what the company knows." |
 | 0:30 | The call. Speak a pitch, let her interrupt once, then talk over her | "Full duplex: she can cut me off, and when I talk over her she stops mid-sentence. The face is Muse Image; the ring around it and the glow behind the page are her mood." |
 | 1:00 | Share the screen, show the weak slide | "She can see my screen. Muse Spark reads the slide and she goes straight for the claim with no source." |
 | 1:25 | Keep talking until the mood turns, or hang up yourself | "Her mood moves with what I say. Hard levels hang up on a weak pitch." |
