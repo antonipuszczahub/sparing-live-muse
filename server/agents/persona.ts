@@ -7,6 +7,7 @@ import type { BotReply, Mood, SessionConfig, Turn } from '../../shared/types.ts'
 import { MODELS } from '../meta/models.ts';
 import { BudgetError, stream, type ChatMessage } from '../meta/client.ts';
 import { buildSystemPromptPl } from './persona.pl.ts';
+import { turnHint } from './turnHint.ts';
 
 /*
  * Live turns use a tagged plain-text format instead of JSON mode. Measured on the Meta API:
@@ -82,6 +83,15 @@ export function toMessages(system: string, history: Turn[], opening?: string): C
   return msgs;
 }
 
+/**
+ * The per-turn hint goes after the conversation, as a note, and not into the system prompt: the system prompt and the
+ * history stay exactly the same from turn to turn, so a host that caches the start of the prompt keeps its cache.
+ */
+export function withHint(messages: ChatMessage[], hint: string | undefined): ChatMessage[] {
+  if (!hint) return messages;
+  return [...messages, { role: 'user', content: `[Note for you only. The user did not say this and you never mention it: ${hint}]` }];
+}
+
 const TAIL = '\nHANGUP:';
 
 /**
@@ -144,8 +154,9 @@ export interface TurnInput {
  * has been spoken yet, the turn is asked again from Meta's hosted Spark with the same prompt, and the reply says so.
  */
 export async function characterTurn(input: TurnInput, onSay: (delta: string) => void, run: typeof stream = stream): Promise<BotReply> {
-  const system = buildSystemPrompt(input.config, { screen: input.screen });
   const lang = langOf(input.config);
+  const hint = turnHint(input.history, lang, input.config.variant);
+  const system = buildSystemPrompt(input.config, { screen: input.screen });
   const opening = input.history.length === 0 ? beginNote(scenarioDef(input.config.scenario, lang).opening, lang) : undefined;
 
   let spoken = false;
@@ -155,7 +166,7 @@ export async function characterTurn(input: TurnInput, onSay: (delta: string) => 
       {
         model: provider === 'open' ? MODELS.open : MODELS.spark,
         provider,
-        messages: toMessages(system, input.history, opening),
+        messages: withHint(toMessages(system, input.history, opening), hint),
         kind: 'character-turn',
         session: input.session,
         // Reasoning tokens count against this limit (measured: 60-370 per turn at effort "minimal" on Meta's Spark).

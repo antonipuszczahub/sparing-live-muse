@@ -89,7 +89,7 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   itself, `languageBias` only sharpens it (Polish came back word for word).
 - Hosted Muse Spark first-word latency varies by day: 1.1 s EN / 1.6 s PL on 28 Oct, 2.4-2.6 s in both languages on 4 Nov
   (same prompts took about 1 s on open weights that day, so default to open weights and quote dated numbers).
-- Muse Spark in Polish uses more tokens than English (open weights: 1.2 s vs 1.0 s); the private thought is
+- Muse Spark in Polish uses more tokens than English (open weights: 1.5 s vs 1.1 s); the private thought is
   capped at 12 words in Polish for that reason.
 - Wonder sometimes puts the outcome word ("lost") in the audit `verdict`; `ensureVerdict` repairs it.
 - What made the character sound like nobody ("no normal person talks like that", the user's own test call, 4 Nov): the
@@ -102,6 +102,10 @@ ledger. Raise real risks as engineering decisions, not as doubts about the idea.
   we supplied, so the examples in the prompt are the lever: write more of them (original lines, never film or subtitle
   text) rather than adding rules. `tests/naturalness.test.ts` guards the pieces; judge the real thing with
   `npm run try:turn` and by reading a call.
+- Left alone, the character asks a question in 74% (EN) / 86% (PL) of its turns, in runs of 4-5 (it sounds like an interview
+  form). `server/agents/turnHint.ts` closes turns to questions after the character has asked, as a note after the history
+  (not in the system prompt, so the prompt prefix stays cacheable): 51% / 57% now, runs of at most 2-3, first word +0.06-0.17 s.
+  A second "director" agent was tried and was worse (4:6 in blind judging), so do not add agents to the voice loop.
 - Model ids and prices are in `server/meta/models.ts`.
 
 ## How to work here

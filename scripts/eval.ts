@@ -150,6 +150,18 @@ const leaks = calls.reduce((n, c) => n + c.leaks, 0);
 const turns = calls.reduce((n, c) => n + c.replies.length, 0);
 const errors = calls.reduce((n, c) => n + c.empty, 0);
 
+// Does the character sound like an interview form? Every turn a question, the same first word again and again.
+const asking = (t: string) => /\?\s*[—–-]?\s*$/.test(t.trim());
+const opener = (t: string) => (t.trim().split(/\s+/)[0] ?? '').replace(/[^\p{L}\p{N}']/gu, '').toLowerCase();
+const asked = calls.reduce((n, c) => n + c.replies.filter(asking).length, 0);
+const runs = calls.map((c) => {
+  let best = 0;
+  let run = 0;
+  for (const r of c.replies) best = Math.max(best, (run = asking(r) ? run + 1 : 0));
+  return best;
+});
+const sameOpener = calls.reduce((n, c) => n + c.replies.filter((r, i) => i > 0 && opener(r) && opener(r) === opener(c.replies[i - 1]!)).length, 0);
+
 const rows = ([1, 2, 3, 4] as Level[]).map((level) => {
   const weak = calls.filter((c) => c.level === level && c.profile === 'weak');
   const strong = calls.filter((c) => c.level === level && c.profile === 'strong');
@@ -182,6 +194,9 @@ ${calls.length} scripted calls (${RUNS} seeds x 4 difficulty levels x weak/stron
 | Turns that repeat an earlier turn of the same call (overlap >= 65%) | ${repeats} of ${pairs} pairs |
 | Stage directions leaked into speech (\`*sigh*\`, \`(pause)\`) | ${leaks} of ${turns} turns |
 | Failed or empty turns | ${errors} |
+| Turns that end in a question | ${asked} of ${turns} (${Math.round((100 * asked) / Math.max(1, turns))}%) |
+| Questions in a row, longest run in a call (average / worst) | ${(runs.reduce((a, b) => a + b, 0) / Math.max(1, runs.length)).toFixed(1)} / ${Math.max(0, ...runs)} |
+| Turns that begin with the same word as the turn before | ${sameOpener} of ${turns} |
 | Output tokens per turn, reasoning included (median / p95 / max) | ${tokenRow} |
 
 ## Does difficulty change behaviour?
