@@ -5,6 +5,7 @@ import { langOf } from '../../shared/lang.ts';
 import { CallEngine, type CallSnapshot } from '../engine/CallEngine.ts';
 import { useLang } from '../i18n/index.ts';
 import { CameraWatch } from '../lib/camera.ts';
+import { getPtt, TalkGate } from '../lib/ptt.ts';
 import { useMoodTheme } from '../lib/useMoodTheme.ts';
 import { ScreenShare } from '../lib/screen.ts';
 import { keepAwake } from '../lib/wakeLock.ts';
@@ -122,10 +123,46 @@ export function CallScreen({
   }, [snap]);
   useEffect(() => () => window.clearTimeout(endTimer.current), []);
 
-  // M mutes and unmutes the microphone, unless a text field has the keyboard
+  // Push to talk (off unless chosen in the voice sheet): the microphone is muted until Space or the button is held.
+  const [pttOn] = useState(getPtt);
+  const gate = useRef<TalkGate | null>(null);
+  useEffect(() => {
+    if (!pttOn) return;
+    const g = new TalkGate((m) => engine.current?.setMuted(m));
+    gate.current = g;
+    g.start();
+    const typing = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      return Boolean(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable));
+    };
+    const down = (e: KeyboardEvent) => {
+      if (e.code !== 'Space' || e.ctrlKey || e.metaKey || e.altKey || typing(e)) return;
+      e.preventDefault(); // a focused button must not be clicked by the same key
+      if (!e.repeat) g.press();
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code !== 'Space' || typing(e)) return;
+      e.preventDefault();
+      g.release();
+    };
+    const blur = () => g.release(); // a key held while the window loses focus would never be let go
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+      g.dispose();
+      gate.current = null;
+    };
+  }, [pttOn, config, session]);
+
+  // M mutes and unmutes the microphone, unless a text field has the keyboard (not in push to talk)
   const mutedNow = useRef(false);
   mutedNow.current = Boolean(snap?.muted);
   useEffect(() => {
+    if (pttOn) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() !== 'm' || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
       const el = e.target as HTMLElement | null;
@@ -134,7 +171,7 @@ export function CallScreen({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [pttOn]);
 
   if (!snap) return null;
   return (
@@ -156,6 +193,7 @@ export function CallScreen({
         if (typed.trim()) engine.current?.sendText(typed.trim());
         setTyped('');
       }}
+      ptt={pttOn ? { onTalk: (down) => (down ? gate.current?.press() : gate.current?.release()) } : undefined}
       onMute={() => engine.current?.setMuted(!snap.muted)}
       onCamera={toggleCamera}
       onShare={toggleShare}

@@ -34,6 +34,8 @@ export interface CallViewProps {
   onCamera: () => void;
   onShare: () => void;
   onHangUp: () => void;
+  /** Push to talk: the microphone button is held to talk (the call screen turns the microphone on and off). */
+  ptt?: { onTalk: (down: boolean) => void };
   /** A recorded call: no typing, microphone, camera or screen, and no portraits are drawn. */
   sample?: boolean;
 }
@@ -49,7 +51,7 @@ export function CallView(p: CallViewProps) {
   const label = moodLabel(snap.mood, lang, persona.gender);
   const statusText = {
     connecting: t('connecting'),
-    listening: snap.muted ? t('mutedStatus') : t('listening'),
+    listening: p.ptt && snap.muted ? t(matchMedia('(pointer: coarse)').matches ? 'pttIdleTouch' : 'pttIdle') : snap.muted ? t('mutedStatus') : t('listening'),
     thinking: t('thinking', first),
     speaking: t('speaking', first),
     ended: snap.endReason === 'hangup' ? t('hungUpBy', first, persona.gender) : t('callEnded'),
@@ -172,14 +174,18 @@ export function CallView(p: CallViewProps) {
           {!p.sample && (
           <button
             type="button"
-            className={`${s.ib} ${s.mic} ${snap.muted ? s.on : ''}`}
-            onClick={p.onMute}
+            className={`${s.ib} ${s.mic} ${(p.ptt ? !snap.muted : snap.muted) ? s.on : ''}`}
+            onClick={p.ptt ? undefined : p.onMute}
+            onPointerDown={p.ptt ? (e) => (e.currentTarget.setPointerCapture(e.pointerId), p.ptt!.onTalk(true)) : undefined}
+            onPointerUp={p.ptt ? () => p.ptt!.onTalk(false) : undefined}
+            onPointerCancel={p.ptt ? () => p.ptt!.onTalk(false) : undefined}
+            style={p.ptt ? { touchAction: 'none', userSelect: 'none' } : undefined}
             disabled={ended}
-            aria-pressed={snap.muted}
-            aria-label={snap.muted ? t('micUnmute') : t('micMute')}
-            title={snap.muted ? t('micUnmute') : t('micMute')}
+            aria-pressed={p.ptt ? !snap.muted : snap.muted}
+            aria-label={p.ptt ? t('micHold') : snap.muted ? t('micUnmute') : t('micMute')}
+            title={p.ptt ? t('micHold') : snap.muted ? t('micUnmute') : t('micMute')}
           >
-            <Icon name={snap.muted ? 'micOff' : 'voice'} />
+            <Icon name={p.ptt || !snap.muted ? 'voice' : 'micOff'} />
           </button>
           )}
           {p.canCamera && (

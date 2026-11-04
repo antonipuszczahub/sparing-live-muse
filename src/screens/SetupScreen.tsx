@@ -10,6 +10,7 @@ import { Switch } from '../components/Switch.tsx';
 import { AboutSheet } from '../components/AboutSheet.tsx';
 import { AudioCheck } from '../components/AudioCheck.tsx';
 import { MicPicker } from '../components/MicPicker.tsx';
+import { PushToTalk } from '../components/PushToTalk.tsx';
 import { hasSeenAbout, markAboutSeen } from '../lib/seen.ts';
 import { Progress } from '../components/Progress.tsx';
 import { useVoiceList, VoicePicker } from '../components/VoicePicker.tsx';
@@ -360,6 +361,7 @@ export function SetupScreen({
       <Sheet open={voices} title={t('voiceTitle')} onClose={() => setVoices(false)}>
         <VoicePicker lang={lang} list={voiceList} />
         <MicPicker />
+        <PushToTalk />
         <AudioCheck lang={lang} />
       </Sheet>
     </main>
