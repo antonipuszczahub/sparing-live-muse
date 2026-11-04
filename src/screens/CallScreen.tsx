@@ -7,6 +7,7 @@ import { useLang } from '../i18n/index.ts';
 import { CameraWatch } from '../lib/camera.ts';
 import { useMoodTheme } from '../lib/useMoodTheme.ts';
 import { ScreenShare } from '../lib/screen.ts';
+import { keepAwake } from '../lib/wakeLock.ts';
 import { CallView } from './CallView.tsx';
 
 export function CallScreen({
@@ -36,6 +37,9 @@ export function CallScreen({
 
   // The light and the portrait ring follow how the character feels.
   useMoodTheme(snap?.mood ?? 3);
+
+  // A phone must not dim and lock in the middle of a call.
+  useEffect(() => keepAwake(), []);
 
   useEffect(() => {
     // A discarded engine (React mounts effects twice in development) must not report its own ending as the call's.
@@ -155,7 +159,10 @@ export function CallScreen({
       onMute={() => engine.current?.setMuted(!snap.muted)}
       onCamera={toggleCamera}
       onShare={toggleShare}
-      onHangUp={() => engine.current?.hangUp()}
+      onHangUp={() => {
+        navigator.vibrate?.(40); // a short tap on phones that can; ignored elsewhere
+        engine.current?.hangUp();
+      }}
     />
   );
 }

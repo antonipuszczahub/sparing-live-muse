@@ -637,7 +637,7 @@
     z-index: 6;
     display: block;
     margin: auto -20px 0;
-    padding: 30px 20px 20px;
+    padding: 30px 20px max(20px, env(safe-area-inset-bottom, 0px));
     background: linear-gradient(180deg, rgba(247, 244, 239, 0), rgba(247, 244, 239, 0.96) 46%);
   }
 }

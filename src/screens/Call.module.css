@@ -7,7 +7,7 @@
   height: 100vh;
   height: 100dvh;
   min-height: 560px;
-  padding: 24px clamp(24px, 6.4vw, 124px) 26px;
+  padding: 24px clamp(24px, 6.4vw, 124px) max(26px, env(safe-area-inset-bottom, 0px));
   gap: clamp(12px, 2vh, 24px);
 }
 
@@ -389,7 +389,7 @@
   background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px; /* under 16px iOS zooms the page when the field is focused */
   outline: none;
   transition:
     border-color 0.3s,
