@@ -22,6 +22,15 @@ It is not a chatbot with a persona prompt. It is a pipeline of specialised agent
 | **English and Polish** | One switch changes everything: the interface, the character and its private thoughts, the company research, the review, speech recognition and the voice. Polish is written for Polish, with gender and "Pan/Pani" handled (see [Two languages](#two-languages)). |
 | **Measured, not claimed** | Latency, repetition, stage-direction leaks and difficulty behaviour are measured against the live API by `npm run eval`. A budget guard with a persistent ledger caps spend. |
 
+## Who it is for
+
+The conversations that decide something (a salary, a defence, a pitch, a sales call you cannot afford to lose) are the ones nobody lets you rehearse. A friend is too kind, a mirror does not answer back, and a coach costs money and time. Sparing Live is a place to fail cheaply, out loud, and then see exactly where.
+
+- **People with no one to practise with:** students before an oral defence, first-time founders before an investor, someone asking for a raise for the first time. The difficulty levels run from a friendly listener to a brutal one, so the same tool serves a nervous beginner and someone preparing for a hard room.
+- **Feedback tied to the moment, not a score:** the review replays the call and shows what the character was privately thinking at each turn, so "you lost them here, because you quoted the market instead of a customer" is something you can see and rehearse again.
+- **Polish as well as English:** most rehearsal tools are English-first. Here the character, the research, the review and the speech recognition run in Polish, with the grammar of gender and of "Pan/Pani" handled, which matters because in Polish the wrong form changes how a request sounds.
+- **Cheap and transparent to run:** the live character can run on open weights, every model call is in a public ledger (`docs/MANIFEST.md`), and nothing a user says is stored by the app (see [Privacy](#privacy)).
+
 ## Meta models used, and where
 
 | Model | Role | Measured |
