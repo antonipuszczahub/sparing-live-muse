@@ -8,7 +8,8 @@ import { audit } from './agents/auditor.ts';
 import { look } from './agents/eye.ts';
 import { findFaces } from './agents/sam.ts';
 import { characterTurn } from './agents/persona.ts';
-import { drawExpressions, drawNeutral, type Portraits } from './agents/portrait.ts';
+import { drawExpressions, drawNeutral } from './agents/portrait.ts';
+import { createPortraitJobs } from './agents/portraitJobs.ts';
 import { researchTwin, twinCache, twinKey } from './agents/twinCache.ts';
 import { BudgetError, openWeightsInfo } from './meta/client.ts';
 import { openByDefault, wantsOpenWeights } from './meta/open.ts';
@@ -227,22 +228,9 @@ app.post('/api/eye', async (req, res) => {
   }
 });
 
-interface PortraitJob {
-  neutral: Promise<string>;
-  rest: Promise<Pick<Portraits, 'cold' | 'warm'>>;
-}
-const portraitCache = new Map<string, PortraitJob>();
-
-/** Starts drawing a character's face: the neutral portrait first, then the two expressions edited from it. */
-function startPortraits(input: Parameters<typeof drawNeutral>[0]): PortraitJob {
-  const neutral = drawNeutral(input);
-  const rest = neutral.then((n) => drawExpressions(n, input.session));
-  const job: PortraitJob = { neutral, rest };
-  portraitCache.set(input.session, job);
-  // a failed job is forgotten, so the next request draws again; both promises are handled here, so neither goes unhandled
-  Promise.all([neutral, rest]).catch(() => portraitCache.delete(input.session));
-  return job;
-}
+/** The faces being drawn, by session: the neutral portrait first, then the two expressions edited from it. */
+const portraits = createPortraitJobs(drawNeutral, drawExpressions);
+const startPortraits = portraits.start;
 
 /**
  * Muse Image draws the counterpart in three moods. Cached per session; the client loads it in the background.
@@ -264,7 +252,7 @@ app.post('/api/portraits', async (req, res) => {
     return;
   }
   const { session, scenario, persona, lang, part } = parsed.data;
-  const job = portraitCache.get(session) ?? startPortraits({ persona, scenario: scenario as never, mood: '', session, lang });
+  const job = portraits.get(session) ?? startPortraits({ persona, scenario: scenario as never, mood: '', session, lang });
   try {
     if (part === 'neutral') res.json({ neutral: await job.neutral });
     else if (part === 'rest') res.json(await job.rest);
