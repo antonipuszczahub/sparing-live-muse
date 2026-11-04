@@ -223,6 +223,10 @@ tests/           unit tests    scripts/  probes and evaluation
 
 Working: English and Polish end to end (character, research, review, clip, speech recognition), voice loop, four scenarios with four difficulty levels, digital twin, screen understanding, portraits, audit with replay, weak-spot memory, budget guard, tests and evaluation. Polish verified through the browser (typed input), the live API and the speech relay; the Polish voices were not heard here. Built, awaiting live verification with a real microphone and camera: Voice Transcribe on a live mic, the microphone picker, the audio check (its thresholds were tried on a synthetic signal only) and the mute button, screen share, camera framing with SAM 3.1, and the open-weights switch is verified on Baseten (evaluation, manifest and a live call in the browser) but not on Fireworks, Modal or Ollama. Built and verified: shareable clip (MP4 rendered in the browser), manifest generation, twin cache (a repeated company returns in 3 s instead of 28 s and costs nothing), deployment files (Dockerfile, static serving, per-visitor rate limits). The character speaks with the browser's own voice (Edge's Natural voices recommended); there is no third-party speech service in the code, because the hackathon allows only Meta models at runtime. There is no hosted link: the project runs from this repository (see [Run it](#run-it)), and a hosted copy is optional. Before recording or submitting, `npm run preflight` checks the running app, the key, the voice switch, the budget and the files in one go.
 
+## Where it is going
+
+Plans, none of them built: a panel of examiners in one call, characters tuned by sparring models, rehearsing against your own documents, a Meta voice when one exists, accounts and a hosted version, more languages. The reasoning and what each step needs is in [`docs/ROADMAP.md`](docs/ROADMAP.md); the same list sits behind the Demo button in the app.
+
 ## License
 
 MIT, see [`LICENSE`](LICENSE). Meta models and any open-weights host are used under their own terms.
