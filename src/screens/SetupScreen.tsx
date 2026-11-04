@@ -151,7 +151,7 @@ export function SetupScreen({
           )}
           <button
             type="button"
-            className={ui.pill}
+            className={`${ui.pill} ${s.demoPill}`}
             title={t('demoPresetBody')}
             onClick={() => setAbout(true)}
           >

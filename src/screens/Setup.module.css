@@ -535,6 +535,32 @@
     padding: 16px 20px 0;
     gap: 20px;
   }
+  /* the controls become one row you can swipe, the language switch first, instead of three rows of pills */
+  .top {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .tools {
+    flex-wrap: nowrap;
+    margin: 0 -20px;
+    padding: 2px 20px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tools::-webkit-scrollbar {
+    display: none;
+  }
+  .tools > * {
+    flex: none;
+  }
+  .tools > [role='group'] {
+    order: -2;
+  }
+  .tools > .demoPill {
+    order: -1;
+  }
   .h1 {
     font-size: 44px;
   }
