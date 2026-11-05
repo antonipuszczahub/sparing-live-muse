@@ -9,5 +9,5 @@ CLAUDE.local.md
 
 # film tools: heavy local assets (footage clips, voices, renders)
 public/film/clips/
-public/film/voice/
+public/film/voice*/
 public/film/incoming/
