@@ -727,7 +727,13 @@ export function drawPerson(c, P, st) {
   const s = { mouth: 0, mood: 0.2, blink: 0, look: { x: 0, y: 0 }, tilt: 0, bob: 0, gesture: 0, gesture2: 0, wob: 0, brow: 0, browTilt: 0, sway: 0, shrug: 0, lean: 0, glint: 0.5, ...st };
   c.save();
   c.translate(0, s.bob);
+  // the hair behind the head turns with the head (same pivot as the front hair), but stays behind the shoulders
+  c.save();
+  c.translate(s.sway * 0.6, 8);
+  c.rotate(s.tilt);
+  c.translate(0, -8);
   blit(c, layer(P, 'hairBack', hairBackPaint));
+  c.restore();
   c.save();
   c.translate(s.sway, -68 - s.shrug * 7);
   c.rotate(s.lean);

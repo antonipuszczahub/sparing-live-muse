@@ -980,7 +980,7 @@ async function start({ record }) {
     bp.frequency.exponentialRampToValueAtTime(3400, at + 0.42);
     const g = actx.createGain();
     g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime(0.15, at + 0.16);
+    g.gain.exponentialRampToValueAtTime(0.42, at + 0.16);
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.52);
     src.connect(bp);
     bp.connect(g);
@@ -995,7 +995,7 @@ async function start({ record }) {
     o.frequency.exponentialRampToValueAtTime(f * 0.5, at + 0.09);
     const g = actx.createGain();
     g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime(0.09, at + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.17, at + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.15);
     o.connect(g);
     outNode(g);

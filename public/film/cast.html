@@ -39,7 +39,7 @@ function card(id, st, x, y, w, h, scale, neck, label) {
 }
 await document.fonts.load('700 22px Figtree').catch(() => {});
 const q = new URLSearchParams(location.search);
-card('antoni', { mouth: 0.55, mood: 0.6, gesture: 1, gesture2: 0.2, wob: 8, brow: 0.5, glint: 0.4 }, 40, 40, 560, 820, 1.2, 0.72, 'Antoni · waves hello');
+card('antoni', { mouth: 0.55, mood: 0.6, gesture: 1, gesture2: 0.2, wob: 8, brow: 0.5, glint: 0.4, tilt: Number(q.get('tilt') ?? 0), sway: Number(q.get('sway') ?? 0) }, 40, 40, 560, 820, 1.2, 0.72, 'Antoni · waves hello');
 card('antoni', { mouth: 0.0, mood: 0.1, look: { x: 0.6, y: 0 }, brow: 0.2, glint: 0.7 }, 640, 40, 460, 400, 0.86, 0.8, 'Antoni · listens');
 card('antoni', { mouth: 0.7, mood: 0.5, gesture: 0.5, gesture2: 0.6, brow: 0.8, tilt: 0.04, shrug: 0.6, glint: 0.2 }, 1140, 40, 420, 400, 0.78, 0.8, 'Antoni · explains');
 card('elena', { mouth: 0.4, mood: 0.2 }, 640, 470, 210, 390, 0.72, 0.62, 'Elena');
