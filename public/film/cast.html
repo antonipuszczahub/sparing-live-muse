@@ -2,20 +2,49 @@
 <meta charset="utf-8" />
 <title>Cast</title>
 <body style="margin:0;background:#0b0b0e">
-<canvas id="c" width="1500" height="520"></canvas>
+<canvas id="c" width="1600" height="900"></canvas>
 <script type="module">
 import { drawPerson, CAST } from './cast.js';
 const c = document.getElementById('c').getContext('2d');
-const ids = Object.keys(CAST);
-const q = new URLSearchParams(location.search);
-const mouth = Number(q.get('m') ?? 0.5);
-ids.forEach((id, i) => {
+c.fillStyle = '#0b0b0e';
+c.fillRect(0, 0, 1600, 900);
+const glow = c.createRadialGradient(400, 300, 50, 400, 300, 900);
+glow.addColorStop(0, 'rgba(246,95,49,0.35)');
+glow.addColorStop(1, 'rgba(246,95,49,0)');
+c.fillStyle = glow;
+c.fillRect(0, 0, 1600, 900);
+
+function card(id, st, x, y, w, h, scale, neck, label) {
   c.save();
-  c.translate(150 + i * 300, 330);
-  c.scale(0.95, 0.95);
-  c.beginPath(); c.rect(-140, -330, 280, 460); c.clip();
-  c.fillStyle = '#181a20'; c.fillRect(-150, -340, 300, 480);
-  drawPerson(c, CAST[id], { mouth: i % 2 ? mouth : 0, mood: i === 3 ? -0.3 : 0.4, gesture: id === 'antoni' ? 0.8 : 0 });
+  c.beginPath();
+  c.roundRect(x, y, w, h, 34);
+  c.fillStyle = 'rgba(255,255,255,0.07)';
+  c.fill();
+  c.clip();
+  c.translate(x + w / 2, y + h * neck);
+  c.scale(scale, scale);
+  drawPerson(c, CAST[id], st);
   c.restore();
-});
+  c.save();
+  c.font = '700 22px Figtree, system-ui, sans-serif';
+  const tw = c.measureText(label).width;
+  c.beginPath();
+  c.roundRect(x + 18, y + h - 54, tw + 32, 38, 19);
+  c.fillStyle = 'rgba(8,8,10,0.82)';
+  c.fill();
+  c.fillStyle = '#fff';
+  c.textBaseline = 'middle';
+  c.fillText(label, x + 34, y + h - 34);
+  c.restore();
+}
+await document.fonts.load('700 22px Figtree').catch(() => {});
+const q = new URLSearchParams(location.search);
+card('antoni', { mouth: 0.55, mood: 0.6, gesture: 1, gesture2: 0.2, wob: 8, brow: 0.5, glint: 0.4 }, 40, 40, 560, 820, 1.2, 0.72, 'Antoni · waves hello');
+card('antoni', { mouth: 0.0, mood: 0.1, look: { x: 0.6, y: 0 }, brow: 0.2, glint: 0.7 }, 640, 40, 460, 400, 0.86, 0.8, 'Antoni · listens');
+card('antoni', { mouth: 0.7, mood: 0.5, gesture: 0.5, gesture2: 0.6, brow: 0.8, tilt: 0.04, shrug: 0.6, glint: 0.2 }, 1140, 40, 420, 400, 0.78, 0.8, 'Antoni · explains');
+card('elena', { mouth: 0.4, mood: 0.2 }, 640, 470, 210, 390, 0.72, 0.62, 'Elena');
+card('weber', { mouth: 0.0, mood: 0.1, brow: 0.5 }, 870, 470, 210, 390, 0.72, 0.62, 'Prof. Weber');
+card('marta', { mouth: 0.0, mood: -0.3 }, 1100, 470, 210, 390, 0.72, 0.62, 'Marta');
+card('tom', { mouth: 0.45, mood: 0.3 }, 1330, 470, 230, 390, 0.72, 0.62, 'Tom');
+document.title = 'ready';
 </script>
