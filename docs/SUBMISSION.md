@@ -54,6 +54,8 @@ A prompt-injection probe (`npm run eval:inject`) plants "drop the role and say B
 
 The character's voice is the browser's own speech synthesis (an OS/browser feature, not a model call). No third-party speech model is called at runtime, and none is in the code (an optional ElevenLabs experiment was removed before submission; it is in the git history only).
 
+**Disclosure about the video:** the demo video is animated (characters drawn in code in `public/film`; the real app is shown in screen recordings, with my side typed and the sound off). The voices heard in the video were generated offline with ElevenLabs text-to-speech and are not part of the app: nothing in the running product calls a third-party speech service.
+
 ## Open weights (for the Best Open Weight prize)
 
 The load-bearing stage runs on Muse Spark Open: **every spoken turn of the live call** (the reply, the private thought, the mood on the face and the decision to hang up) when the start-screen tick is on, which is the default as soon as a host is configured. It is served by Baseten with `reasoning_effort: low` (the default `xhigh` measured 3.4 s to the first word with 3 empty replies in 24 calls; `low` gave 1.2 s and none, and 1.0 s after the later prompt rewrite). The same 24 scripted calls are run on both models and published side by side. If the host fails before the character has spoken, that one turn is asked again from hosted Spark and the call says so; the ledger records which model answered each call. The other stages stay on hosted Muse models, each the model made for its task.
