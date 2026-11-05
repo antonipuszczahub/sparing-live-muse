@@ -12,7 +12,7 @@ const port = Number(process.env.FILM_PORT ?? 9112);
 
 http
   .createServer((req, res) => {
-    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, GET, OPTIONS' };
+    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, GET, DELETE, OPTIONS' };
     if (req.method === 'OPTIONS') return res.writeHead(204, cors).end();
     const m = /^\/save\/([a-z0-9_.-]{1,60})$/i.exec(req.url ?? '');
     if (req.method === 'POST' && m) {
@@ -25,6 +25,18 @@ http
         res.writeHead(200, cors).end('ok');
       });
       return;
+    }
+    const del = /^\/save\/([a-z0-9_.-]{1,60})$/i.exec(req.url ?? '');
+    if (req.method === 'DELETE' && del) {
+      fs.rmSync(path.join(root, del[1]), { force: true });
+      console.log('deleted', del[1]);
+      return res.writeHead(200, cors).end('ok');
+    }
+    if (req.method === 'POST' && req.url === '/clear') {
+      // only the narrator's and callers' voice takes, never the renders
+      for (const f of fs.readdirSync(root)) if (/^[ac]\d{2}[a-z]?\.webm$/.test(f)) fs.rmSync(path.join(root, f), { force: true });
+      console.log('cleared all voice takes');
+      return res.writeHead(200, cors).end('ok');
     }
     if (req.url === '/list') return res.writeHead(200, cors).end(JSON.stringify(fs.readdirSync(root)));
     res.writeHead(200, cors).end('film receiver');
