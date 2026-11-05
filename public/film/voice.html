@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Voice studio · Sparing Live film</title>
+<title>Studio głosu · film Sparing Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -11,51 +11,64 @@
   :root { --bg: #08090b; --ink: #f3f3f5; --soft: #a9a9b3; --orange: #f65f31; --glass: rgba(255,255,255,.06); --edge: rgba(255,255,255,.14); }
   * { box-sizing: border-box; }
   body { margin: 0; background: radial-gradient(1200px 500px at 70% -10%, rgba(246,95,49,.28), transparent 60%), var(--bg); color: var(--ink); font-family: Figtree, system-ui, sans-serif; min-height: 100vh; }
-  main { max-width: 860px; margin: 0 auto; padding: 28px 18px 80px; }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 18px 80px; }
   h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -.02em; }
   p.lead { color: var(--soft); margin: 0 0 20px; line-height: 1.5; }
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   select, button { font: 600 15px Figtree, system-ui, sans-serif; color: var(--ink); background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 10px 16px; }
   button { cursor: pointer; } button:hover { background: rgba(255,255,255,.12); }
+  button.on { background: var(--orange); border-color: var(--orange); }
   .card { background: var(--glass); border: 1px solid var(--edge); border-radius: 26px; padding: 22px; margin: 16px 0; backdrop-filter: blur(8px); }
   .now .no { color: var(--orange); font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
-  .now .txt { font-size: 30px; line-height: 1.32; font-weight: 700; margin: 10px 0 18px; letter-spacing: -.01em; }
-  #rec { width: 92px; height: 92px; border-radius: 50%; background: var(--orange); border: 0; font-size: 15px; font-weight: 800; box-shadow: 0 0 0 0 rgba(246,95,49,.6); }
-  #rec.on { animation: pulse 1.1s infinite; background: #e8312a; }
+  .now .txt { font-size: 32px; line-height: 1.36; font-weight: 700; margin: 10px 0 8px; letter-spacing: -.01em; }
+  .now .alt { color: var(--soft); font-size: 16px; line-height: 1.45; margin: 0 0 18px; }
+  #rec { width: 96px; height: 96px; border-radius: 50%; background: var(--orange); border: 0; font-size: 15px; font-weight: 800; box-shadow: 0 0 0 0 rgba(246,95,49,.6); }
+  #rec.rec { animation: pulse 1.1s infinite; background: #e8312a; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(232,49,42,.6); } 100% { box-shadow: 0 0 0 26px rgba(232,49,42,0); } }
   .meter { height: 10px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: hidden; flex: 1; min-width: 160px; }
   .meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffb347, var(--orange)); transition: width .06s; }
   ol { list-style: none; padding: 0; margin: 0; }
   li { display: flex; gap: 12px; align-items: center; padding: 10px 6px; border-top: 1px solid rgba(255,255,255,.08); cursor: pointer; }
   li:first-child { border-top: 0; }
+  li.head { cursor: default; color: var(--orange); font-weight: 800; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; padding-top: 18px; }
   li .n { width: 34px; color: var(--soft); font-weight: 700; }
-  li .t { flex: 1; color: #d9d9df; font-size: 15px; line-height: 1.35; }
+  li .t { flex: 1; color: #d9d9df; font-size: 15px; line-height: 1.4; }
   li.cur { background: rgba(246,95,49,.1); border-radius: 14px; }
   .ok { color: #7ee2a8; font-weight: 700; font-size: 13px; white-space: nowrap; }
   .err { color: #ff8b8b; font-weight: 700; font-size: 13px; }
   .hint { color: var(--soft); font-size: 14px; line-height: 1.5; }
   kbd { background: rgba(255,255,255,.12); border-radius: 6px; padding: 1px 7px; font: 700 13px Figtree; }
+  .legend { font-size: 14px; color: var(--soft); line-height: 1.55; }
+  .legend b { color: var(--ink); }
 </style>
 </head>
 <body>
 <main>
-  <h1>Voice studio</h1>
-  <p class="lead">Read each line in your own voice. The film animates Antoni to it: the mouth follows how loud you are, so a calm, clear take looks best. Leave about a second of silence before and after each line.</p>
+  <h1>Studio głosu</h1>
+  <p class="lead">Czytaj każdą linię swoim głosem. Film animuje Antoniego do Twojego głosu: usta ruszają się zgodnie z głośnością, więc spokojne i wyraźne czytanie wygląda najlepiej. Zostaw około sekundy ciszy przed i po każdej linii. Tekst jest zapisany <b>fonetycznie po polsku</b>, żebyś nie musiał myśleć o akcencie: czytaj dokładnie tak, jak jest napisane, a angielski wyjdzie sam.</p>
   <div class="row">
-    <select id="mic" title="Microphone"></select>
+    <select id="mic" title="Mikrofon"></select>
     <div class="meter"><i id="lvl"></i></div>
     <span class="hint" id="count"></span>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <button id="modePh" class="on">Fonetycznie (po polsku)</button>
+    <button id="modeEn">Po angielsku</button>
   </div>
   <div class="card now">
     <div class="no" id="no"></div>
     <div class="txt" id="txt"></div>
+    <p class="alt" id="alt"></p>
     <div class="row">
-      <button id="rec">Record</button>
-      <button id="play">Play back</button>
-      <button id="next">Next line →</button>
+      <button id="rec">Nagraj</button>
+      <button id="play">Odtwórz</button>
+      <button id="next">Następna →</button>
       <span id="msg" class="hint"></span>
     </div>
-    <p class="hint" style="margin-top:14px">Keys: <kbd>Space</kbd> record / stop · <kbd>P</kbd> play back · <kbd>→</kbd> next · <kbd>←</kbd> previous. Use your headset microphone, not a Voicemeeter virtual input. Every take is saved straight to the project folder on this computer.</p>
+    <p class="hint" style="margin-top:14px">Klawisze: <kbd>Spacja</kbd> nagrywa i zatrzymuje · <kbd>P</kbd> odtwarza · <kbd>→</kbd> następna · <kbd>←</kbd> poprzednia. Użyj mikrofonu ze słuchawek, nie wirtualnego wejścia Voicemeeter. Każde nagranie zapisuje się od razu w folderze projektu na tym komputerze.</p>
+  </div>
+  <div class="card legend">
+    <b>Jak czytać zapis:</b> duże litery = akcent (mocniej wymów tę sylabę). <b>ł</b> = angielskie „w” (jak w „water”), <b>w</b> = polskie „w”. <b>dh</b> = „th” dźwięczne (język lekko między zębami: „the, they, with”), <b>th</b> = „th” bezdźwięczne („think, thanks”). <b>dż</b>, <b>sz</b>, <b>cz</b> jak po polsku. <b>ej / aj / ou</b> to dwugłoski („day, my, go”).
   </div>
   <div class="card"><ol id="list"></ol></div>
 </main>
@@ -69,58 +82,89 @@ let recorder = null;
 let stream = null;
 let chunks = [];
 let audioCtx, analyser, raf;
+let mode = localStorage.getItem('film-mode') || 'ph';
 
 const $ = (id) => document.getElementById(id);
+const shown = (l) => (mode === 'ph' ? l.ph : l.text);
+const other = (l) => (mode === 'ph' ? 'Po angielsku: ' + l.text : 'Fonetycznie: ' + l.ph);
 
 async function boot() {
   const all = await (await fetch('lines.json')).json();
-  all.filter((l) => l.who === 'antoni').forEach((l) => lines.push(l));
-  const list = $('list');
-  lines.forEach((l, i) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="n">${i + 1}</span><span class="t"></span><span class="ok" id="ok${i}"></span>`;
-    li.querySelector('.t').textContent = l.text;
-    li.onclick = () => select(i);
-    list.appendChild(li);
-  });
+  const mine = all.filter((l) => l.who === 'antoni');
+  const callers = all.filter((l) => l.who !== 'antoni');
+  mine.forEach((l) => lines.push(l));
+  callers.forEach((l) => lines.push({ ...l, caller: true }));
+  render();
   try {
     const have = await (await fetch('http://127.0.0.1:9112/list')).json();
-    lines.forEach((l, i) => { if (have.includes(l.id + '.webm')) mark(i, 'on disk'); });
-  } catch { $('msg').textContent = 'The local receiver is not running. Ask Claude to start it.'; }
+    lines.forEach((l, i) => { if (have.includes(l.id + '.webm')) mark(i, 'na dysku'); });
+  } catch { $('msg').textContent = 'Lokalny odbiornik nie działa. Poproś Claude o jego uruchomienie.'; }
   select(0);
   await listMics();
 }
 
+function render() {
+  const list = $('list');
+  list.innerHTML = '';
+  lines.forEach((l, i) => {
+    if (i === 0) list.appendChild(headItem('Antoni (14 linii, to jest wymagane)'));
+    if (l.caller && !lines[i - 1].caller) list.appendChild(headItem('Rozmówcy (opcjonalnie: zmienię wysokość Twojego głosu)'));
+    const li = document.createElement('li');
+    li.dataset.i = i;
+    li.innerHTML = `<span class="n">${l.caller ? '·' : i + 1}</span><span class="t"></span><span class="ok" id="ok${i}"></span>`;
+    li.querySelector('.t').textContent = shown(l);
+    li.onclick = () => select(i);
+    list.appendChild(li);
+    if (done[l.id]) mark(i, 'zapisane ✓');
+  });
+  $('modePh').classList.toggle('on', mode === 'ph');
+  $('modeEn').classList.toggle('on', mode === 'en');
+  if (lines.length) select(cur, true);
+}
+
+function headItem(text) {
+  const li = document.createElement('li');
+  li.className = 'head';
+  li.textContent = text;
+  return li;
+}
+
 function mark(i, text, bad) {
   const el = $('ok' + i);
+  if (!el) return;
   el.textContent = text;
   el.className = bad ? 'err' : 'ok';
   if (!bad) done[lines[i].id] = true;
-  $('count').textContent = `${Object.keys(done).length} / ${lines.length} saved`;
+  const mineDone = lines.filter((l) => !l.caller && done[l.id]).length;
+  const callersDone = lines.filter((l) => l.caller && done[l.id]).length;
+  $('count').textContent = `Antoni ${mineDone} / 14 · rozmówcy ${callersDone} / 4`;
 }
 
-function select(i) {
+function select(i, keep) {
   if (recorder) return;
   cur = Math.max(0, Math.min(lines.length - 1, i));
-  $('no').textContent = `Line ${cur + 1} of ${lines.length}`;
-  $('txt').textContent = lines[cur].text;
-  [...$('list').children].forEach((li, k) => li.classList.toggle('cur', k === cur));
-  $('list').children[cur].scrollIntoView({ block: 'nearest' });
-  $('msg').textContent = '';
+  const l = lines[cur];
+  $('no').textContent = l.caller ? `Rozmówca: ${l.who} (opcjonalnie)` : `Linia ${cur + 1} z 14`;
+  $('txt').textContent = shown(l);
+  $('alt').textContent = other(l);
+  [...$('list').querySelectorAll('li[data-i]')].forEach((li) => li.classList.toggle('cur', Number(li.dataset.i) === cur));
+  const li = $('list').querySelector(`li[data-i="${cur}"]`);
+  if (li) li.scrollIntoView({ block: 'nearest' });
+  if (!keep) $('msg').textContent = '';
 }
 
 async function listMics() {
   try {
     const s = await navigator.mediaDevices.getUserMedia({ audio: true });
     s.getTracks().forEach((t) => t.stop());
-  } catch (e) { $('msg').textContent = 'Allow the microphone for this page.'; }
+  } catch (e) { $('msg').textContent = 'Zezwól stronie na mikrofon.'; }
   const devs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput');
   const sel = $('mic');
   sel.innerHTML = '';
   devs.forEach((d) => {
     const o = document.createElement('option');
     o.value = d.deviceId;
-    o.textContent = d.label || 'Microphone';
+    o.textContent = d.label || 'Mikrofon';
     sel.appendChild(o);
   });
   const saved = localStorage.getItem('film-mic');
@@ -150,8 +194,8 @@ async function startRec() {
   recorder.onstop = onStop;
   recorder.start();
   $('rec').textContent = 'Stop';
-  $('rec').classList.add('on');
-  $('msg').textContent = 'Recording… read the line, then stop.';
+  $('rec').classList.add('rec');
+  $('msg').textContent = 'Nagrywam… przeczytaj linię i zatrzymaj.';
 }
 
 async function onStop() {
@@ -163,32 +207,34 @@ async function onStop() {
   const i = cur;
   blobs[lines[i].id] = blob;
   recorder = null;
-  $('rec').textContent = 'Record';
-  $('rec').classList.remove('on');
+  $('rec').textContent = 'Nagraj';
+  $('rec').classList.remove('rec');
   try {
     const r = await fetch(RECEIVER + lines[i].id + '.webm', { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: blob });
     if (!r.ok) throw new Error(r.status);
-    mark(i, 'saved ✓');
-    $('msg').textContent = 'Saved. Press P to listen, Space to record this line again, or → for the next one.';
+    mark(i, 'zapisane ✓');
+    $('msg').textContent = 'Zapisane. P = odsłuchaj, Spacja = nagraj jeszcze raz, → = następna linia.';
   } catch (e) {
-    mark(i, 'not saved', true);
-    $('msg').textContent = 'Could not save to the project folder (is the receiver running?).';
+    mark(i, 'nie zapisano', true);
+    $('msg').textContent = 'Nie udało się zapisać w folderze projektu (czy odbiornik działa?).';
   }
 }
 
 function toggle() {
   if (recorder) recorder.stop();
-  else startRec().catch((e) => ($('msg').textContent = 'Microphone error: ' + e.message));
+  else startRec().catch((e) => ($('msg').textContent = 'Błąd mikrofonu: ' + e.message));
 }
 function playBack() {
   const b = blobs[lines[cur].id];
-  if (!b) return ($('msg').textContent = 'Nothing recorded for this line yet.');
+  if (!b) return ($('msg').textContent = 'Dla tej linii nie ma jeszcze nagrania.');
   new Audio(URL.createObjectURL(b)).play();
 }
 
 $('rec').onclick = toggle;
 $('play').onclick = playBack;
 $('next').onclick = () => select(cur + 1);
+$('modePh').onclick = () => { mode = 'ph'; localStorage.setItem('film-mode', mode); render(); };
+$('modeEn').onclick = () => { mode = 'en'; localStorage.setItem('film-mode', mode); render(); };
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'SELECT') return;
   if (e.code === 'Space') { e.preventDefault(); toggle(); }
