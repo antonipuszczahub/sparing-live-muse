@@ -77,64 +77,143 @@ const blit = (c, cv) => c.drawImage(cv, LAYER.x, LAYER.y, LAYER.w, LAYER.h);
 
 /* ---------- hair ---------- */
 
-function curlBall(c, x, y, r, tone, base) {
-  const g = c.createRadialGradient(x - r * 0.38, y - r * 0.42, r * 0.08, x, y, r * 1.06);
-  g.addColorStop(0, shade(base, 0.24 + tone * 0.1));
-  g.addColorStop(0.5, shade(base, 0.02 + (tone - 0.5) * 0.12));
-  g.addColorStop(1, shade(base, -0.3));
-  c.beginPath();
-  c.arc(x, y, r, 0, TAU);
-  c.fillStyle = g;
-  c.fill();
-  // the spiral of the curl
+/* Antoni's curly hair: big soft puffs with shading, corkscrew ringlets at the sides and a swept fringe */
+
+function puff(c, x, y, rad, h, strength = 1) {
+  // a soft highlight on the upper left and a darker rim on the lower right: every puff reads as its own curl
   c.lineCap = 'round';
-  c.strokeStyle = shade(base, -0.42);
-  c.globalAlpha = 0.3;
-  c.lineWidth = Math.max(2, r * 0.12);
-  const a0 = 3.4 + tone * 2.2;
+  c.globalAlpha = 0.32 * strength;
+  c.strokeStyle = shade(h, 0.45);
+  c.lineWidth = Math.max(3, rad * 0.14);
   c.beginPath();
-  c.arc(x + r * 0.06, y + r * 0.05, r * 0.56, a0, a0 + 4.1);
+  c.arc(x - rad * 0.06, y - rad * 0.06, rad * 0.7, 3.45, 4.75);
   c.stroke();
+  c.globalAlpha = 0.3 * strength;
+  c.strokeStyle = shade(h, -0.58);
+  c.lineWidth = Math.max(3.5, rad * 0.16);
   c.beginPath();
-  c.arc(x + r * 0.04, y + r * 0.02, r * 0.26, a0 + 1.6, a0 + 5);
-  c.stroke();
-  c.globalAlpha = 0.32;
-  c.strokeStyle = shade(base, 0.5);
-  c.lineWidth = Math.max(1.6, r * 0.09);
-  c.beginPath();
-  c.arc(x, y, r * 0.8, 3.7, 4.5);
+  c.arc(x, y, rad * 0.9, 0.15, 1.75);
   c.stroke();
   c.globalAlpha = 1;
 }
 
-function curlSet(seed) {
-  const r = rng(seed);
-  const back = [];
-  for (let i = 0; i < 38; i++) {
-    const a = Math.PI * (0.98 + (i / 37) * 1.04);
-    const rad = 1 + (r() - 0.5) * 0.14;
-    back.push({ x: Math.cos(a) * 100 * rad, y: -184 + Math.sin(a) * 108 * rad, r: 24 + r() * 14, tone: r() });
+function shadeHair(c, h, cx, cy) {
+  c.save();
+  c.globalCompositeOperation = 'source-atop';
+  const g = c.createRadialGradient(cx - 50, cy - 70, 10, cx, cy, 300);
+  g.addColorStop(0, shade(h, 0.22));
+  g.addColorStop(0.42, h);
+  g.addColorStop(1, shade(h, -0.46));
+  c.fillStyle = g;
+  c.fillRect(LAYER.x, LAYER.y, LAYER.w, LAYER.h);
+  c.restore();
+}
+
+function strands(c, h, r, n, x0, x1, y0, y1) {
+  c.save();
+  c.globalCompositeOperation = 'source-atop';
+  c.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const x = x0 + r() * (x1 - x0);
+    const y = y0 + r() * (y1 - y0);
+    c.globalAlpha = 0.14;
+    c.strokeStyle = shade(h, -0.55);
+    c.lineWidth = 2.2;
+    c.beginPath();
+    c.moveTo(x, y);
+    c.quadraticCurveTo(x + (r() - 0.5) * 34, y + 16, x + (r() - 0.5) * 26, y + 36);
+    c.stroke();
   }
-  for (const s of [-1, 1]) {
-    for (let i = 0; i < 9; i++) back.push({ x: s * (84 + r() * 22 + i * 1.4), y: -176 + i * 13 + r() * 8, r: 19 + r() * 10, tone: r() });
+  c.restore();
+}
+
+function flow(c, h, n, top = -272, spread = 1) {
+  c.save();
+  c.globalCompositeOperation = 'source-atop';
+  c.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const x0 = -52 + i * (104 / (n - 1));
+    c.strokeStyle = i % 2 ? shade(h, 0.38) : shade(h, -0.5);
+    c.globalAlpha = 0.26;
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(x0 * 0.25, top);
+    c.quadraticCurveTo(x0 * 0.9 * spread, top + 10, x0 * 1.55 * spread, -222 + Math.abs(x0) * 0.25);
+    c.stroke();
   }
-  back.sort((a, b) => a.y - b.y);
-  const front = [];
-  for (let i = 0; i < 13; i++) {
-    const x = -72 + (i / 12) * 144 + (r() - 0.5) * 8;
-    front.push({ x, y: -240 + Math.abs(x) * 0.26 + (r() - 0.5) * 8, r: 20 + r() * 10, tone: r() });
+  c.restore();
+}
+
+function ringlet(c, x0, y0, n, dir, h, seed) {
+  // a corkscrew curl hanging down: overlapping beads, the lowest drawn first
+  for (let i = n - 1; i >= 0; i--) {
+    const t = i / Math.max(1, n - 1);
+    const cx = x0 + dir * (Math.sin(i * 1.25 + seed) * 8 + t * 6);
+    const cy = y0 + i * 13.5;
+    const rad = 17.5 - t * 6.5;
+    const g = c.createRadialGradient(cx - rad * 0.35, cy - rad * 0.4, 1, cx, cy, rad * 1.1);
+    g.addColorStop(0, shade(h, 0.24));
+    g.addColorStop(0.6, h);
+    g.addColorStop(1, shade(h, -0.38));
+    ell(c, cx, cy, rad, rad * 0.96, g);
+    c.globalAlpha = 0.34;
+    c.strokeStyle = shade(h, 0.5);
+    c.lineWidth = 2.6;
+    c.lineCap = 'round';
+    c.beginPath();
+    c.arc(cx - rad * 0.05, cy, rad * 0.66, 3.5, 4.6);
+    c.stroke();
+    c.globalAlpha = 1;
   }
-  for (const s of [-1, 1]) for (let i = 0; i < 4; i++) front.push({ x: s * (70 + i * 3), y: -218 + i * 15, r: 13 + r() * 6, tone: r() });
-  for (const x of [-34, -6, 22, 46]) front.push({ x: x + (r() - 0.5) * 6, y: -222 + r() * 8, r: 11 + r() * 5, tone: r() });
-  return { back, front };
+}
+
+function curlyBackPaint(c, P) {
+  const h = P.hair;
+  const r = rng(P.seed ?? 7);
+  const blobs = [];
+  for (let i = 0; i < 17; i++) {
+    const a = Math.PI * (0.93 + (i / 16) * 1.14);
+    blobs.push({ x: Math.cos(a) * 90 + (r() - 0.5) * 8, y: -186 + Math.sin(a) * 94 + (r() - 0.5) * 8, rad: 33 + r() * 11 });
+  }
+  for (const s of [-1, 1]) for (let i = 0; i < 4; i++) blobs.push({ x: s * (96 - i * 1.5 + r() * 6), y: -150 + i * 24, rad: 29 - i * 2 + r() * 6 });
+  ell(c, 0, -184, 88, 92, h);
+  for (const b of blobs) ell(c, b.x, b.y, b.rad, b.rad, h);
+  shadeHair(c, h, 0, -200);
+  for (const b of blobs) puff(c, b.x, b.y, b.rad, h);
+  strands(c, h, r, 8, -90, 90, -300, -200);
+  for (const [s, y0, n, sd] of [[-1, -130, 6, 1], [1, -134, 6, 2], [-1, -100, 5, 3], [1, -98, 5, 4], [-1, -152, 4, 5], [1, -154, 4, 6]]) {
+    ringlet(c, s * (88 + (sd % 3) * 7), y0, n, s, h, sd);
+  }
+}
+
+function curlyFrontPaint(c, P) {
+  const h = P.hair;
+  const r = rng((P.seed ?? 7) + 5);
+  c.beginPath();
+  c.moveTo(-85, -168);
+  c.bezierCurveTo(-96, -252, -44, -294, 6, -292);
+  c.bezierCurveTo(64, -290, 98, -250, 85, -168);
+  c.bezierCurveTo(82, -196, 66, -218, 44, -230);
+  c.bezierCurveTo(26, -240, 6, -230, -10, -236);
+  c.bezierCurveTo(-34, -244, -62, -226, -72, -192);
+  c.bezierCurveTo(-76, -182, -80, -174, -85, -168);
+  c.closePath();
+  c.fillStyle = h;
+  c.fill();
+  const crown = [[-62, -250, 30], [-30, -272, 32], [6, -280, 34], [44, -268, 32], [72, -240, 28], [-80, -216, 24], [84, -212, 22]];
+  const tips = [[-66, -206, 16], [-44, -226, 19], [-18, -234, 17], [8, -232, 18], [34, -232, 16], [58, -218, 15]];
+  for (const [x, y, rad] of crown) ell(c, x, y, rad, rad, h);
+  for (const [x, y, rad] of tips) ell(c, x, y, rad, rad, h);
+  shadeHair(c, h, 0, -230);
+  for (const [x, y, rad] of crown) puff(c, x, y, rad, h);
+  for (const [x, y, rad] of tips) puff(c, x, y, rad, h, 0.9);
+  strands(c, h, r, 6, -70, 70, -285, -225);
 }
 
 function hairBackPaint(c, P) {
   const h = P.hair;
   if (P.style === 'curly') {
-    const set = curlSet(P.seed ?? 7);
-    ell(c, 0, -188, 98, 106, lin(c, 0, -300, 0, -90, [[0, shade(h, 0.1)], [1, shade(h, -0.3)]]));
-    for (const k of set.back) curlBall(c, k.x, k.y, k.r, k.tone, h);
+    curlyBackPaint(c, P);
   } else if (P.style === 'wavy') {
     c.beginPath();
     c.moveTo(-86, -196);
@@ -147,15 +226,18 @@ function hairBackPaint(c, P) {
     c.fillStyle = lin(c, -100, -260, 100, 10, [[0, shade(h, 0.04)], [1, shade(h, -0.3)]]);
     c.fill();
   } else if (P.style === 'bun') {
-    curlBall(c, 0, -290, 31, 0.4, '#3d3132');
+    const g = c.createRadialGradient(-10, -302, 2, 0, -290, 36);
+    g.addColorStop(0, '#6a5658');
+    g.addColorStop(0.55, '#3d3132');
+    g.addColorStop(1, '#1d1717');
+    ell(c, 0, -290, 31, 29, g);
   }
 }
 
 function hairFrontPaint(c, P) {
   const h = P.hair;
   if (P.style === 'curly') {
-    const set = curlSet(P.seed ?? 7);
-    for (const k of set.front) curlBall(c, k.x, k.y, k.r, k.tone, h);
+    curlyFrontPaint(c, P);
   } else if (P.style === 'wavy') {
     c.beginPath();
     c.moveTo(-82, -166);
@@ -173,6 +255,7 @@ function hairFrontPaint(c, P) {
     c.moveTo(-50, -244);
     c.quadraticCurveTo(-10, -266, 36, -256);
     c.stroke();
+    flow(c, h, 7, -270, 1.1);
   } else if (P.style === 'short' || P.style === 'bun') {
     c.beginPath();
     c.moveTo(-81, -166);
@@ -190,6 +273,7 @@ function hairFrontPaint(c, P) {
     c.moveTo(-40, -252);
     c.quadraticCurveTo(0, -264, 38, -250);
     c.stroke();
+    flow(c, h, 9);
   } else if (P.style === 'sides') {
     for (const s of [-1, 1]) {
       c.beginPath();
